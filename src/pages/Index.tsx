@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { SuggestionCard } from "@/components/SuggestionCard";
-import { Loader2 } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { calculateMomentum, getMomentumLevel } from "@/lib/momentum";
-import { Flame } from "lucide-react";
+import type { MomentumLevel } from "@/lib/momentum";
 
 interface Suggestion {
   id: string;
@@ -95,6 +95,8 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<SortOption>("newest");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedMomentum, setSelectedMomentum] = useState<MomentumLevel | null>(null);
   const [momentumStats, setMomentumStats] = useState<MomentumStats>({
     fresh: 0,
     warming: 0,
@@ -172,11 +174,35 @@ const Index = () => {
     new Set(displaySuggestions.flatMap((s) => s.ai_tags || []))
   ).sort();
 
-  const filteredSuggestions = selectedTags.length === 0
-    ? displaySuggestions
-    : displaySuggestions.filter((s) =>
-        s.ai_tags?.some((tag) => selectedTags.includes(tag))
+  let filteredSuggestions = displaySuggestions;
+
+  // Filter by search query
+  if (searchQuery) {
+    filteredSuggestions = filteredSuggestions.filter((s) =>
+      s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.description.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }
+
+  // Filter by tags
+  if (selectedTags.length > 0) {
+    filteredSuggestions = filteredSuggestions.filter((s) =>
+      s.ai_tags?.some((tag) => selectedTags.includes(tag))
+    );
+  }
+
+  // Filter by momentum level
+  if (selectedMomentum) {
+    filteredSuggestions = filteredSuggestions.filter((s) => {
+      const momentum = calculateMomentum(
+        s.likes_count,
+        s.comments_count,
+        s.views,
+        new Date(s.created_at)
       );
+      return getMomentumLevel(momentum) === selectedMomentum;
+    });
+  }
 
   const sortedSuggestions = [...filteredSuggestions].sort((a, b) => {
     switch (sortBy) {
@@ -220,34 +246,62 @@ const Index = () => {
       
       <div className="container mx-auto px-4 py-8">
         {!loading && suggestions.length > 0 && (
-          <div className="flex items-center justify-center gap-8 mb-8">
-            <div className="flex flex-col items-center gap-2">
-              <div className="w-12 h-12 rounded-full bg-momentum-fresh flex items-center justify-center">
+          <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 mb-8">
+            <button
+              onClick={() => setSelectedMomentum(selectedMomentum === "fresh" ? null : "fresh")}
+              className={`flex flex-col items-center gap-2 transition-opacity ${
+                selectedMomentum && selectedMomentum !== "fresh" ? "opacity-40" : "opacity-100"
+              } hover:opacity-100 cursor-pointer`}
+            >
+              <div className={`w-12 h-12 rounded-full bg-momentum-fresh flex items-center justify-center ${
+                selectedMomentum === "fresh" ? "ring-2 ring-momentum-fresh ring-offset-2" : ""
+              }`}>
                 <span className="text-sm font-semibold text-white">{momentumStats.fresh}</span>
               </div>
               <span className="text-xs text-muted-foreground">Fresh</span>
-            </div>
+            </button>
             
-            <div className="flex flex-col items-center gap-2">
-              <div className="w-12 h-12 rounded-full bg-momentum-warming flex items-center justify-center">
+            <button
+              onClick={() => setSelectedMomentum(selectedMomentum === "warming" ? null : "warming")}
+              className={`flex flex-col items-center gap-2 transition-opacity ${
+                selectedMomentum && selectedMomentum !== "warming" ? "opacity-40" : "opacity-100"
+              } hover:opacity-100 cursor-pointer`}
+            >
+              <div className={`w-12 h-12 rounded-full bg-momentum-warming flex items-center justify-center ${
+                selectedMomentum === "warming" ? "ring-2 ring-momentum-warming ring-offset-2" : ""
+              }`}>
                 <span className="text-sm font-semibold text-white">{momentumStats.warming}</span>
               </div>
               <span className="text-xs text-muted-foreground">Warming</span>
-            </div>
+            </button>
             
-            <div className="flex flex-col items-center gap-2">
-              <div className="w-12 h-12 rounded-full bg-momentum-heating flex items-center justify-center">
+            <button
+              onClick={() => setSelectedMomentum(selectedMomentum === "heating" ? null : "heating")}
+              className={`flex flex-col items-center gap-2 transition-opacity ${
+                selectedMomentum && selectedMomentum !== "heating" ? "opacity-40" : "opacity-100"
+              } hover:opacity-100 cursor-pointer`}
+            >
+              <div className={`w-12 h-12 rounded-full bg-momentum-heating flex items-center justify-center ${
+                selectedMomentum === "heating" ? "ring-2 ring-momentum-heating ring-offset-2" : ""
+              }`}>
                 <span className="text-sm font-semibold text-white">{momentumStats.heating}</span>
               </div>
               <span className="text-xs text-muted-foreground">Heating</span>
-            </div>
+            </button>
             
-            <div className="flex flex-col items-center gap-2">
-              <div className="w-12 h-12 rounded-full bg-momentum-fire flex items-center justify-center animate-pulse">
+            <button
+              onClick={() => setSelectedMomentum(selectedMomentum === "fire" ? null : "fire")}
+              className={`flex flex-col items-center gap-2 transition-opacity ${
+                selectedMomentum && selectedMomentum !== "fire" ? "opacity-40" : "opacity-100"
+              } hover:opacity-100 cursor-pointer`}
+            >
+              <div className={`w-12 h-12 rounded-full bg-momentum-fire flex items-center justify-center animate-pulse ${
+                selectedMomentum === "fire" ? "ring-2 ring-momentum-fire ring-offset-2" : ""
+              }`}>
                 <span className="text-sm font-semibold text-white">{momentumStats.fire}</span>
               </div>
               <span className="text-xs text-muted-foreground">On Fire</span>
-            </div>
+            </button>
           </div>
         )}
 
@@ -259,6 +313,19 @@ const Index = () => {
           <p className="text-muted-foreground">
             Browse and engage with ideas from the community
           </p>
+        </div>
+
+        <div className="mb-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input
+              type="text"
+              placeholder="Search suggestions..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -304,7 +371,13 @@ const Index = () => {
         ) : sortedSuggestions.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground text-lg">
-              No suggestions match the selected tags.
+              {searchQuery 
+                ? "No suggestions match your search."
+                : selectedTags.length > 0 
+                ? "No suggestions match the selected tags."
+                : selectedMomentum
+                ? "No suggestions at this momentum level."
+                : "No suggestions found."}
             </p>
           </div>
         ) : (
