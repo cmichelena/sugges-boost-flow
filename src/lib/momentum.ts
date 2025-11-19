@@ -1,4 +1,4 @@
-type MomentumLevel = "fresh" | "warming" | "heating" | "fire";
+export type MomentumLevel = "fresh" | "warming" | "heating" | "fire";
 
 export const calculateMomentum = (
   likes: number,
