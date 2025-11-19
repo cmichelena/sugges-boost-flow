@@ -110,9 +110,13 @@ const HowItWorks = () => {
                   <CheckCircle className="w-6 h-6 text-green-500" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2">5. Status Updates</h3>
+                  <h3 className="text-xl font-semibold mb-2">5. Status Tracking & Closure</h3>
                   <p className="text-muted-foreground mb-3">
-                    Track progress as suggestions move through different stages:
+                    Suggestion owners update status to keep everyone informed. Active suggestions 
+                    move through Open → Acknowledged → In Progress. To close a suggestion, owners 
+                    must Accept or Reject it with a required comment explaining implementation plans 
+                    or rejection reasons. This ensures proper closure and trackability, with closed 
+                    items automatically archived for reference.
                   </p>
                   <div className="flex flex-wrap gap-2">
                     <span className="px-3 py-1 bg-muted rounded-full text-sm">Open</span>
