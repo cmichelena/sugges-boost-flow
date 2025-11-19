@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Flame, Plus, User, LogOut, Info } from "lucide-react";
+import { Plus, User, LogOut, Info } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -8,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import logo from "@/assets/suggistit-logo.png";
 
 export const Navbar = () => {
   const { user, signOut } = useAuth();
@@ -15,11 +16,8 @@ export const Navbar = () => {
   return (
     <nav className="border-b bg-card">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 font-bold text-xl">
-          <Flame className="w-6 h-6 text-primary" />
-          <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Suggistit
-          </span>
+        <Link to="/" className="flex items-center">
+          <img src={logo} alt="Suggistit" className="h-8" />
         </Link>
 
         <div className="flex items-center gap-2">
