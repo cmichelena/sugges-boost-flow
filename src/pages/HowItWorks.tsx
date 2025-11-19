@@ -116,10 +116,10 @@ const HowItWorks = () => {
                   </p>
                   <div className="flex flex-wrap gap-2">
                     <span className="px-3 py-1 bg-muted rounded-full text-sm">Open</span>
-                    <span className="px-3 py-1 bg-blue-500/10 text-blue-600 rounded-full text-sm">Acknowledged</span>
+                    <span className="px-3 py-1 bg-blue-500/10 text-blue-600 rounded-full text-sm">In Review</span>
                     <span className="px-3 py-1 bg-amber-500/10 text-amber-600 rounded-full text-sm">In Progress</span>
-                    <span className="px-3 py-1 bg-green-500/10 text-green-600 rounded-full text-sm">Resolved</span>
-                    <span className="px-3 py-1 bg-gray-500/10 text-gray-600 rounded-full text-sm">Not Pursuing</span>
+                    <span className="px-3 py-1 bg-green-500/10 text-green-600 rounded-full text-sm">Completed</span>
+                    <span className="px-3 py-1 bg-gray-500/10 text-gray-600 rounded-full text-sm">Rejected</span>
                   </div>
                 </div>
               </div>
