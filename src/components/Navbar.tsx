@@ -17,7 +17,7 @@ export const Navbar = () => {
     <nav className="border-b bg-card">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center">
-          <img src={logo} alt="Suggistit" className="h-8" />
+          <img src={logo} alt="Suggistit" className="h-16" />
         </Link>
 
         <div className="flex items-center gap-2">
