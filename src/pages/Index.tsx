@@ -81,6 +81,9 @@ const Index = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">All Suggestions</h1>
+          <p className="text-xl text-primary font-semibold mb-2">
+            If you see something, Suggistit.
+          </p>
           <p className="text-muted-foreground">
             Browse and engage with ideas from the community
           </p>
