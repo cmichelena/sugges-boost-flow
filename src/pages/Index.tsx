@@ -5,6 +5,8 @@ import { Navbar } from "@/components/Navbar";
 import { SuggestionCard } from "@/components/SuggestionCard";
 import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { calculateMomentum } from "@/lib/momentum";
 
 interface Suggestion {
   id: string;
@@ -22,10 +24,13 @@ interface Suggestion {
   comments_count: number;
 }
 
+type SortOption = "newest" | "oldest" | "momentum" | "most-liked" | "most-commented";
+
 const Index = () => {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState<SortOption>("newest");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -87,6 +92,36 @@ const Index = () => {
         s.ai_tags?.some((tag) => selectedTags.includes(tag))
       );
 
+  const sortedSuggestions = [...filteredSuggestions].sort((a, b) => {
+    switch (sortBy) {
+      case "newest":
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      case "oldest":
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      case "momentum": {
+        const momentumA = calculateMomentum(
+          a.likes_count,
+          a.comments_count,
+          a.views,
+          new Date(a.created_at)
+        );
+        const momentumB = calculateMomentum(
+          b.likes_count,
+          b.comments_count,
+          b.views,
+          new Date(b.created_at)
+        );
+        return momentumB - momentumA;
+      }
+      case "most-liked":
+        return b.likes_count - a.likes_count;
+      case "most-commented":
+        return b.comments_count - a.comments_count;
+      default:
+        return 0;
+    }
+  });
+
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
@@ -108,29 +143,47 @@ const Index = () => {
           </p>
         </div>
 
-        {allTags.length > 0 && (
-          <div className="mb-6">
-            <p className="text-sm text-muted-foreground mb-2">Filter by tags:</p>
-            <div className="flex flex-wrap gap-2">
-              {allTags.map((tag) => (
-                <Badge
-                  key={tag}
-                  variant={selectedTags.includes(tag) ? "default" : "outline"}
-                  className="cursor-pointer"
-                  onClick={() => toggleTag(tag)}
-                >
-                  {tag}
-                </Badge>
-              ))}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          {allTags.length > 0 && (
+            <div className="flex-1">
+              <p className="text-sm text-muted-foreground mb-2">Filter by tags:</p>
+              <div className="flex flex-wrap gap-2">
+                {allTags.map((tag) => (
+                  <Badge
+                    key={tag}
+                    variant={selectedTags.includes(tag) ? "default" : "outline"}
+                    className="cursor-pointer"
+                    onClick={() => toggleTag(tag)}
+                  >
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
             </div>
+          )}
+          
+          <div className="sm:w-48">
+            <p className="text-sm text-muted-foreground mb-2">Sort by:</p>
+            <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest First</SelectItem>
+                <SelectItem value="oldest">Oldest First</SelectItem>
+                <SelectItem value="momentum">Highest Momentum</SelectItem>
+                <SelectItem value="most-liked">Most Liked</SelectItem>
+                <SelectItem value="most-commented">Most Commented</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        )}
+        </div>
 
         {loading ? (
           <div className="flex justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
-        ) : filteredSuggestions.length === 0 ? (
+        ) : sortedSuggestions.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground text-lg">
               {suggestions.length === 0
@@ -140,7 +193,7 @@ const Index = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {filteredSuggestions.map((suggestion) => (
+            {sortedSuggestions.map((suggestion) => (
               <SuggestionCard
                 key={suggestion.id}
                 id={suggestion.id}
