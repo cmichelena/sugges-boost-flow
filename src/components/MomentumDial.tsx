@@ -17,22 +17,22 @@ const levelConfig: Record<
   fresh: {
     label: "Fresh",
     color: "hsl(var(--momentum-fresh))",
-    percentage: 20,
+    percentage: 25,
   },
   warming: {
     label: "Warming Up",
     color: "hsl(var(--momentum-warming))",
-    percentage: 45,
+    percentage: 50,
   },
   heating: {
     label: "Heating Up",
     color: "hsl(var(--momentum-heating))",
-    percentage: 70,
+    percentage: 75,
   },
   fire: {
     label: "On Fire",
     color: "hsl(var(--momentum-fire))",
-    percentage: 95,
+    percentage: 100,
   },
 };
 
@@ -41,84 +41,56 @@ export const MomentumDial = ({ level, score, size = "sm" }: MomentumDialProps) =
   const isSmall = size === "sm";
   
   const diameter = isSmall ? 64 : 120;
-  const strokeWidth = isSmall ? 6 : 10;
+  const strokeWidth = isSmall ? 8 : 12;
   const radius = (diameter - strokeWidth) / 2;
-  const circumference = Math.PI * radius;
+  const circumference = 2 * Math.PI * radius;
   
-  // Gauge goes from -90° to 90° (180° semicircle)
-  // Calculate arc length shown (accounting for round linecap which adds strokeWidth/2 visually)
-  const arcLengthShown = circumference * (config.percentage / 100);
-  const arcAngleShown = (arcLengthShown / circumference) * 180;
-  
-  // Needle points to the visual end of the colored arc
-  const needleAngle = -90 + arcAngleShown;
-  const needleLength = radius + strokeWidth / 2;
-  const needleX = diameter / 2 + needleLength * Math.cos((needleAngle * Math.PI) / 180);
-  const needleY = diameter / 2 + needleLength * Math.sin((needleAngle * Math.PI) / 180);
-  
-  // Calculate the arc dash offset - start from beginning
+  // Calculate the progress offset for a full circle
   const progressOffset = circumference * (1 - config.percentage / 100);
 
   return (
     <div className={`flex items-center gap-2 ${isSmall ? "" : "flex-col"}`}>
-      <div className="relative" style={{ width: diameter, height: diameter / 2 + strokeWidth }}>
+      <div className="relative" style={{ width: diameter, height: diameter }}>
         <svg
           width={diameter}
-          height={diameter / 2 + strokeWidth}
-          className="overflow-visible"
+          height={diameter}
+          className="transform -rotate-90"
         >
-          {/* Background arc */}
-          <path
-            d={`M ${strokeWidth / 2} ${diameter / 2} A ${radius} ${radius} 0 0 1 ${diameter - strokeWidth / 2} ${diameter / 2}`}
-            fill="none"
-            stroke="hsl(var(--muted))"
-            strokeWidth={strokeWidth}
-            strokeLinecap="round"
-          />
-          
-          {/* Progress arc with solid color based on level */}
-          <path
-            d={`M ${strokeWidth / 2} ${diameter / 2} A ${radius} ${radius} 0 0 1 ${diameter - strokeWidth / 2} ${diameter / 2}`}
-            fill="none"
-            stroke={config.color}
-            strokeWidth={strokeWidth}
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={progressOffset}
-            className="transition-all duration-700 ease-out"
-            style={{ filter: level === "fire" ? "drop-shadow(0 0 8px currentColor)" : "none" }}
-          />
-          
-          {/* Center pivot point */}
+          {/* Background circle */}
           <circle
             cx={diameter / 2}
             cy={diameter / 2}
-            r={isSmall ? 3 : 5}
-            fill="hsl(var(--foreground))"
-            className="drop-shadow-sm"
+            r={radius}
+            fill="none"
+            stroke="hsl(var(--muted))"
+            strokeWidth={strokeWidth}
           />
           
-          {/* Elegant needle */}
-          <line
-            x1={diameter / 2}
-            y1={diameter / 2}
-            x2={needleX}
-            y2={needleY}
-            stroke="hsl(var(--foreground))"
-            strokeWidth={isSmall ? 2 : 3}
-            strokeLinecap="round"
-            className="transition-all duration-700 ease-out drop-shadow-md"
-          />
-          
-          {/* Needle tip dot */}
+          {/* Progress circle with color based on level */}
           <circle
-            cx={needleX}
-            cy={needleY}
-            r={isSmall ? 3 : 4}
-            fill={config.color}
-            className={`transition-all duration-700 ease-out drop-shadow-lg ${level === "fire" ? "animate-pulse" : ""}`}
+            cx={diameter / 2}
+            cy={diameter / 2}
+            r={radius}
+            fill="none"
+            stroke={config.color}
+            strokeWidth={strokeWidth}
+            strokeDasharray={circumference}
+            strokeDashoffset={progressOffset}
+            strokeLinecap="round"
+            className="transition-all duration-700 ease-out"
+            style={{ filter: level === "fire" ? "drop-shadow(0 0 8px currentColor)" : "none" }}
           />
         </svg>
+        
+        {/* Score value in center */}
+        <div 
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ color: config.color }}
+        >
+          <span className={`font-bold ${isSmall ? "text-sm" : "text-2xl"} ${level === "fire" ? "animate-pulse" : ""}`}>
+            {score}
+          </span>
+        </div>
       </div>
       
       {!isSmall && (
