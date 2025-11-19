@@ -17,7 +17,7 @@ const HowItWorks = () => {
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold mb-4">How Suggistit Works</h1>
             <p className="text-xl text-muted-foreground">
-              Share ideas, track momentum, and make your voice heard
+              If you see something, Suggistit
             </p>
           </div>
 
@@ -28,7 +28,7 @@ const HowItWorks = () => {
                   <Lightbulb className="w-6 h-6 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2">1. Submit Your Idea</h3>
+                  <h3 className="text-xl font-semibold mb-2">1. Submit Your Suggestion</h3>
                   <p className="text-muted-foreground">
                     Have a suggestion? Click "Submit Suggestion" and share your idea with a title, 
                     description, and category. Whether it's a feature request, improvement, or issue—

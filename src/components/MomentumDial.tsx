@@ -78,7 +78,6 @@ export const MomentumDial = ({ level, score, size = "sm" }: MomentumDialProps) =
             strokeDashoffset={progressOffset}
             strokeLinecap="round"
             className="transition-all duration-700 ease-out"
-            style={{ filter: level === "fire" ? "drop-shadow(0 0 8px currentColor)" : "none" }}
           />
         </svg>
         
