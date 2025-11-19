@@ -8,10 +8,22 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { MomentumDial } from "@/components/MomentumDial";
 import { calculateMomentum, getMomentumLevel } from "@/lib/momentum";
-import { Heart, MessageCircle, Eye, ArrowLeft, Send } from "lucide-react";
+import { Heart, MessageCircle, Eye, ArrowLeft, Send, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Comment {
   id: string;
@@ -33,6 +45,7 @@ const SuggestionDetail = () => {
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(true);
   const [submittingComment, setSubmittingComment] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -108,6 +121,7 @@ const SuggestionDetail = () => {
       setLikesCount(likesCount || 0);
       setComments(commentsWithProfiles);
       setHasLiked(!!userLike.data);
+      setIsOwner(user?.id === suggestionData.user_id);
     } catch (error) {
       console.error("Error loading suggestion:", error);
       toast.error("Failed to load suggestion");
@@ -189,6 +203,44 @@ const SuggestionDetail = () => {
     }
   };
 
+  const handleStatusChange = async (newStatus: string) => {
+    if (!id) return;
+
+    try {
+      const { error } = await supabase
+        .from("suggestions")
+        .update({ status: newStatus })
+        .eq("id", id);
+
+      if (error) throw error;
+
+      setSuggestion({ ...suggestion, status: newStatus });
+      toast.success("Status updated successfully");
+    } catch (error: any) {
+      toast.error("Failed to update status");
+      console.error(error);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!id) return;
+
+    try {
+      const { error } = await supabase
+        .from("suggestions")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      toast.success("Suggestion deleted successfully");
+      navigate("/");
+    } catch (error: any) {
+      toast.error("Failed to delete suggestion");
+      console.error(error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -239,6 +291,49 @@ const SuggestionDetail = () => {
                   </p>
                 </div>
               </div>
+
+              {isOwner && (
+                <div className="flex items-center gap-3 mb-4 pb-4 border-b">
+                  <div className="flex-1">
+                    <label className="text-sm font-medium mb-2 block">Change Status</label>
+                    <Select value={suggestion.status} onValueChange={handleStatusChange}>
+                      <SelectTrigger className="w-full sm:w-[200px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Open">Open</SelectItem>
+                        <SelectItem value="In Review">In Review</SelectItem>
+                        <SelectItem value="In Progress">In Progress</SelectItem>
+                        <SelectItem value="Completed">Completed</SelectItem>
+                        <SelectItem value="Rejected">Rejected</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" size="sm" className="gap-2 mt-6">
+                        <Trash2 className="w-4 h-4" />
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Suggestion</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete this suggestion? This action cannot be undone.
+                          All comments and likes will also be removed.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              )}
 
               <div className="prose max-w-none mb-6">
                 <p className="text-foreground whitespace-pre-wrap">{suggestion.description}</p>
