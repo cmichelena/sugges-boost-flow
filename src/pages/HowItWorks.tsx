@@ -2,7 +2,7 @@ import { Navbar } from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Lightbulb, Sparkles, Heart, MessageCircle, TrendingUp, CheckCircle } from "lucide-react";
+import { Lightbulb, Sparkles, Heart, MessageCircle, TrendingUp, CheckCircle, Search, Filter } from "lucide-react";
 import { MomentumDial } from "@/components/MomentumDial";
 
 const HowItWorks = () => {
@@ -17,7 +17,7 @@ const HowItWorks = () => {
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold mb-4">How Suggistit Works</h1>
             <p className="text-xl text-muted-foreground">
-              A simple, effective way to share and track ideas within your organization
+              Share ideas, track momentum, and make your voice heard
             </p>
           </div>
 
@@ -30,8 +30,9 @@ const HowItWorks = () => {
                 <div className="flex-1">
                   <h3 className="text-xl font-semibold mb-2">1. Submit Your Idea</h3>
                   <p className="text-muted-foreground">
-                    Share your suggestions, issues, or observations. Just provide a title, 
-                    description, and category. Keep it simple and authentic.
+                    Have a suggestion? Click "Submit Suggestion" and share your idea with a title, 
+                    description, and category. Whether it's a feature request, improvement, or issue—
+                    every voice matters.
                   </p>
                 </div>
               </div>
@@ -45,9 +46,9 @@ const HowItWorks = () => {
                 <div className="flex-1">
                   <h3 className="text-xl font-semibold mb-2">2. AI Enhancement</h3>
                   <p className="text-muted-foreground">
-                    Our AI automatically refines your submission for clarity and suggests 
-                    relevant tags. This helps others understand your idea better while 
-                    preserving your original intent.
+                    Our AI automatically improves your submission for clarity and adds 
+                    relevant tags. Your original idea is preserved, but presented in a way 
+                    that's easier for others to understand and engage with.
                   </p>
                 </div>
               </div>
@@ -61,8 +62,9 @@ const HowItWorks = () => {
                 <div className="flex-1">
                   <h3 className="text-xl font-semibold mb-2">3. Community Engagement</h3>
                   <p className="text-muted-foreground">
-                    Browse all suggestions, like the ones you support, and add your thoughts 
-                    through comments. Every interaction helps surface the best ideas.
+                    Browse suggestions, like the ones you support, and share your thoughts 
+                    through comments. Use the search bar to find specific ideas, or filter 
+                    by tags and categories. Every interaction helps surface the best ideas.
                   </p>
                 </div>
               </div>
@@ -76,8 +78,9 @@ const HowItWorks = () => {
                 <div className="flex-1">
                   <h3 className="text-xl font-semibold mb-2">4. Momentum Tracking</h3>
                   <p className="text-muted-foreground mb-4">
-                    Each suggestion has a momentum score that increases with likes, comments, 
-                    views, and time waiting. This helps prioritize ideas that need attention.
+                    Each suggestion has a momentum level based on likes, comments, views, and 
+                    time since submission. Click the momentum circles on the dashboard to filter 
+                    suggestions by their heat level—from Fresh ideas to those On Fire!
                   </p>
                   <div className="flex items-center gap-4 flex-wrap">
                     <div className="flex items-center gap-2">
@@ -118,6 +121,34 @@ const HowItWorks = () => {
                     <span className="px-3 py-1 bg-green-500/10 text-green-600 rounded-full text-sm">Resolved</span>
                     <span className="px-3 py-1 bg-gray-500/10 text-gray-600 rounded-full text-sm">Not Pursuing</span>
                   </div>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                  <Search className="w-6 h-6 text-blue-500" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold mb-2">6. Find What Matters</h3>
+                  <p className="text-muted-foreground mb-3">
+                    Use powerful tools to discover relevant suggestions:
+                  </p>
+                  <ul className="space-y-2 text-muted-foreground text-sm">
+                    <li className="flex items-start gap-2">
+                      <Search className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <span><strong>Search:</strong> Find suggestions by keywords in titles and descriptions</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Filter className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <span><strong>Filter:</strong> Click momentum circles to see suggestions at specific heat levels</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <TrendingUp className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <span><strong>Sort:</strong> Order by newest, momentum, likes, or comments</span>
+                    </li>
+                  </ul>
                 </div>
               </div>
             </Card>
