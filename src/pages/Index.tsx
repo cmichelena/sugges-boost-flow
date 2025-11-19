@@ -246,18 +246,42 @@ const Index = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">All Suggestions</h1>
-          <p className="text-xl text-primary font-semibold mb-2">
-            If you see something, Suggistit.
+        {/* Hero Section */}
+        <div className="text-center mb-12">
+          <div className="mb-6">
+            <img 
+              src={vector56Logo} 
+              alt="Vector56" 
+              className="h-16 mx-auto mb-4 object-contain"
+            />
+          </div>
+          <h1 className="text-5xl md:text-6xl font-bold mb-4">
+            If you see something,{" "}
+            <span className="text-primary">Suggistit</span>
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-6">
+            Share your ideas, support great suggestions, and help shape what's next. 
+            Every voice matters in building something better together.
           </p>
-          <p className="text-muted-foreground">
-            Browse and engage with ideas from the community
-          </p>
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-muted/50 rounded-full">
+            <span className="text-sm font-medium">{suggestions.length} active suggestions</span>
+            {selectedMomentum && (
+              <>
+                <span className="text-muted-foreground">•</span>
+                <span className="text-sm text-primary capitalize">{selectedMomentum} filtered</span>
+              </>
+            )}
+          </div>
         </div>
 
+        {/* Momentum Filter Section */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold text-center mb-6">
+            Filter by Momentum
+          </h2>
+
         {!loading && suggestions.length > 0 && (
-          <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 mb-8">
+          <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 mb-12">
             <button
               onClick={() => setSelectedMomentum(selectedMomentum === "fresh" ? null : "fresh")}
               className={`flex flex-col items-center gap-2 transition-opacity ${
@@ -315,7 +339,12 @@ const Index = () => {
             </button>
           </div>
         )}
+        </div>
 
+        {/* Search and Filters Section */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">Browse Suggestions</h2>
+          
         <div className="mb-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -363,6 +392,7 @@ const Index = () => {
               </SelectContent>
             </Select>
           </div>
+        </div>
         </div>
 
         {loading ? (
