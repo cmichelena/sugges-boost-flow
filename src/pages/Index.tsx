@@ -6,6 +6,7 @@ import { SuggestionCard } from "@/components/SuggestionCard";
 import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card } from "@/components/ui/card";
 import { calculateMomentum } from "@/lib/momentum";
 
 interface Suggestion {
@@ -22,6 +23,10 @@ interface Suggestion {
   } | null;
   likes_count: number;
   comments_count: number;
+}
+
+interface StatusStats {
+  [status: string]: number;
 }
 
 type SortOption = "newest" | "oldest" | "momentum" | "most-liked" | "most-commented";
@@ -86,6 +91,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<SortOption>("newest");
+  const [statusStats, setStatusStats] = useState<StatusStats>({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -130,6 +136,13 @@ const Index = () => {
       );
 
       setSuggestions(suggestionsWithCounts);
+      
+      // Calculate status stats
+      const stats: StatusStats = {};
+      suggestionsWithCounts.forEach((suggestion) => {
+        stats[suggestion.status] = (stats[suggestion.status] || 0) + 1;
+      });
+      setStatusStats(stats);
     } catch (error) {
       console.error("Error loading suggestions:", error);
     } finally {
@@ -190,6 +203,19 @@ const Index = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
+        {!loading && suggestions.length > 0 && Object.keys(statusStats).length > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            {Object.entries(statusStats).map(([status, count]) => (
+              <Card key={status} className="p-4">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-foreground">{count}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{status}</p>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">All Suggestions</h1>
           <p className="text-xl text-primary font-semibold mb-2">
