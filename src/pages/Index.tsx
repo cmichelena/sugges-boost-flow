@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { calculateMomentum, getMomentumLevel } from "@/lib/momentum";
 import type { MomentumLevel } from "@/lib/momentum";
 import vector56Logo from "@/assets/vector56-logo.png";
+import { MomentumDial } from "@/components/MomentumDial";
 
 interface Suggestion {
   id: string;
@@ -279,13 +280,11 @@ const Index = () => {
               onClick={() => setSelectedMomentum(selectedMomentum === "fresh" ? null : "fresh")}
               className={`flex flex-col items-center gap-2 transition-opacity ${
                 selectedMomentum && selectedMomentum !== "fresh" ? "opacity-40" : "opacity-100"
-              } hover:opacity-100 cursor-pointer`}
+              } hover:opacity-100 cursor-pointer ${
+                selectedMomentum === "fresh" ? "ring-2 ring-momentum-fresh ring-offset-2 rounded-full" : ""
+              }`}
             >
-              <div className={`w-12 h-12 rounded-full bg-momentum-fresh flex items-center justify-center ${
-                selectedMomentum === "fresh" ? "ring-2 ring-momentum-fresh ring-offset-2" : ""
-              }`}>
-                <span className="text-sm font-semibold text-white">{momentumStats.fresh}</span>
-              </div>
+              <MomentumDial level="fresh" score={momentumStats.fresh} size="sm" />
               <span className="text-xs text-muted-foreground">Fresh</span>
             </button>
             
@@ -293,13 +292,11 @@ const Index = () => {
               onClick={() => setSelectedMomentum(selectedMomentum === "warming" ? null : "warming")}
               className={`flex flex-col items-center gap-2 transition-opacity ${
                 selectedMomentum && selectedMomentum !== "warming" ? "opacity-40" : "opacity-100"
-              } hover:opacity-100 cursor-pointer`}
+              } hover:opacity-100 cursor-pointer ${
+                selectedMomentum === "warming" ? "ring-2 ring-momentum-warming ring-offset-2 rounded-full" : ""
+              }`}
             >
-              <div className={`w-12 h-12 rounded-full bg-momentum-warming flex items-center justify-center ${
-                selectedMomentum === "warming" ? "ring-2 ring-momentum-warming ring-offset-2" : ""
-              }`}>
-                <span className="text-sm font-semibold text-white">{momentumStats.warming}</span>
-              </div>
+              <MomentumDial level="warming" score={momentumStats.warming} size="sm" />
               <span className="text-xs text-muted-foreground">Warming</span>
             </button>
             
@@ -307,13 +304,11 @@ const Index = () => {
               onClick={() => setSelectedMomentum(selectedMomentum === "heating" ? null : "heating")}
               className={`flex flex-col items-center gap-2 transition-opacity ${
                 selectedMomentum && selectedMomentum !== "heating" ? "opacity-40" : "opacity-100"
-              } hover:opacity-100 cursor-pointer`}
+              } hover:opacity-100 cursor-pointer ${
+                selectedMomentum === "heating" ? "ring-2 ring-momentum-heating ring-offset-2 rounded-full" : ""
+              }`}
             >
-              <div className={`w-12 h-12 rounded-full bg-momentum-heating flex items-center justify-center ${
-                selectedMomentum === "heating" ? "ring-2 ring-momentum-heating ring-offset-2" : ""
-              }`}>
-                <span className="text-sm font-semibold text-white">{momentumStats.heating}</span>
-              </div>
+              <MomentumDial level="heating" score={momentumStats.heating} size="sm" />
               <span className="text-xs text-muted-foreground">Heating</span>
             </button>
             
@@ -321,13 +316,11 @@ const Index = () => {
               onClick={() => setSelectedMomentum(selectedMomentum === "fire" ? null : "fire")}
               className={`flex flex-col items-center gap-2 transition-opacity ${
                 selectedMomentum && selectedMomentum !== "fire" ? "opacity-40" : "opacity-100"
-              } hover:opacity-100 cursor-pointer`}
+              } hover:opacity-100 cursor-pointer ${
+                selectedMomentum === "fire" ? "ring-2 ring-momentum-fire ring-offset-2 rounded-full" : ""
+              }`}
             >
-              <div className={`w-12 h-12 rounded-full bg-momentum-fire flex items-center justify-center animate-pulse ${
-                selectedMomentum === "fire" ? "ring-2 ring-momentum-fire ring-offset-2" : ""
-              }`}>
-                <span className="text-sm font-semibold text-white">{momentumStats.fire}</span>
-              </div>
+              <MomentumDial level="fire" score={momentumStats.fire} size="sm" />
               <span className="text-xs text-muted-foreground">On Fire</span>
             </button>
           </div>
