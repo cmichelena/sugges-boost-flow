@@ -7,6 +7,26 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Flame } from "lucide-react";
+import { z } from "zod";
+
+const signUpSchema = z.object({
+  email: z.string().email('Invalid email address').max(255, 'Email must be less than 255 characters'),
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/[A-Z]/, 'Password must contain an uppercase letter')
+    .regex(/[a-z]/, 'Password must contain a lowercase letter')
+    .regex(/[0-9]/, 'Password must contain a number'),
+  displayName: z.string()
+    .trim()
+    .min(2, 'Display name must be at least 2 characters')
+    .max(50, 'Display name must be less than 50 characters')
+    .regex(/^[a-zA-Z0-9\s-_]+$/, 'Display name can only contain letters, numbers, spaces, hyphens, and underscores')
+});
+
+const signInSchema = z.object({
+  email: z.string().email('Invalid email address').max(255, 'Email must be less than 255 characters'),
+  password: z.string().min(1, 'Password is required')
+});
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -30,13 +50,27 @@ const Auth = () => {
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
+        // Validate sign-up form
+        const validation = signUpSchema.safeParse({
           email,
           password,
+          displayName
+        });
+
+        if (!validation.success) {
+          const firstError = validation.error.errors[0];
+          toast.error(firstError.message);
+          setLoading(false);
+          return;
+        }
+
+        const { error } = await supabase.auth.signUp({
+          email: validation.data.email,
+          password: validation.data.password,
           options: {
             emailRedirectTo: `${window.location.origin}/`,
             data: {
-              display_name: displayName,
+              display_name: validation.data.displayName,
             },
           },
         });
@@ -44,9 +78,22 @@ const Auth = () => {
         toast.success("Account created! You can now sign in.");
         setIsSignUp(false);
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        // Validate sign-in form
+        const validation = signInSchema.safeParse({
           email,
-          password,
+          password
+        });
+
+        if (!validation.success) {
+          const firstError = validation.error.errors[0];
+          toast.error(firstError.message);
+          setLoading(false);
+          return;
+        }
+
+        const { error } = await supabase.auth.signInWithPassword({
+          email: validation.data.email,
+          password: validation.data.password,
         });
         if (error) throw error;
         toast.success("Signed in successfully!");
@@ -109,7 +156,7 @@ const Auth = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="••••••••"
-              minLength={6}
+              minLength={8}
             />
           </div>
 
