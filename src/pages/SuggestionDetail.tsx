@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { z } from "zod";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +25,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+
+const commentSchema = z.string().trim().min(1, 'Comment cannot be empty').max(1000, 'Comment must be less than 1000 characters');
 
 interface Comment {
   id: string;
@@ -168,8 +171,10 @@ const SuggestionDetail = () => {
       return;
     }
 
-    if (!newComment.trim()) {
-      toast.error(withStatusChange ? "A comment is required to close this suggestion" : "Comment cannot be empty");
+    // Validate comment
+    const validation = commentSchema.safeParse(newComment);
+    if (!validation.success) {
+      toast.error(validation.error.errors[0].message);
       return;
     }
 
@@ -424,6 +429,7 @@ const SuggestionDetail = () => {
                     onChange={(e) => setNewComment(e.target.value)}
                     placeholder={statusAction ? "Your explanation is required to close this suggestion..." : "Add a comment..."}
                     rows={statusAction ? 4 : 3}
+                    maxLength={1000}
                   />
                   
                   <div className="flex gap-2">

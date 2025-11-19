@@ -10,6 +10,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Navbar } from "@/components/Navbar";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { z } from "zod";
+
+const suggestionSchema = z.object({
+  title: z.string().trim().min(5, 'Title must be at least 5 characters').max(100, 'Title must be less than 100 characters'),
+  description: z.string().trim().min(10, 'Description must be at least 10 characters').max(2000, 'Description must be less than 2000 characters'),
+  category: z.enum(['Process Improvement', 'Cost Reduction', 'Customer Experience', 'Employee Wellbeing', 'Technology', 'Safety', 'Other'])
+});
 
 const categories = [
   "Process Improvement",
@@ -33,6 +40,14 @@ const Submit = () => {
     setLoading(true);
 
     try {
+      // Validate form inputs
+      const validation = suggestionSchema.safeParse({ title, description, category });
+      if (!validation.success) {
+        toast.error(validation.error.errors[0].message);
+        setLoading(false);
+        return;
+      }
+
       // Get the current session to ensure we have a valid token
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !session) {
@@ -132,10 +147,10 @@ const Submit = () => {
                   required
                   placeholder="Describe your suggestion in detail..."
                   rows={6}
-                  maxLength={1000}
+                  maxLength={2000}
                 />
                 <p className="text-sm text-muted-foreground mt-1">
-                  {description.length}/1000 characters
+                  {description.length}/2000 characters
                 </p>
               </div>
 
