@@ -46,12 +46,13 @@ export const MomentumDial = ({ level, score, size = "sm" }: MomentumDialProps) =
   const circumference = Math.PI * radius;
   
   // Gauge goes from -90° to 90° (180° semicircle)
+  // Needle points to the end of the colored arc
   const needleAngle = -90 + (180 * config.percentage) / 100;
-  const needleLength = radius - 4;
+  const needleLength = radius - 2;
   const needleX = diameter / 2 + needleLength * Math.cos((needleAngle * Math.PI) / 180);
   const needleY = diameter / 2 + needleLength * Math.sin((needleAngle * Math.PI) / 180);
   
-  // Calculate the arc dash offset for the progress
+  // Calculate the arc dash offset - start from beginning
   const progressOffset = circumference * (1 - config.percentage / 100);
 
   return (
@@ -71,24 +72,17 @@ export const MomentumDial = ({ level, score, size = "sm" }: MomentumDialProps) =
             strokeLinecap="round"
           />
           
-          {/* Progress arc with gradient */}
-          <defs>
-            <linearGradient id={`momentum-gradient-${level}`} x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="hsl(var(--momentum-fresh))" />
-              <stop offset="50%" stopColor="hsl(var(--momentum-warming))" />
-              <stop offset="100%" stopColor="hsl(var(--momentum-fire))" />
-            </linearGradient>
-          </defs>
-          
+          {/* Progress arc with solid color based on level */}
           <path
             d={`M ${strokeWidth / 2} ${diameter / 2} A ${radius} ${radius} 0 0 1 ${diameter - strokeWidth / 2} ${diameter / 2}`}
             fill="none"
-            stroke={`url(#momentum-gradient-${level})`}
+            stroke={config.color}
             strokeWidth={strokeWidth}
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={progressOffset}
             className="transition-all duration-700 ease-out"
+            style={{ filter: level === "fire" ? "drop-shadow(0 0 8px currentColor)" : "none" }}
           />
           
           {/* Center pivot point */}
