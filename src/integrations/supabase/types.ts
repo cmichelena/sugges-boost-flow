@@ -257,7 +257,9 @@ export type Database = {
           ai_improved_description: string | null
           ai_improved_title: string | null
           ai_tags: string[] | null
+          archived: boolean
           category: string
+          closure_comment_id: string | null
           created_at: string
           description: string
           id: string
@@ -274,7 +276,9 @@ export type Database = {
           ai_improved_description?: string | null
           ai_improved_title?: string | null
           ai_tags?: string[] | null
+          archived?: boolean
           category: string
+          closure_comment_id?: string | null
           created_at?: string
           description: string
           id?: string
@@ -291,7 +295,9 @@ export type Database = {
           ai_improved_description?: string | null
           ai_improved_title?: string | null
           ai_tags?: string[] | null
+          archived?: boolean
           category?: string
+          closure_comment_id?: string | null
           created_at?: string
           description?: string
           id?: string
@@ -305,6 +311,13 @@ export type Database = {
           views?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "suggestions_closure_comment_id_fkey"
+            columns: ["closure_comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "suggestions_organization_id_fkey"
             columns: ["organization_id"]

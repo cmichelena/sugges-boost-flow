@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { MomentumDial } from "@/components/MomentumDial";
 import { calculateMomentum, getMomentumLevel } from "@/lib/momentum";
-import { Heart, MessageCircle, Eye, ArrowLeft, Send, Trash2 } from "lucide-react";
+import { Heart, MessageCircle, Eye, ArrowLeft, Send, Trash2, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
@@ -46,6 +46,7 @@ const SuggestionDetail = () => {
   const [loading, setLoading] = useState(true);
   const [submittingComment, setSubmittingComment] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
+  const [statusAction, setStatusAction] = useState<"accept" | "reject" | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -160,7 +161,7 @@ const SuggestionDetail = () => {
     }
   };
 
-  const submitComment = async () => {
+  const submitComment = async (withStatusChange?: "accept" | "reject") => {
     if (!user) {
       toast.error("Please sign in to comment");
       navigate("/auth");
@@ -168,13 +169,14 @@ const SuggestionDetail = () => {
     }
 
     if (!newComment.trim()) {
-      toast.error("Comment cannot be empty");
+      toast.error(withStatusChange ? "A comment is required to close this suggestion" : "Comment cannot be empty");
       return;
     }
 
     setSubmittingComment(true);
     try {
-      const { data, error } = await supabase
+      // Insert the comment first
+      const { data: commentData, error: commentError } = await supabase
         .from("comments")
         .insert({
           suggestion_id: id,
@@ -184,7 +186,26 @@ const SuggestionDetail = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (commentError) throw commentError;
+
+      // If this is a status change, update the suggestion
+      if (withStatusChange) {
+        const newStatus = withStatusChange === "accept" ? "Accepted" : "Rejected";
+        const { error: statusError } = await supabase
+          .from("suggestions")
+          .update({ 
+            status: newStatus,
+            archived: true,
+            closure_comment_id: commentData.id
+          })
+          .eq("id", id);
+
+        if (statusError) throw statusError;
+        setSuggestion({ ...suggestion, status: newStatus, archived: true });
+        toast.success(`Suggestion ${withStatusChange === "accept" ? "accepted" : "rejected"} and archived`);
+      } else {
+        toast.success("Comment added!");
+      }
 
       const { data: profile } = await supabase
         .from("profiles")
@@ -192,9 +213,9 @@ const SuggestionDetail = () => {
         .eq("id", user.id)
         .single();
 
-      setComments([...comments, { ...data, profiles: profile }]);
+      setComments([...comments, { ...commentData, profiles: profile }]);
       setNewComment("");
-      toast.success("Comment added!");
+      setStatusAction(null);
     } catch (error) {
       console.error("Error submitting comment:", error);
       toast.error("Failed to submit comment");
@@ -293,7 +314,7 @@ const SuggestionDetail = () => {
                 </div>
               </div>
 
-              {isOwner && (
+              {isOwner && !suggestion.archived && (
                 <div className="mb-4 pb-4 border-b">
                   <label className="text-sm font-medium mb-2 block">Change Status</label>
                   <Select value={suggestion.status} onValueChange={handleStatusChange}>
@@ -304,8 +325,6 @@ const SuggestionDetail = () => {
                       <SelectItem value="Open">Open</SelectItem>
                       <SelectItem value="Acknowledged">Acknowledged</SelectItem>
                       <SelectItem value="In Progress">In Progress</SelectItem>
-                      <SelectItem value="Completed">Completed</SelectItem>
-                      <SelectItem value="Rejected">Rejected</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -366,17 +385,71 @@ const SuggestionDetail = () => {
               </div>
 
               {user ? (
-                <div className="space-y-2">
+                <div className="space-y-3">
+                  {isOwner && !suggestion.archived && (
+                    <div className="flex gap-2 p-3 bg-muted/50 rounded-lg border">
+                      <Button
+                        variant={statusAction === "accept" ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setStatusAction(statusAction === "accept" ? null : "accept")}
+                        className="flex-1 gap-2"
+                      >
+                        <CheckCircle className="w-4 h-4" />
+                        Accept & Close
+                      </Button>
+                      <Button
+                        variant={statusAction === "reject" ? "destructive" : "outline"}
+                        size="sm"
+                        onClick={() => setStatusAction(statusAction === "reject" ? null : "reject")}
+                        className="flex-1 gap-2"
+                      >
+                        <XCircle className="w-4 h-4" />
+                        Reject & Close
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {statusAction && (
+                    <div className="p-3 bg-muted/30 rounded-lg border">
+                      <p className="text-sm font-medium mb-2">
+                        {statusAction === "accept" 
+                          ? "Explain how this suggestion will be implemented:" 
+                          : "Explain why this suggestion is being rejected:"}
+                      </p>
+                    </div>
+                  )}
+
                   <Textarea
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Add a comment..."
-                    rows={3}
+                    placeholder={statusAction ? "Your explanation is required to close this suggestion..." : "Add a comment..."}
+                    rows={statusAction ? 4 : 3}
                   />
-                  <Button onClick={submitComment} disabled={submittingComment}>
-                    <Send className="w-4 h-4 mr-2" />
-                    {submittingComment ? "Sending..." : "Post Comment"}
-                  </Button>
+                  
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={() => submitComment(statusAction || undefined)} 
+                      disabled={submittingComment}
+                      variant={statusAction ? (statusAction === "accept" ? "default" : "destructive") : "default"}
+                      className="flex-1"
+                    >
+                      <Send className="w-4 h-4 mr-2" />
+                      {submittingComment 
+                        ? "Sending..." 
+                        : statusAction 
+                          ? `${statusAction === "accept" ? "Accept" : "Reject"} with Comment`
+                          : "Post Comment"}
+                    </Button>
+                    {statusAction && (
+                      <Button 
+                        variant="ghost" 
+                        onClick={() => setStatusAction(null)}
+                        disabled={submittingComment}
+                      >
+                        Cancel
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <p className="text-muted-foreground text-center py-4">

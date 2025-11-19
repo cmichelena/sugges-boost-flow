@@ -118,8 +118,8 @@ const HowItWorks = () => {
                     <span className="px-3 py-1 bg-muted rounded-full text-sm">Open</span>
                     <span className="px-3 py-1 bg-blue-500/10 text-blue-600 rounded-full text-sm">Acknowledged</span>
                     <span className="px-3 py-1 bg-amber-500/10 text-amber-600 rounded-full text-sm">In Progress</span>
-                    <span className="px-3 py-1 bg-green-500/10 text-green-600 rounded-full text-sm">Completed</span>
-                    <span className="px-3 py-1 bg-gray-500/10 text-gray-600 rounded-full text-sm">Rejected</span>
+                    <span className="px-3 py-1 bg-green-500/10 text-green-600 rounded-full text-sm">Accepted (Archived)</span>
+                    <span className="px-3 py-1 bg-gray-500/10 text-gray-600 rounded-full text-sm">Rejected (Archived)</span>
                   </div>
                 </div>
               </div>
