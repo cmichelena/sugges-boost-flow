@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { calculateMomentum, getMomentumLevel } from "@/lib/momentum";
 import type { MomentumLevel } from "@/lib/momentum";
+import vector56Logo from "@/assets/vector56-logo.png";
 
 interface Suggestion {
   id: string;
@@ -410,6 +411,13 @@ const Index = () => {
           </>
         )}
       </div>
+      
+      <footer className="py-6 text-center border-t border-border/40">
+        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <span>Created by</span>
+          <img src={vector56Logo} alt="Vector56" className="h-4 opacity-70" />
+        </div>
+      </footer>
     </div>
   );
 };
