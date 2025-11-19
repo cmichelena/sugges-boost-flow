@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Flame } from "lucide-react";
 import { z } from "zod";
+import logoBlack from "@/assets/suggistit-logo-black.png";
 
 const signUpSchema = z.object({
   email: z.string().email('Invalid email address').max(255, 'Email must be less than 255 characters'),
@@ -109,11 +109,8 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-background p-4">
       <Card className="w-full max-w-md p-8">
-        <div className="flex items-center justify-center gap-2 mb-6">
-          <Flame className="w-8 h-8 text-primary" />
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Suggistit
-          </h1>
+        <div className="flex items-center justify-center mb-6">
+          <img src={logoBlack} alt="Suggistit" className="h-12" />
         </div>
 
         <h2 className="text-2xl font-bold text-center mb-6">
