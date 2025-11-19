@@ -52,7 +52,7 @@ export const MomentumDial = ({ level, score, size = "sm" }: MomentumDialProps) =
   
   // Needle points to the visual end of the colored arc
   const needleAngle = -90 + arcAngleShown;
-  const needleLength = radius;
+  const needleLength = radius + strokeWidth / 2;
   const needleX = diameter / 2 + needleLength * Math.cos((needleAngle * Math.PI) / 180);
   const needleY = diameter / 2 + needleLength * Math.sin((needleAngle * Math.PI) / 180);
   
