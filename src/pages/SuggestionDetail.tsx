@@ -302,7 +302,7 @@ const SuggestionDetail = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Open">Open</SelectItem>
-                      <SelectItem value="In Review">In Review</SelectItem>
+                      <SelectItem value="Acknowledged">Acknowledged</SelectItem>
                       <SelectItem value="In Progress">In Progress</SelectItem>
                       <SelectItem value="Completed">Completed</SelectItem>
                       <SelectItem value="Rejected">Rejected</SelectItem>
