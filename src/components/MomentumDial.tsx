@@ -46,9 +46,13 @@ export const MomentumDial = ({ level, score, size = "sm" }: MomentumDialProps) =
   const circumference = Math.PI * radius;
   
   // Gauge goes from -90° to 90° (180° semicircle)
-  // Needle points to the end of the colored arc
-  const needleAngle = -90 + (180 * config.percentage) / 100;
-  const needleLength = radius - 2;
+  // Calculate arc length shown (accounting for round linecap which adds strokeWidth/2 visually)
+  const arcLengthShown = circumference * (config.percentage / 100);
+  const arcAngleShown = (arcLengthShown / circumference) * 180;
+  
+  // Needle points to the visual end of the colored arc
+  const needleAngle = -90 + arcAngleShown;
+  const needleLength = radius;
   const needleX = diameter / 2 + needleLength * Math.cos((needleAngle * Math.PI) / 180);
   const needleY = diameter / 2 + needleLength * Math.sin((needleAngle * Math.PI) / 180);
   
