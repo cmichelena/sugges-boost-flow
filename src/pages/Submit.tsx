@@ -33,18 +33,22 @@ const Submit = () => {
     setLoading(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      // Get the current session to ensure we have a valid token
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session) {
         toast.error("Please sign in to submit a suggestion");
         navigate("/auth");
         return;
       }
 
-      // Call AI to improve the suggestion
+      // Call AI to improve the suggestion with explicit auth header
       const { data: improved, error: aiError } = await supabase.functions.invoke(
         "improve-suggestion",
         {
           body: { title, description, category },
+          headers: {
+            Authorization: `Bearer ${session.access_token}`
+          }
         }
       );
 
@@ -55,7 +59,7 @@ const Submit = () => {
 
       // Insert the suggestion
       const { error } = await supabase.from("suggestions").insert({
-        user_id: user.id,
+        user_id: session.user.id,
         title: improved?.improved_title || title,
         description: improved?.improved_description || description,
         original_title: title,
