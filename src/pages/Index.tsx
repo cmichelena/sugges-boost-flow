@@ -7,7 +7,8 @@ import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { calculateMomentum } from "@/lib/momentum";
+import { calculateMomentum, getMomentumLevel } from "@/lib/momentum";
+import { Flame } from "lucide-react";
 
 interface Suggestion {
   id: string;
@@ -25,8 +26,11 @@ interface Suggestion {
   comments_count: number;
 }
 
-interface StatusStats {
-  [status: string]: number;
+interface MomentumStats {
+  fresh: number;
+  warming: number;
+  heating: number;
+  fire: number;
 }
 
 type SortOption = "newest" | "oldest" | "momentum" | "most-liked" | "most-commented";
@@ -91,7 +95,12 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<SortOption>("newest");
-  const [statusStats, setStatusStats] = useState<StatusStats>({});
+  const [momentumStats, setMomentumStats] = useState<MomentumStats>({
+    fresh: 0,
+    warming: 0,
+    heating: 0,
+    fire: 0,
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -137,12 +146,19 @@ const Index = () => {
 
       setSuggestions(suggestionsWithCounts);
       
-      // Calculate status stats
-      const stats: StatusStats = {};
+      // Calculate momentum stats
+      const stats: MomentumStats = { fresh: 0, warming: 0, heating: 0, fire: 0 };
       suggestionsWithCounts.forEach((suggestion) => {
-        stats[suggestion.status] = (stats[suggestion.status] || 0) + 1;
+        const momentum = calculateMomentum(
+          suggestion.likes_count,
+          suggestion.comments_count,
+          suggestion.views,
+          new Date(suggestion.created_at)
+        );
+        const level = getMomentumLevel(momentum);
+        stats[level]++;
       });
-      setStatusStats(stats);
+      setMomentumStats(stats);
     } catch (error) {
       console.error("Error loading suggestions:", error);
     } finally {
@@ -203,16 +219,47 @@ const Index = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        {!loading && suggestions.length > 0 && Object.keys(statusStats).length > 0 && (
+        {!loading && suggestions.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            {Object.entries(statusStats).map(([status, count]) => (
-              <Card key={status} className="p-4">
+            <Card className="p-4 bg-momentum-fresh/10 border-momentum-fresh/20">
+              <div className="flex items-center justify-center gap-3">
+                <Flame className="w-6 h-6 text-momentum-fresh rotate-[-45deg]" />
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-foreground">{count}</p>
-                  <p className="text-sm text-muted-foreground mt-1">{status}</p>
+                  <p className="text-2xl font-bold text-foreground">{momentumStats.fresh}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Fresh</p>
                 </div>
-              </Card>
-            ))}
+              </div>
+            </Card>
+            
+            <Card className="p-4 bg-momentum-warming/10 border-momentum-warming/20">
+              <div className="flex items-center justify-center gap-3">
+                <Flame className="w-6 h-6 text-momentum-warming" />
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-foreground">{momentumStats.warming}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Warming Up</p>
+                </div>
+              </div>
+            </Card>
+            
+            <Card className="p-4 bg-momentum-heating/10 border-momentum-heating/20">
+              <div className="flex items-center justify-center gap-3">
+                <Flame className="w-6 h-6 text-momentum-heating rotate-45" />
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-foreground">{momentumStats.heating}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Heating Up</p>
+                </div>
+              </div>
+            </Card>
+            
+            <Card className="p-4 bg-momentum-fire/10 border-momentum-fire/20">
+              <div className="flex items-center justify-center gap-3">
+                <Flame className="w-6 h-6 text-momentum-fire rotate-90 animate-pulse" />
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-foreground">{momentumStats.fire}</p>
+                  <p className="text-xs text-muted-foreground mt-1">On Fire</p>
+                </div>
+              </div>
+            </Card>
           </div>
         )}
 
