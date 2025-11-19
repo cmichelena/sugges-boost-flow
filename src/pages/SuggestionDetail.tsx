@@ -278,60 +278,36 @@ const SuggestionDetail = () => {
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <Card className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge>{suggestion.category}</Badge>
-                    <Badge variant="outline">{suggestion.status}</Badge>
-                  </div>
-                  <h1 className="text-3xl font-bold mb-2">{suggestion.title}</h1>
-                  <p className="text-muted-foreground">
-                    by {suggestion.profiles?.display_name || "Anonymous"} •{" "}
-                    {formatDistanceToNow(new Date(suggestion.created_at), { addSuffix: true })}
-                  </p>
+              <div className="space-y-4 mb-4">
+                <div className="flex items-center gap-2">
+                  <Badge>{suggestion.category}</Badge>
+                  <Badge variant="outline">{suggestion.status}</Badge>
+                </div>
+                <h1 className="text-3xl font-bold">{suggestion.title}</h1>
+                <p className="text-muted-foreground">
+                  by {suggestion.profiles?.display_name || "Anonymous"} •{" "}
+                  {formatDistanceToNow(new Date(suggestion.created_at), { addSuffix: true })}
+                </p>
+                <div className="flex justify-center py-4">
+                  <MomentumDial level={momentumLevel} score={momentumScore} size="lg" />
                 </div>
               </div>
 
               {isOwner && (
-                <div className="flex items-center gap-3 mb-4 pb-4 border-b">
-                  <div className="flex-1">
-                    <label className="text-sm font-medium mb-2 block">Change Status</label>
-                    <Select value={suggestion.status} onValueChange={handleStatusChange}>
-                      <SelectTrigger className="w-full sm:w-[200px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Open">Open</SelectItem>
-                        <SelectItem value="In Review">In Review</SelectItem>
-                        <SelectItem value="In Progress">In Progress</SelectItem>
-                        <SelectItem value="Completed">Completed</SelectItem>
-                        <SelectItem value="Rejected">Rejected</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="destructive" size="sm" className="gap-2 mt-6">
-                        <Trash2 className="w-4 h-4" />
-                        Delete
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Suggestion</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete this suggestion? This action cannot be undone.
-                          All comments and likes will also be removed.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                <div className="mb-4 pb-4 border-b">
+                  <label className="text-sm font-medium mb-2 block">Change Status</label>
+                  <Select value={suggestion.status} onValueChange={handleStatusChange}>
+                    <SelectTrigger className="w-full sm:w-[200px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Open">Open</SelectItem>
+                      <SelectItem value="In Review">In Review</SelectItem>
+                      <SelectItem value="In Progress">In Progress</SelectItem>
+                      <SelectItem value="Completed">Completed</SelectItem>
+                      <SelectItem value="Rejected">Rejected</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
 
@@ -410,14 +386,35 @@ const SuggestionDetail = () => {
             </Card>
           </div>
 
-          <div className="space-y-6">
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4 text-center">Momentum</h3>
-              <div className="flex justify-center">
-                <MomentumDial level={momentumLevel} score={momentumScore} size="lg" />
-              </div>
-            </Card>
-          </div>
+          {isOwner && (
+            <div className="lg:col-span-2">
+              <Card className="p-6">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="lg" className="w-full gap-2">
+                      <Trash2 className="w-4 h-4" />
+                      Delete Suggestion
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Suggestion</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete this suggestion? This action cannot be undone.
+                        All comments and likes will also be removed.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </Card>
+            </div>
+          )}
         </div>
       </div>
     </div>
