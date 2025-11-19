@@ -26,6 +26,61 @@ interface Suggestion {
 
 type SortOption = "newest" | "oldest" | "momentum" | "most-liked" | "most-commented";
 
+const SAMPLE_SUGGESTIONS: Suggestion[] = [
+  {
+    id: "sample-1",
+    title: "Add Dark Mode Toggle",
+    description: "It would be great to have a dark mode option in the settings. Many users prefer dark themes, especially when working late at night.",
+    category: "Feature",
+    status: "Open",
+    views: 234,
+    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    ai_tags: ["UI", "Accessibility", "User Experience"],
+    profiles: { display_name: "Sample User" },
+    likes_count: 45,
+    comments_count: 12,
+  },
+  {
+    id: "sample-2",
+    title: "Improve Mobile Navigation",
+    description: "The navigation menu is a bit difficult to use on mobile devices. Consider adding a hamburger menu or improving the touch targets.",
+    category: "Enhancement",
+    status: "Open",
+    views: 189,
+    created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    ai_tags: ["Mobile", "UI", "Navigation"],
+    profiles: { display_name: "Demo User" },
+    likes_count: 32,
+    comments_count: 8,
+  },
+  {
+    id: "sample-3",
+    title: "Export Data Feature",
+    description: "Allow users to export their data in CSV or JSON format. This would be useful for backing up information or analyzing trends.",
+    category: "Feature",
+    status: "Open",
+    views: 156,
+    created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    ai_tags: ["Data", "Export", "Analytics"],
+    profiles: { display_name: "Sample User" },
+    likes_count: 28,
+    comments_count: 5,
+  },
+  {
+    id: "sample-4",
+    title: "Add Search Functionality",
+    description: "A search bar would help users find specific suggestions quickly, especially as the number of suggestions grows.",
+    category: "Feature",
+    status: "Open",
+    views: 312,
+    created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    ai_tags: ["Search", "User Experience", "Performance"],
+    profiles: { display_name: "Demo User" },
+    likes_count: 67,
+    comments_count: 15,
+  },
+];
+
 const Index = () => {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,13 +137,15 @@ const Index = () => {
     }
   };
 
+  const displaySuggestions = suggestions.length === 0 ? SAMPLE_SUGGESTIONS : suggestions;
+
   const allTags = Array.from(
-    new Set(suggestions.flatMap((s) => s.ai_tags || []))
+    new Set(displaySuggestions.flatMap((s) => s.ai_tags || []))
   ).sort();
 
   const filteredSuggestions = selectedTags.length === 0
-    ? suggestions
-    : suggestions.filter((s) =>
+    ? displaySuggestions
+    : displaySuggestions.filter((s) =>
         s.ai_tags?.some((tag) => selectedTags.includes(tag))
       );
 
@@ -186,30 +243,37 @@ const Index = () => {
         ) : sortedSuggestions.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground text-lg">
-              {suggestions.length === 0
-                ? "No suggestions yet. Be the first to submit one!"
-                : "No suggestions match the selected tags."}
+              No suggestions match the selected tags.
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {sortedSuggestions.map((suggestion) => (
-              <SuggestionCard
-                key={suggestion.id}
-                id={suggestion.id}
-                title={suggestion.title}
-                description={suggestion.description}
-                category={suggestion.category}
-                status={suggestion.status}
-                likes={suggestion.likes_count}
-                comments={suggestion.comments_count}
-                views={suggestion.views}
-                createdAt={suggestion.created_at}
-                authorName={suggestion.profiles?.display_name || "Anonymous"}
-                onClick={() => navigate(`/suggestion/${suggestion.id}`)}
-              />
-            ))}
-          </div>
+          <>
+            {suggestions.length === 0 && (
+              <div className="mb-4 p-4 bg-muted/50 rounded-lg border border-border">
+                <p className="text-sm text-muted-foreground text-center">
+                  👋 These are sample suggestions to help you get started. Submit your own to see them here!
+                </p>
+              </div>
+            )}
+            <div className="space-y-4">
+              {sortedSuggestions.map((suggestion) => (
+                <SuggestionCard
+                  key={suggestion.id}
+                  id={suggestion.id}
+                  title={suggestion.title}
+                  description={suggestion.description}
+                  category={suggestion.category}
+                  status={suggestion.status}
+                  likes={suggestion.likes_count}
+                  comments={suggestion.comments_count}
+                  views={suggestion.views}
+                  createdAt={suggestion.created_at}
+                  authorName={suggestion.profiles?.display_name || "Anonymous"}
+                  onClick={() => navigate(`/suggestion/${suggestion.id}`)}
+                />
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>
