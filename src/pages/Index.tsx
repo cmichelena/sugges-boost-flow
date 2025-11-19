@@ -220,46 +220,34 @@ const Index = () => {
       
       <div className="container mx-auto px-4 py-8">
         {!loading && suggestions.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <Card className="p-4 bg-momentum-fresh/10 border-momentum-fresh/20">
-              <div className="flex items-center justify-center gap-3">
-                <Flame className="w-6 h-6 text-momentum-fresh rotate-[-45deg]" />
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-foreground">{momentumStats.fresh}</p>
-                  <p className="text-xs text-muted-foreground mt-1">Fresh</p>
-                </div>
+          <div className="flex items-center justify-center gap-8 mb-8">
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-12 h-12 rounded-full bg-momentum-fresh flex items-center justify-center">
+                <span className="text-sm font-semibold text-white">{momentumStats.fresh}</span>
               </div>
-            </Card>
+              <span className="text-xs text-muted-foreground">Fresh</span>
+            </div>
             
-            <Card className="p-4 bg-momentum-warming/10 border-momentum-warming/20">
-              <div className="flex items-center justify-center gap-3">
-                <Flame className="w-6 h-6 text-momentum-warming" />
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-foreground">{momentumStats.warming}</p>
-                  <p className="text-xs text-muted-foreground mt-1">Warming Up</p>
-                </div>
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-12 h-12 rounded-full bg-momentum-warming flex items-center justify-center">
+                <span className="text-sm font-semibold text-white">{momentumStats.warming}</span>
               </div>
-            </Card>
+              <span className="text-xs text-muted-foreground">Warming</span>
+            </div>
             
-            <Card className="p-4 bg-momentum-heating/10 border-momentum-heating/20">
-              <div className="flex items-center justify-center gap-3">
-                <Flame className="w-6 h-6 text-momentum-heating rotate-45" />
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-foreground">{momentumStats.heating}</p>
-                  <p className="text-xs text-muted-foreground mt-1">Heating Up</p>
-                </div>
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-12 h-12 rounded-full bg-momentum-heating flex items-center justify-center">
+                <span className="text-sm font-semibold text-white">{momentumStats.heating}</span>
               </div>
-            </Card>
+              <span className="text-xs text-muted-foreground">Heating</span>
+            </div>
             
-            <Card className="p-4 bg-momentum-fire/10 border-momentum-fire/20">
-              <div className="flex items-center justify-center gap-3">
-                <Flame className="w-6 h-6 text-momentum-fire rotate-90 animate-pulse" />
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-foreground">{momentumStats.fire}</p>
-                  <p className="text-xs text-muted-foreground mt-1">On Fire</p>
-                </div>
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-12 h-12 rounded-full bg-momentum-fire flex items-center justify-center animate-pulse">
+                <span className="text-sm font-semibold text-white">{momentumStats.fire}</span>
               </div>
-            </Card>
+              <span className="text-xs text-muted-foreground">On Fire</span>
+            </div>
           </div>
         )}
 
