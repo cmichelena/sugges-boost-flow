@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { SuggestionCard } from "@/components/SuggestionCard";
 import { Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Suggestion {
   id: string;
@@ -20,42 +21,50 @@ interface Suggestion {
   comments_count: number;
 }
 
-const Index = () => {
+const MySuggestions = () => {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
     loadSuggestions();
-  }, []);
+  }, [user, navigate]);
 
   const loadSuggestions = async () => {
+    if (!user) return;
+
     try {
       const { data: suggestionsData, error } = await supabase
         .from("suggestions")
         .select("*")
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
 
-      // Fetch related data separately
       const suggestionsWithCounts = await Promise.all(
         (suggestionsData || []).map(async (suggestion) => {
-          const [{ data: profile }, { count: likesCount }, { count: commentsCount }] = await Promise.all([
-            supabase
-              .from("profiles")
-              .select("display_name")
-              .eq("id", suggestion.user_id)
-              .single(),
-            supabase
-              .from("likes")
-              .select("*", { count: "exact", head: true })
-              .eq("suggestion_id", suggestion.id),
-            supabase
-              .from("comments")
-              .select("*", { count: "exact", head: true })
-              .eq("suggestion_id", suggestion.id),
-          ]);
+          const [{ data: profile }, { count: likesCount }, { count: commentsCount }] =
+            await Promise.all([
+              supabase
+                .from("profiles")
+                .select("display_name")
+                .eq("id", suggestion.user_id)
+                .single(),
+              supabase
+                .from("likes")
+                .select("*", { count: "exact", head: true })
+                .eq("suggestion_id", suggestion.id),
+              supabase
+                .from("comments")
+                .select("*", { count: "exact", head: true })
+                .eq("suggestion_id", suggestion.id),
+            ]);
 
           return {
             ...suggestion,
@@ -77,12 +86,12 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">All Suggestions</h1>
+          <h1 className="text-4xl font-bold mb-2">My Suggestions</h1>
           <p className="text-muted-foreground">
-            Browse and engage with ideas from the community
+            Track your submitted ideas and their momentum
           </p>
         </div>
 
@@ -92,8 +101,8 @@ const Index = () => {
           </div>
         ) : suggestions.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground text-lg">
-              No suggestions yet. Be the first to submit one!
+            <p className="text-muted-foreground text-lg mb-4">
+              You haven't submitted any suggestions yet.
             </p>
           </div>
         ) : (
@@ -121,4 +130,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default MySuggestions;
