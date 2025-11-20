@@ -2,7 +2,7 @@ import { Navbar } from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Lightbulb, Sparkles, Heart, MessageCircle, TrendingUp, CheckCircle, Search, Filter } from "lucide-react";
+import { Lightbulb, Users, Heart, MessageCircle, TrendingUp, CheckCircle, Filter, UserCircle, Shield } from "lucide-react";
 import { MomentumDial } from "@/components/MomentumDial";
 
 const HowItWorks = () => {
@@ -29,27 +29,20 @@ const HowItWorks = () => {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-xl font-semibold mb-2">1. Submit Your Suggestion</h3>
-                  <p className="text-muted-foreground">
-                    Have a suggestion? Click "Submit Suggestion" and share your idea with a title, 
-                    description, and category. Whether it's a feature request, improvement, or issue—
-                    every voice matters.
+                  <p className="text-muted-foreground mb-3">
+                    Click "Submit Suggestion" and share your idea with a title, description, and category. 
+                    Each category may have different settings:
                   </p>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="w-6 h-6 text-accent" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2">2. AI Enhancement</h3>
-                  <p className="text-muted-foreground">
-                    Our AI automatically improves your submission for clarity and adds 
-                    relevant tags. Your original idea is preserved, but presented in a way 
-                    that's easier for others to understand and engage with.
-                  </p>
+                  <ul className="space-y-2 text-muted-foreground text-sm">
+                    <li className="flex items-start gap-2">
+                      <Shield className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <span><strong>Anonymous Option:</strong> Some categories allow anonymous submissions to encourage honest feedback</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Users className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <span><strong>Team Assignment:</strong> Suggestions are automatically routed to responsible teams based on category</span>
+                    </li>
+                  </ul>
                 </div>
               </div>
             </Card>
@@ -60,12 +53,21 @@ const HowItWorks = () => {
                   <Heart className="w-6 h-6 text-secondary" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2">3. Community Engagement</h3>
-                  <p className="text-muted-foreground">
-                    Browse suggestions, like the ones you support, and share your thoughts 
-                    through comments. Use the search bar to find specific ideas, or filter 
-                    by tags and categories. Every interaction helps surface the best ideas.
+                  <h3 className="text-xl font-semibold mb-2">2. Community Engagement</h3>
+                  <p className="text-muted-foreground mb-3">
+                    Browse suggestions, like the ones you support, and share your thoughts through comments. 
+                    Every interaction helps build momentum and surface the best ideas.
                   </p>
+                  <ul className="space-y-2 text-muted-foreground text-sm">
+                    <li className="flex items-start gap-2">
+                      <Heart className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <span><strong>Likes:</strong> Show support for suggestions you agree with</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <MessageCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <span><strong>Comments:</strong> Share your thoughts, ask questions, or provide feedback</span>
+                    </li>
+                  </ul>
                 </div>
               </div>
             </Card>
@@ -76,11 +78,11 @@ const HowItWorks = () => {
                   <TrendingUp className="w-6 h-6 text-momentum-fire" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2">4. Momentum Tracking</h3>
+                  <h3 className="text-xl font-semibold mb-2">3. Momentum Tracking</h3>
                   <p className="text-muted-foreground mb-4">
                     Each suggestion has a momentum level based on likes, comments, views, and 
-                    time since submission. Click the momentum circles on the dashboard to filter 
-                    suggestions by their heat level—from Fresh ideas to those On Fire!
+                    time since submission. The activity dashboard shows momentum distribution and 
+                    you can click momentum levels to filter suggestions by their heat level.
                   </p>
                   <div className="flex items-center gap-4 flex-wrap">
                     <div className="flex items-center gap-2">
@@ -106,24 +108,51 @@ const HowItWorks = () => {
 
             <Card className="p-6">
               <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                  <UserCircle className="w-6 h-6 text-blue-500" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold mb-2">4. Team Management & Assignments</h3>
+                  <p className="text-muted-foreground mb-3">
+                    Organizations can create teams and assign members to handle specific suggestion categories:
+                  </p>
+                  <ul className="space-y-2 text-muted-foreground text-sm">
+                    <li className="flex items-start gap-2">
+                      <Users className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <span><strong>Team Routing:</strong> Suggestions automatically assigned to responsible teams based on category</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <UserCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <span><strong>Individual Assignment:</strong> Team leads can assign specific suggestions to team members</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Filter className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <span><strong>My Assignments:</strong> Quickly view suggestions assigned to you with the filter badge</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center flex-shrink-0">
                   <CheckCircle className="w-6 h-6 text-green-500" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2">5. Status Tracking & Closure</h3>
+                  <h3 className="text-xl font-semibold mb-2">5. Status Workflow & Closure</h3>
                   <p className="text-muted-foreground mb-3">
-                    Suggestion owners update status to keep everyone informed. Active suggestions 
-                    move through Open → Acknowledged → In Progress. To close a suggestion, owners 
-                    must Accept or Reject it with a required comment explaining implementation plans 
-                    or rejection reasons. This ensures proper closure and trackability, with closed 
-                    items automatically archived for reference.
+                    Suggestions flow through a clear status workflow. Admins and assigned team members can update 
+                    status to keep everyone informed. When closing a suggestion as Completed or Declined, a comment 
+                    explaining the outcome is required to maintain transparency.
                   </p>
                   <div className="flex flex-wrap gap-2">
                     <span className="px-3 py-1 bg-muted rounded-full text-sm">Open</span>
-                    <span className="px-3 py-1 bg-blue-500/10 text-blue-600 rounded-full text-sm">Acknowledged</span>
+                    <span className="px-3 py-1 bg-blue-500/10 text-blue-600 rounded-full text-sm">Under Review</span>
+                    <span className="px-3 py-1 bg-purple-500/10 text-purple-600 rounded-full text-sm">Planned</span>
                     <span className="px-3 py-1 bg-amber-500/10 text-amber-600 rounded-full text-sm">In Progress</span>
-                    <span className="px-3 py-1 bg-green-500/10 text-green-600 rounded-full text-sm">Accepted (Archived)</span>
-                    <span className="px-3 py-1 bg-gray-500/10 text-gray-600 rounded-full text-sm">Rejected (Archived)</span>
+                    <span className="px-3 py-1 bg-green-500/10 text-green-600 rounded-full text-sm">Completed</span>
+                    <span className="px-3 py-1 bg-gray-500/10 text-gray-600 rounded-full text-sm">Declined</span>
                   </div>
                 </div>
               </div>
@@ -131,26 +160,30 @@ const HowItWorks = () => {
 
             <Card className="p-6">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                  <Search className="w-6 h-6 text-blue-500" />
+                <div className="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center flex-shrink-0">
+                  <Filter className="w-6 h-6 text-purple-500" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2">6. Find What Matters</h3>
+                  <h3 className="text-xl font-semibold mb-2">6. Powerful Filtering</h3>
                   <p className="text-muted-foreground mb-3">
-                    Use powerful tools to discover relevant suggestions:
+                    Quickly find what matters most with powerful filtering options:
                   </p>
                   <ul className="space-y-2 text-muted-foreground text-sm">
                     <li className="flex items-start gap-2">
-                      <Search className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span><strong>Search:</strong> Find suggestions by keywords in titles and descriptions</span>
+                      <TrendingUp className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <span><strong>Momentum Levels:</strong> Click momentum circles in the activity dashboard to filter by heat level</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Filter className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span><strong>Filter:</strong> Click momentum circles to see suggestions at specific heat levels</span>
+                      <span><strong>Categories:</strong> Filter suggestions by category using the dropdown menu</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <TrendingUp className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span><strong>Sort:</strong> Order by newest, momentum, likes, or comments</span>
+                      <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <span><strong>Status:</strong> View suggestions at specific workflow stages (Open, In Progress, etc.)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <UserCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <span><strong>My Assignments:</strong> Toggle to see only suggestions assigned to you</span>
                     </li>
                   </ul>
                 </div>
