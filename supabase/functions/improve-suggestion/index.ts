@@ -44,7 +44,7 @@ serve(async (req) => {
       );
     }
 
-    console.log("Authenticated user:", user.id);
+    console.log("Request authenticated");
 
     const { title, description, category } = await req.json();
     
@@ -57,7 +57,7 @@ serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-    console.log("Improving suggestion:", { title, description, category });
+    console.log("Processing suggestion improvement request");
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -126,7 +126,7 @@ Respond in JSON format:
 
     const data = await response.json();
     const content = data.choices[0].message.content;
-    console.log("AI response:", content);
+    console.log("AI response received");
 
     const result = JSON.parse(content);
 
