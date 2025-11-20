@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.83.0";
 import { Resend } from "https://esm.sh/resend@4.0.0";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -11,11 +12,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface InvitationRequest {
-  email: string;
-  organizationId: string;
-  role: "admin" | "member" | "viewer";
-}
+const invitationSchema = z.object({
+  email: z.string().trim().email("Invalid email address").max(255, "Email must be less than 255 characters"),
+  organizationId: z.string().uuid("Invalid organization ID"),
+  role: z.enum(["admin", "member", "viewer"], { 
+    errorMap: () => ({ message: "Role must be admin, member, or viewer" })
+  }),
+});
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -38,7 +41,28 @@ serve(async (req) => {
       throw new Error("Unauthorized");
     }
 
-    const { email, organizationId, role }: InvitationRequest = await req.json();
+    // Validate request body
+    const body = await req.json();
+    const validation = invitationSchema.safeParse(body);
+    
+    if (!validation.success) {
+      console.error("Validation error:", validation.error.errors);
+      return new Response(
+        JSON.stringify({ 
+          error: "Invalid input", 
+          details: validation.error.errors.map(e => ({ 
+            field: e.path.join('.'), 
+            message: e.message 
+          }))
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        }
+      );
+    }
+
+    const { email, organizationId, role } = validation.data;
 
     console.log("Processing invitation request", { organizationId });
 
