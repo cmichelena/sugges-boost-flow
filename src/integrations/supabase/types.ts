@@ -303,6 +303,54 @@ export type Database = {
         }
         Relationships: []
       }
+      suggestion_categories: {
+        Row: {
+          created_at: string
+          display_order: number | null
+          id: string
+          is_default: boolean | null
+          is_hidden: boolean | null
+          name: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_default?: boolean | null
+          is_hidden?: boolean | null
+          name: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_default?: boolean | null
+          is_hidden?: boolean | null
+          name?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suggestion_categories_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suggestion_categories_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_member_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suggestions: {
         Row: {
           ai_improved_description: string | null
@@ -310,6 +358,7 @@ export type Database = {
           ai_tags: string[] | null
           archived: boolean
           category: string
+          category_id: string | null
           closure_comment_id: string | null
           created_at: string
           description: string
@@ -329,6 +378,7 @@ export type Database = {
           ai_tags?: string[] | null
           archived?: boolean
           category: string
+          category_id?: string | null
           closure_comment_id?: string | null
           created_at?: string
           description: string
@@ -348,6 +398,7 @@ export type Database = {
           ai_tags?: string[] | null
           archived?: boolean
           category?: string
+          category_id?: string | null
           closure_comment_id?: string | null
           created_at?: string
           description?: string
@@ -362,6 +413,13 @@ export type Database = {
           views?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "suggestions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "suggestion_categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "suggestions_closure_comment_id_fkey"
             columns: ["closure_comment_id"]

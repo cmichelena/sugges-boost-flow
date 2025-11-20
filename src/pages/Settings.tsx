@@ -279,6 +279,19 @@ const Settings = () => {
           </Button>
         </Card>
 
+        {/* Category Management */}
+        {(userRole === "admin" || userRole === "owner") && (
+          <Card className="p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-2">Suggestion Categories</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Customize the categories available for suggestions in your organization
+            </p>
+            <Button variant="outline" onClick={() => navigate("/categories")}>
+              Manage Categories
+            </Button>
+          </Card>
+        )}
+
         {/* Team Members */}
         <Card className="p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Team Members ({members.length})</h2>
