@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ThumbsUp, MessageSquare, Eye, User, Users, EyeOff } from "lucide-react";
 import { MomentumDial } from "./MomentumDial";
-import { calculateMomentum } from "@/lib/momentum";
+import { calculateMomentum, getMomentumLevel } from "@/lib/momentum";
 
 interface SuggestionCardProps {
   id: string;
@@ -38,6 +38,7 @@ export const SuggestionCard = ({
   onClick,
 }: SuggestionCardProps) => {
   const momentum = calculateMomentum(likes, comments, views, new Date(createdAt));
+  const momentumLevel = getMomentumLevel(momentum);
 
   return (
     <Card
@@ -45,7 +46,7 @@ export const SuggestionCard = ({
       onClick={onClick}
     >
       <div className="flex gap-4">
-        <MomentumDial score={momentum} size="sm" />
+        <MomentumDial level={momentumLevel} score={momentum} size="sm" />
         
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-4 mb-2">
