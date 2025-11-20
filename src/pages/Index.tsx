@@ -60,7 +60,7 @@ const Index = () => {
       .select(`
         *,
         likes:likes(count),
-        comments:comments(count),
+        comments:comments!comments_suggestion_id_fkey(count),
         assigned_user:assigned_to_user_id (
           id,
           profiles (display_name)
