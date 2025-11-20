@@ -63,10 +63,6 @@ const Dashboard = () => {
         *,
         likes:likes(count),
         comments:comments!comments_suggestion_id_fkey(count),
-        assigned_user:assigned_to_user_id (
-          id,
-          profiles (display_name)
-        ),
         assigned_team:assigned_team_id (
           id,
           name
@@ -82,11 +78,14 @@ const Dashboard = () => {
       return;
     }
 
-    // Get unique user IDs for profile lookup (excluding anonymous)
+    // Get unique user IDs for profile lookup (including assigned users)
     const userIds = [...new Set(
       (data || [])
-        .filter(s => !s.is_anonymous && s.user_id)
-        .map(s => s.user_id)
+        .flatMap(s => [
+          !s.is_anonymous && s.user_id ? s.user_id : null,
+          s.assigned_to_user_id ? s.assigned_to_user_id : null
+        ])
+        .filter(Boolean)
     )];
 
     // Fetch profiles for these users
@@ -110,6 +109,11 @@ const Dashboard = () => {
       profiles: suggestion.is_anonymous ? null : { 
         display_name: profilesMap.get(suggestion.user_id) || null 
       },
+      assigned_user: suggestion.assigned_to_user_id ? {
+        profiles: {
+          display_name: profilesMap.get(suggestion.assigned_to_user_id) || null
+        }
+      } : null
     }));
 
     setSuggestions(suggestionsWithCounts);
