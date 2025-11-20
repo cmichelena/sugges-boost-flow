@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { SuggestionCard } from "@/components/SuggestionCard";
@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { Loader2, Plus, User } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { MomentumActivityDashboard } from "@/components/MomentumActivityDashboard";
+import { calculateMomentum, getMomentumLevel, type MomentumLevel } from "@/lib/momentum";
 
 const Index = () => {
   const [suggestions, setSuggestions] = useState<any[]>([]);
@@ -17,6 +19,7 @@ const Index = () => {
   const [showMyAssignments, setShowMyAssignments] = useState(false);
   const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [selectedMomentum, setSelectedMomentum] = useState<MomentumLevel | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -114,7 +117,57 @@ const Index = () => {
     setLoading(false);
   };
 
+  const momentumStats = useMemo(() => {
+    const result = { fresh: 0, warming: 0, heating: 0, fire: 0 };
+    
+    for (const s of suggestions) {
+      const score = calculateMomentum(
+        s.likes ?? 0,
+        s.comments ?? 0,
+        s.views ?? 0,
+        new Date(s.created_at)
+      );
+      const level = getMomentumLevel(score);
+      result[level] += 1;
+    }
+    return result;
+  }, [suggestions]);
+
+  const activityStats = useMemo(() => {
+    let total = suggestions.length;
+    let open = 0;
+    let inProgress = 0;
+    let completed = 0;
+    let totalLikes = 0;
+    let totalComments = 0;
+
+    for (const s of suggestions) {
+      const status = s.status || "";
+      if (status === "Open" || status === "") open++;
+      if (status === "In Progress") inProgress++;
+      if (status === "Completed") completed++;
+
+      totalLikes += s.likes ?? 0;
+      totalComments += s.comments ?? 0;
+    }
+
+    return { total, open, inProgress, completed, totalLikes, totalComments };
+  }, [suggestions]);
+
   let filteredSuggestions = suggestions;
+
+  if (selectedMomentum) {
+    filteredSuggestions = filteredSuggestions.filter((s) => {
+      const score = calculateMomentum(
+        s.likes ?? 0,
+        s.comments ?? 0,
+        s.views ?? 0,
+        new Date(s.created_at)
+      );
+      const level = getMomentumLevel(score);
+      return level === selectedMomentum;
+    });
+  }
   if (categoryFilter !== "all") {
     filteredSuggestions = filteredSuggestions.filter(s => s.category_id === categoryFilter);
   }
@@ -131,15 +184,22 @@ const Index = () => {
       
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
+          <div className="mb-8">
+            <MomentumActivityDashboard
+              momentumStats={momentumStats}
+              activityStats={activityStats}
+              selectedMomentum={selectedMomentum}
+              onMomentumClick={(level) =>
+                setSelectedMomentum((current) => (current === level ? null : level))
+              }
+            />
+          </div>
+
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="text-4xl font-bold mb-2">Suggestions</h1>
               <p className="text-muted-foreground">Browse and vote on community suggestions</p>
             </div>
-            <Button onClick={() => navigate("/submit")}>
-              <Plus className="w-4 h-4 mr-2" />
-              Submit Suggestion
-            </Button>
           </div>
 
           <div className="flex gap-4 mb-6 flex-wrap">
