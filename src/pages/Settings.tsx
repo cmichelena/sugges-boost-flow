@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Loader2, Users, Crown, Calendar, Mail, CheckCircle, Clock } from "lucide-react";
+import { Loader2, Users, Crown, Calendar, Mail, CheckCircle, Clock, Sparkles, BarChart3, Palette, Headphones, Check } from "lucide-react";
 import { z } from "zod";
 
 const emailSchema = z.string().email("Please enter a valid email address");
@@ -38,6 +38,20 @@ interface Member {
   }[];
 }
 
+interface SubscriptionPlan {
+  id: string;
+  name: string;
+  tier: string;
+  price_monthly: number;
+  price_annual: number;
+  max_suggestions_per_month: number | null;
+  max_members: number | null;
+  ai_improvements_enabled: boolean;
+  advanced_analytics_enabled: boolean;
+  custom_branding_enabled: boolean;
+  priority_support_enabled: boolean;
+}
+
 const Settings = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -47,6 +61,7 @@ const Settings = () => {
   const [members, setMembers] = useState<Member[]>([]);
   const [inviteEmail, setInviteEmail] = useState("");
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
 
   useEffect(() => {
     if (!user) {
@@ -123,6 +138,16 @@ const Settings = () => {
       );
 
       setMembers(enrichedMembers);
+
+      // Fetch available subscription plans
+      const { data: plansData, error: plansError } = await supabase
+        .from("subscription_plans")
+        .select("*")
+        .order("price_monthly", { ascending: true });
+
+      if (!plansError && plansData) {
+        setPlans(plansData);
+      }
     } catch (error: any) {
       console.error("Error loading organization data:", error);
       toast.error("Failed to load organization data");
@@ -273,11 +298,108 @@ const Settings = () => {
               </div>
             )}
           </div>
-          <Separator className="my-4" />
-          <Button variant="outline" disabled>
-            Upgrade Plan (Coming Soon)
-          </Button>
         </Card>
+
+        {/* Pricing Plans - Only for Admins/Owners */}
+        {(userRole === "admin" || userRole === "owner") && plans.length > 0 && (
+          <Card className="p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-2">Available Plans</h2>
+            <p className="text-sm text-muted-foreground mb-6">
+              Choose the plan that best fits your organization's needs
+            </p>
+            
+            <div className="grid md:grid-cols-3 gap-4">
+              {plans.map((plan) => {
+                const isCurrentPlan = plan.tier === organization?.subscription_tier;
+                
+                return (
+                  <Card 
+                    key={plan.id} 
+                    className={`p-5 relative ${isCurrentPlan ? 'border-primary border-2 shadow-lg' : ''}`}
+                  >
+                    {isCurrentPlan && (
+                      <Badge className="absolute -top-2 right-4">Current Plan</Badge>
+                    )}
+                    
+                    <div className="mb-4">
+                      <h3 className="text-xl font-bold mb-1">{plan.name}</h3>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-3xl font-bold">${plan.price_monthly}</span>
+                        <span className="text-muted-foreground">/month</span>
+                      </div>
+                      {plan.price_annual > 0 && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          ${plan.price_annual}/year (save {Math.round((1 - (plan.price_annual / 12) / plan.price_monthly) * 100)}%)
+                        </p>
+                      )}
+                    </div>
+
+                    <Separator className="my-4" />
+
+                    <ul className="space-y-3 mb-6">
+                      {plan.max_suggestions_per_month && (
+                        <li className="flex items-start gap-2 text-sm">
+                          <Check className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                          <span>{plan.max_suggestions_per_month === -1 ? 'Unlimited' : plan.max_suggestions_per_month} suggestions/month</span>
+                        </li>
+                      )}
+                      {plan.max_members && (
+                        <li className="flex items-start gap-2 text-sm">
+                          <Check className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                          <span>{plan.max_members === -1 ? 'Unlimited' : plan.max_members} team members</span>
+                        </li>
+                      )}
+                      {plan.ai_improvements_enabled && (
+                        <li className="flex items-start gap-2 text-sm">
+                          <Check className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                          <span className="flex items-center gap-1">
+                            <Sparkles className="w-3 h-3" />
+                            AI-powered improvements
+                          </span>
+                        </li>
+                      )}
+                      {plan.advanced_analytics_enabled && (
+                        <li className="flex items-start gap-2 text-sm">
+                          <Check className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                          <span className="flex items-center gap-1">
+                            <BarChart3 className="w-3 h-3" />
+                            Advanced analytics
+                          </span>
+                        </li>
+                      )}
+                      {plan.custom_branding_enabled && (
+                        <li className="flex items-start gap-2 text-sm">
+                          <Check className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                          <span className="flex items-center gap-1">
+                            <Palette className="w-3 h-3" />
+                            Custom branding
+                          </span>
+                        </li>
+                      )}
+                      {plan.priority_support_enabled && (
+                        <li className="flex items-start gap-2 text-sm">
+                          <Check className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                          <span className="flex items-center gap-1">
+                            <Headphones className="w-3 h-3" />
+                            Priority support
+                          </span>
+                        </li>
+                      )}
+                    </ul>
+
+                    <Button 
+                      className="w-full" 
+                      variant={isCurrentPlan ? "outline" : "default"}
+                      disabled
+                    >
+                      {isCurrentPlan ? "Current Plan" : "Upgrade (Coming Soon)"}
+                    </Button>
+                  </Card>
+                );
+              })}
+            </div>
+          </Card>
+        )}
 
         {/* Category Management */}
         {(userRole === "admin" || userRole === "owner") && (
