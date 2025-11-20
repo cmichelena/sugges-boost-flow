@@ -40,7 +40,7 @@ serve(async (req) => {
 
     const { email, organizationId, role }: InvitationRequest = await req.json();
 
-    console.log("Processing invitation:", { email, organizationId, role, invitedBy: user.id });
+    console.log("Processing invitation request", { organizationId });
 
     // Verify user has admin or owner role
     const { data: userRole } = await supabase
@@ -125,7 +125,7 @@ serve(async (req) => {
       throw new Error("Failed to send invitation email");
     }
 
-    console.log("Invitation sent successfully to:", email);
+    console.log("Invitation sent successfully");
 
     return new Response(
       JSON.stringify({ success: true, message: "Invitation sent successfully" }),

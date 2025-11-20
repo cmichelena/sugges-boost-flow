@@ -171,6 +171,12 @@ const SuggestionDetail = () => {
       return;
     }
 
+    // Prevent anonymous submitters from commenting on their own anonymous suggestions
+    if (suggestion?.is_anonymous && suggestion?.user_id === user.id) {
+      toast.error("Cannot comment on your own anonymous suggestion");
+      return;
+    }
+
     // Validate comment
     const validation = commentSchema.safeParse(newComment);
     if (!validation.success) {
