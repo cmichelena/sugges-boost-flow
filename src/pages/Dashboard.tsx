@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { SuggestionCard } from "@/components/SuggestionCard";
 import { Navbar } from "@/components/Navbar";
+import { Onboarding } from "@/components/Onboarding";
 import { toast } from "sonner";
 import { Loader2, User } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -19,6 +20,8 @@ const Dashboard = () => {
   const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [selectedMomentum, setSelectedMomentum] = useState<MomentumLevel | null>(null);
+  const [isNewUser, setIsNewUser] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,6 +36,27 @@ const Dashboard = () => {
     }
 
     setCurrentUserId(session.user.id);
+
+    // Check if user is new and needs onboarding
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("created_at, onboarding_completed")
+      .eq("id", session.user.id)
+      .single();
+
+    if (profile) {
+      const createdAt = new Date(profile.created_at);
+      const now = new Date();
+      const hoursSinceCreation = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60);
+      
+      // User is "new" if account created within last 24 hours
+      setIsNewUser(hoursSinceCreation < 24);
+      
+      // Show onboarding if not completed
+      if (!profile.onboarding_completed) {
+        setShowOnboarding(true);
+      }
+    }
 
     const { data: orgMember, error: orgError } = await supabase
       .from("organization_members")
@@ -200,10 +224,22 @@ const Dashboard = () => {
 
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Suggestions</h1>
-              <p className="text-muted-foreground">Browse and vote on community suggestions</p>
+              <h1 className="text-4xl font-bold mb-2">
+                {isNewUser ? "Welcome to Suggistit! 🎉" : "Welcome back!"}
+              </h1>
+              <p className="text-muted-foreground">
+                {isNewUser 
+                  ? "Start exploring suggestions and share your ideas with the community"
+                  : "Browse and vote on community suggestions"
+                }
+              </p>
             </div>
           </div>
+
+          <Onboarding 
+            open={showOnboarding} 
+            onComplete={() => setShowOnboarding(false)} 
+          />
 
           <div className="flex gap-4 mb-6 flex-wrap">
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
