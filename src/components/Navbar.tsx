@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Plus, User, LogOut, Info } from "lucide-react";
+import { Plus, User, LogOut, Info, DollarSign } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -25,6 +25,13 @@ export const Navbar = () => {
             <Link to="/how-it-works">
               <Info className="w-4 h-4 mr-2" />
               How it Works
+            </Link>
+          </Button>
+
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/pricing">
+              <DollarSign className="w-4 h-4 mr-2" />
+              Pricing
             </Link>
           </Button>
 

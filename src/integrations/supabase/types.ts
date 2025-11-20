@@ -253,10 +253,12 @@ export type Database = {
         Row: {
           advanced_analytics_enabled: boolean
           ai_improvements_enabled: boolean
+          coming_soon: boolean | null
           created_at: string
           custom_branding_enabled: boolean
           features: Json | null
           id: string
+          is_lifetime: boolean | null
           max_members: number | null
           max_suggestions_per_month: number | null
           name: string
@@ -271,10 +273,12 @@ export type Database = {
         Insert: {
           advanced_analytics_enabled?: boolean
           ai_improvements_enabled?: boolean
+          coming_soon?: boolean | null
           created_at?: string
           custom_branding_enabled?: boolean
           features?: Json | null
           id?: string
+          is_lifetime?: boolean | null
           max_members?: number | null
           max_suggestions_per_month?: number | null
           name: string
@@ -289,10 +293,12 @@ export type Database = {
         Update: {
           advanced_analytics_enabled?: boolean
           ai_improvements_enabled?: boolean
+          coming_soon?: boolean | null
           created_at?: string
           custom_branding_enabled?: boolean
           features?: Json | null
           id?: string
+          is_lifetime?: boolean | null
           max_members?: number | null
           max_suggestions_per_month?: number | null
           name?: string
@@ -715,7 +721,7 @@ export type Database = {
         | "canceled"
         | "trialing"
         | "incomplete"
-      subscription_tier: "free" | "pro" | "business" | "enterprise"
+      subscription_tier: "free" | "pro" | "business" | "enterprise" | "forever"
       team_role: "lead" | "member"
     }
     CompositeTypes: {
@@ -853,7 +859,7 @@ export const Constants = {
         "trialing",
         "incomplete",
       ],
-      subscription_tier: ["free", "pro", "business", "enterprise"],
+      subscription_tier: ["free", "pro", "business", "enterprise", "forever"],
       team_role: ["lead", "member"],
     },
   },
