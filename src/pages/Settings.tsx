@@ -150,12 +150,33 @@ const Settings = () => {
         return;
       }
 
-      // TODO: Implement actual invite logic
-      // For now, just show a success message
-      toast.success("Invitation sent! (Note: Email invites not yet implemented)");
+      if (!organization?.id) {
+        toast.error("Organization not found");
+        setInviting(false);
+        return;
+      }
+
+      // Call edge function to send invitation
+      const { error } = await supabase.functions.invoke("send-invitation", {
+        body: {
+          email: inviteEmail,
+          organizationId: organization.id,
+          role: "member",
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast.success("Invitation sent successfully!");
       setInviteEmail("");
+      
+      // Reload members list
+      await loadOrganizationData();
     } catch (error: any) {
-      toast.error(error.message);
+      console.error("Error inviting member:", error);
+      toast.error(error.message || "Failed to send invitation");
     } finally {
       setInviting(false);
     }
@@ -312,7 +333,7 @@ const Settings = () => {
                     </Button>
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">
-                    Note: Email invitations are not yet implemented. This is a placeholder for future functionality.
+                    An invitation email will be sent to this address. They'll have 7 days to accept.
                   </p>
                 </div>
               </form>
