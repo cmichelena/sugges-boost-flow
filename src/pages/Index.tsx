@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { calculateMomentum, getMomentumLevel } from "@/lib/momentum";
 import type { MomentumLevel } from "@/lib/momentum";
 import vector56Logo from "@/assets/vector56-logo.png";
-import { MomentumDial } from "@/components/MomentumDial";
+import { MomentumActivityDashboard } from "@/components/MomentumActivityDashboard";
 import suggestionBoxIcon from "@/assets/suggestion-box-icon.png";
 
 interface Suggestion {
@@ -296,64 +296,24 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Momentum Filter Section */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-semibold text-center mb-6">
-            Filter by Momentum
-          </h2>
-
+        {/* Momentum & Activity Dashboard */}
         {!loading && suggestions.length > 0 && (
-          <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 mb-12">
-            <button
-              onClick={() => setSelectedMomentum(selectedMomentum === "fresh" ? null : "fresh")}
-              className={`flex flex-col items-center gap-2 transition-opacity ${
-                selectedMomentum && selectedMomentum !== "fresh" ? "opacity-40" : "opacity-100"
-              } hover:opacity-100 cursor-pointer ${
-                selectedMomentum === "fresh" ? "ring-2 ring-momentum-fresh ring-offset-2 rounded-full" : ""
-              }`}
-            >
-              <MomentumDial level="fresh" score={momentumStats.fresh} size="sm" />
-              <span className="text-xs text-muted-foreground">Fresh</span>
-            </button>
-            
-            <button
-              onClick={() => setSelectedMomentum(selectedMomentum === "warming" ? null : "warming")}
-              className={`flex flex-col items-center gap-2 transition-opacity ${
-                selectedMomentum && selectedMomentum !== "warming" ? "opacity-40" : "opacity-100"
-              } hover:opacity-100 cursor-pointer ${
-                selectedMomentum === "warming" ? "ring-2 ring-momentum-warming ring-offset-2 rounded-full" : ""
-              }`}
-            >
-              <MomentumDial level="warming" score={momentumStats.warming} size="sm" />
-              <span className="text-xs text-muted-foreground">Warming</span>
-            </button>
-            
-            <button
-              onClick={() => setSelectedMomentum(selectedMomentum === "heating" ? null : "heating")}
-              className={`flex flex-col items-center gap-2 transition-opacity ${
-                selectedMomentum && selectedMomentum !== "heating" ? "opacity-40" : "opacity-100"
-              } hover:opacity-100 cursor-pointer ${
-                selectedMomentum === "heating" ? "ring-2 ring-momentum-heating ring-offset-2 rounded-full" : ""
-              }`}
-            >
-              <MomentumDial level="heating" score={momentumStats.heating} size="sm" />
-              <span className="text-xs text-muted-foreground">Heating</span>
-            </button>
-            
-            <button
-              onClick={() => setSelectedMomentum(selectedMomentum === "fire" ? null : "fire")}
-              className={`flex flex-col items-center gap-2 transition-opacity ${
-                selectedMomentum && selectedMomentum !== "fire" ? "opacity-40" : "opacity-100"
-              } hover:opacity-100 cursor-pointer ${
-                selectedMomentum === "fire" ? "ring-2 ring-momentum-fire ring-offset-2 rounded-full" : ""
-              }`}
-            >
-              <MomentumDial level="fire" score={momentumStats.fire} size="sm" />
-              <span className="text-xs text-muted-foreground">On Fire</span>
-            </button>
+          <div className="mb-8">
+            <MomentumActivityDashboard
+              momentumStats={momentumStats}
+              activityStats={{
+                total: suggestions.length,
+                open: suggestions.filter((s) => s.status === "Open").length,
+                inProgress: suggestions.filter((s) => s.status === "In Progress").length,
+                completed: suggestions.filter((s) => s.status === "Completed").length,
+                totalLikes: suggestions.reduce((sum, s) => sum + s.likes_count, 0),
+                totalComments: suggestions.reduce((sum, s) => sum + s.comments_count, 0),
+              }}
+              selectedMomentum={selectedMomentum}
+              onMomentumClick={(level) => setSelectedMomentum(selectedMomentum === level ? null : level)}
+            />
           </div>
         )}
-        </div>
 
         {/* Search and Filters Section */}
         <div className="mb-8">
