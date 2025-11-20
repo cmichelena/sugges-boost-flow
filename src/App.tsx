@@ -10,6 +10,7 @@ import Submit from "./pages/Submit";
 import SuggestionDetail from "./pages/SuggestionDetail";
 import MySuggestions from "./pages/MySuggestions";
 import HowItWorks from "./pages/HowItWorks";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/suggestion/:id" element={<SuggestionDetail />} />
             <Route path="/my-suggestions" element={<MySuggestions />} />
             <Route path="/how-it-works" element={<HowItWorks />} />
+            <Route path="/settings" element={<Settings />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
