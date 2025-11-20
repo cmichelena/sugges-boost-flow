@@ -16,7 +16,7 @@ export const Navbar = () => {
   return (
     <nav className="sticky top-0 z-50 border-b bg-card">
       <div className="container mx-auto px-4 py-2 md:py-0 md:h-16 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-0">
-        <Link to="/" className="flex items-center flex-shrink-0">
+        <Link to={user ? "/dashboard" : "/"} className="flex items-center flex-shrink-0">
           <img src={logo} alt="Suggistit" className="h-12 md:h-16" />
         </Link>
 
