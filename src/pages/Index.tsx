@@ -11,7 +11,7 @@ import { calculateMomentum, getMomentumLevel } from "@/lib/momentum";
 import type { MomentumLevel } from "@/lib/momentum";
 import vector56Logo from "@/assets/vector56-logo.png";
 import { MomentumDial } from "@/components/MomentumDial";
-import suggestionBoxAnimation from "@/assets/suggestion-box-animation.gif";
+import suggestionBoxIcon from "@/assets/suggestion-box-icon.png";
 
 interface Suggestion {
   id: string;
@@ -251,10 +251,10 @@ const Index = () => {
         {/* Hero Section */}
         <div className="text-center mb-12">
           <div className="flex justify-center mb-6">
-            <img src={suggestionBoxAnimation} alt="Suggestion Box" className="w-32 h-32" />
+            <img src={suggestionBoxIcon} alt="Suggestion Box" className="w-32 h-32" />
           </div>
           <h1 className="text-5xl md:text-6xl font-bold mb-4">
-            🔥 The Suggestion Box, Upgraded
+            The Suggestion Box, Upgraded
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-6">
             Submit suggestions and ideas in seconds, let AI tidy them up, and watch momentum build across your team — ensuring no suggestion goes unanswered.
