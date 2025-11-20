@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,36 @@ const Submit = () => {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [loading, setLoading] = useState(false);
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  // Fetch user's organization on mount
+  useEffect(() => {
+    const fetchUserOrganization = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("organization_members")
+        .select("organization_id")
+        .eq("user_id", session.user.id)
+        .eq("status", "active")
+        .single();
+
+      if (error) {
+        console.error("Error fetching organization:", error);
+        toast.error("Failed to load organization");
+        return;
+      }
+
+      setOrganizationId(data.organization_id);
+    };
+
+    fetchUserOrganization();
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,9 +101,10 @@ const Submit = () => {
         toast.error("Failed to improve suggestion with AI");
       }
 
-      // Insert the suggestion
+      // Insert the suggestion with organization_id
       const { error } = await supabase.from("suggestions").insert({
         user_id: session.user.id,
+        organization_id: organizationId,
         title: improved?.improved_title || title,
         description: improved?.improved_description || description,
         original_title: title,

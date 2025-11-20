@@ -106,18 +106,44 @@ const Index = () => {
     heating: 0,
     fire: 0,
   });
+  const [userOrganizationId, setUserOrganizationId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadSuggestions();
+    const fetchUserOrganizationAndSuggestions = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const { data, error } = await supabase
+          .from("organization_members")
+          .select("organization_id")
+          .eq("user_id", session.user.id)
+          .eq("status", "active")
+          .maybeSingle();
+
+        if (data) {
+          setUserOrganizationId(data.organization_id);
+        }
+      }
+      
+      await loadSuggestions();
+    };
+
+    fetchUserOrganizationAndSuggestions();
   }, []);
 
   const loadSuggestions = async () => {
     try {
-      const { data: suggestionsData, error } = await supabase
+      let query = supabase
         .from("suggestions")
         .select("*")
         .order("created_at", { ascending: false });
+
+      // Filter by user's organization if logged in
+      if (userOrganizationId) {
+        query = query.eq("organization_id", userOrganizationId);
+      }
+
+      const { data: suggestionsData, error } = await query;
 
       if (error) throw error;
 
