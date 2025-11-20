@@ -15,6 +15,7 @@ import Settings from "./pages/Settings";
 import Categories from "./pages/Categories";
 import Teams from "./pages/Teams";
 import AcceptInvitation from "./pages/AcceptInvitation";
+import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/suggestion/:id" element={<SuggestionDetail />} />
             <Route path="/my-suggestions" element={<MySuggestions />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/pricing" element={<Pricing />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/categories" element={<Categories />} />
           <Route path="/teams" element={<Teams />} />
