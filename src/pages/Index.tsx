@@ -1,401 +1,173 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Navbar } from "@/components/Navbar";
 import { SuggestionCard } from "@/components/SuggestionCard";
-import { Loader2, Search } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Navbar } from "@/components/Navbar";
+import { toast } from "sonner";
+import { Loader2, Plus, User } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { calculateMomentum, getMomentumLevel } from "@/lib/momentum";
-import type { MomentumLevel } from "@/lib/momentum";
-import vector56Logo from "@/assets/vector56-logo.png";
-import { MomentumActivityDashboard } from "@/components/MomentumActivityDashboard";
-import suggestionBoxIcon from "@/assets/suggestion-box-icon.png";
-
-interface Suggestion {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  status: string;
-  views: number;
-  created_at: string;
-  ai_tags: string[] | null;
-  profiles: {
-    display_name: string;
-  } | null;
-  likes_count: number;
-  comments_count: number;
-}
-
-interface MomentumStats {
-  fresh: number;
-  warming: number;
-  heating: number;
-  fire: number;
-}
-
-type SortOption = "newest" | "oldest" | "momentum" | "most-liked" | "most-commented";
-
-const SAMPLE_SUGGESTIONS: Suggestion[] = [
-  {
-    id: "sample-1",
-    title: "Add Dark Mode Toggle",
-    description: "It would be great to have a dark mode option in the settings. Many users prefer dark themes, especially when working late at night.",
-    category: "Feature",
-    status: "Open",
-    views: 234,
-    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    ai_tags: ["UI", "Accessibility", "User Experience"],
-    profiles: { display_name: "Sample User" },
-    likes_count: 45,
-    comments_count: 12,
-  },
-  {
-    id: "sample-2",
-    title: "Improve Mobile Navigation",
-    description: "The navigation menu is a bit difficult to use on mobile devices. Consider adding a hamburger menu or improving the touch targets.",
-    category: "Enhancement",
-    status: "Open",
-    views: 189,
-    created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    ai_tags: ["Mobile", "UI", "Navigation"],
-    profiles: { display_name: "Demo User" },
-    likes_count: 32,
-    comments_count: 8,
-  },
-  {
-    id: "sample-3",
-    title: "Export Data Feature",
-    description: "Allow users to export their data in CSV or JSON format. This would be useful for backing up information or analyzing trends.",
-    category: "Feature",
-    status: "Open",
-    views: 156,
-    created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    ai_tags: ["Data", "Export", "Analytics"],
-    profiles: { display_name: "Sample User" },
-    likes_count: 28,
-    comments_count: 5,
-  },
-  {
-    id: "sample-4",
-    title: "Add Search Functionality",
-    description: "A search bar would help users find specific suggestions quickly, especially as the number of suggestions grows.",
-    category: "Feature",
-    status: "Open",
-    views: 312,
-    created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    ai_tags: ["Search", "User Experience", "Performance"],
-    profiles: { display_name: "Demo User" },
-    likes_count: 67,
-    comments_count: 15,
-  },
-];
+import { Badge } from "@/components/ui/badge";
 
 const Index = () => {
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<SortOption>("newest");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedMomentum, setSelectedMomentum] = useState<MomentumLevel | null>(null);
-  const [momentumStats, setMomentumStats] = useState<MomentumStats>({
-    fresh: 0,
-    warming: 0,
-    heating: 0,
-    fire: 0,
-  });
-  const [userOrganizationId, setUserOrganizationId] = useState<string | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [showMyAssignments, setShowMyAssignments] = useState(false);
+  const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUserOrganizationAndSuggestions = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        const { data, error } = await supabase
-          .from("organization_members")
-          .select("organization_id")
-          .eq("user_id", session.user.id)
-          .eq("status", "active")
-          .maybeSingle();
-
-        if (data) {
-          setUserOrganizationId(data.organization_id);
-        }
-      }
-      
-      await loadSuggestions();
-    };
-
-    fetchUserOrganizationAndSuggestions();
-  }, []);
+    loadSuggestions();
+  }, [navigate]);
 
   const loadSuggestions = async () => {
-    try {
-      let query = supabase
-        .from("suggestions")
-        .select("*")
-        .order("created_at", { ascending: false });
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      navigate("/auth");
+      return;
+    }
 
-      // Filter by user's organization if logged in
-      if (userOrganizationId) {
-        query = query.eq("organization_id", userOrganizationId);
-      }
+    setCurrentUserId(session.user.id);
 
-      const { data: suggestionsData, error } = await query;
+    const { data: orgMember, error: orgError } = await supabase
+      .from("organization_members")
+      .select("organization_id")
+      .eq("user_id", session.user.id)
+      .eq("status", "active")
+      .single();
 
-      if (error) throw error;
-
-      // Fetch related data separately
-      const suggestionsWithCounts = await Promise.all(
-        (suggestionsData || []).map(async (suggestion) => {
-          const [{ data: profile }, { count: likesCount }, { count: commentsCount }] = await Promise.all([
-            supabase
-              .from("profiles")
-              .select("display_name")
-              .eq("id", suggestion.user_id)
-              .single(),
-            supabase
-              .from("likes")
-              .select("*", { count: "exact", head: true })
-              .eq("suggestion_id", suggestion.id),
-            supabase
-              .from("comments")
-              .select("*", { count: "exact", head: true })
-              .eq("suggestion_id", suggestion.id),
-          ]);
-
-          return {
-            ...suggestion,
-            profiles: profile,
-            likes_count: likesCount || 0,
-            comments_count: commentsCount || 0,
-          };
-        })
-      );
-
-      setSuggestions(suggestionsWithCounts);
-      
-      // Calculate momentum stats
-      const stats: MomentumStats = { fresh: 0, warming: 0, heating: 0, fire: 0 };
-      suggestionsWithCounts.forEach((suggestion) => {
-        const momentum = calculateMomentum(
-          suggestion.likes_count,
-          suggestion.comments_count,
-          suggestion.views,
-          new Date(suggestion.created_at)
-        );
-        const level = getMomentumLevel(momentum);
-        stats[level]++;
-      });
-      setMomentumStats(stats);
-    } catch (error) {
-      console.error("Error loading suggestions:", error);
-    } finally {
+    if (orgError || !orgMember) {
+      toast.error("Failed to load organization");
       setLoading(false);
+      return;
     }
+
+    // Load categories
+    const { data: categoriesData } = await supabase
+      .from("suggestion_categories")
+      .select("id, name")
+      .eq("organization_id", orgMember.organization_id)
+      .eq("is_hidden", false)
+      .order("display_order");
+
+    setCategories(categoriesData || []);
+
+    const { data, error } = await supabase
+      .from("suggestions")
+      .select(`
+        *,
+        profiles:user_id (display_name),
+        likes:likes(count),
+        comments:comments(count),
+        assigned_user:assigned_to_user_id (
+          id,
+          profiles (display_name)
+        ),
+        assigned_team:assigned_team_id (
+          id,
+          name
+        )
+      `)
+      .eq("organization_id", orgMember.organization_id)
+      .eq("archived", false)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      toast.error("Failed to load suggestions");
+      setLoading(false);
+      return;
+    }
+
+    const suggestionsWithCounts = (data || []).map((suggestion: any) => ({
+      ...suggestion,
+      likes: suggestion.likes?.[0]?.count || 0,
+      comments: suggestion.comments?.[0]?.count || 0,
+    }));
+
+    setSuggestions(suggestionsWithCounts);
+    setLoading(false);
   };
 
-  const displaySuggestions = suggestions.length === 0 ? SAMPLE_SUGGESTIONS : suggestions;
-
-  const allTags = Array.from(
-    new Set(displaySuggestions.flatMap((s) => s.ai_tags || []))
-  ).sort();
-
-  let filteredSuggestions = displaySuggestions;
-
-  // Filter by search query
-  if (searchQuery) {
-    filteredSuggestions = filteredSuggestions.filter((s) =>
-      s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.description.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+  let filteredSuggestions = suggestions;
+  if (categoryFilter !== "all") {
+    filteredSuggestions = filteredSuggestions.filter(s => s.category_id === categoryFilter);
   }
-
-  // Filter by tags
-  if (selectedTags.length > 0) {
-    filteredSuggestions = filteredSuggestions.filter((s) =>
-      s.ai_tags?.some((tag) => selectedTags.includes(tag))
-    );
+  if (statusFilter !== "all") {
+    filteredSuggestions = filteredSuggestions.filter(s => s.status === statusFilter);
   }
-
-  // Filter by momentum level
-  if (selectedMomentum) {
-    filteredSuggestions = filteredSuggestions.filter((s) => {
-      const momentum = calculateMomentum(
-        s.likes_count,
-        s.comments_count,
-        s.views,
-        new Date(s.created_at)
-      );
-      return getMomentumLevel(momentum) === selectedMomentum;
-    });
+  if (showMyAssignments && currentUserId) {
+    filteredSuggestions = filteredSuggestions.filter(s => s.assigned_to_user_id === currentUserId);
   }
-
-  const sortedSuggestions = [...filteredSuggestions].sort((a, b) => {
-    switch (sortBy) {
-      case "newest":
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      case "oldest":
-        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-      case "momentum": {
-        const momentumA = calculateMomentum(
-          a.likes_count,
-          a.comments_count,
-          a.views,
-          new Date(a.created_at)
-        );
-        const momentumB = calculateMomentum(
-          b.likes_count,
-          b.comments_count,
-          b.views,
-          new Date(b.created_at)
-        );
-        return momentumB - momentumA;
-      }
-      case "most-liked":
-        return b.likes_count - a.likes_count;
-      case "most-commented":
-        return b.comments_count - a.comments_count;
-      default:
-        return 0;
-    }
-  });
-
-  const toggleTag = (tag: string) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    );
-  };
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        {/* Hero Section */}
-        <div className="text-center mb-12">
-          <div className="flex justify-center mb-6">
-            <img src={suggestionBoxIcon} alt="Suggestion Box" className="w-32 h-32" />
-          </div>
-          <h1 className="text-5xl md:text-6xl font-bold mb-4">
-            The Suggestion Box, Upgraded
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-6">
-            Submit suggestions and ideas in seconds, let AI tidy them up, and watch momentum build across your team — ensuring no suggestion goes unanswered.
-          </p>
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-muted/50 rounded-full">
-            <span className="text-sm font-medium">{suggestions.length} active suggestions</span>
-            {selectedMomentum && (
-              <>
-                <span className="text-muted-foreground">•</span>
-                <span className="text-sm text-primary capitalize">{selectedMomentum} filtered</span>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Momentum & Activity Dashboard */}
-        {!loading && suggestions.length > 0 && (
-          <div className="mb-8">
-            <MomentumActivityDashboard
-              momentumStats={momentumStats}
-              activityStats={{
-                total: suggestions.length,
-                open: suggestions.filter((s) => s.status === "Open").length,
-                inProgress: suggestions.filter((s) => s.status === "In Progress").length,
-                completed: suggestions.filter((s) => s.status === "Completed").length,
-                totalLikes: suggestions.reduce((sum, s) => sum + s.likes_count, 0),
-                totalComments: suggestions.reduce((sum, s) => sum + s.comments_count, 0),
-              }}
-              selectedMomentum={selectedMomentum}
-              onMomentumClick={(level) => setSelectedMomentum(selectedMomentum === level ? null : level)}
-            />
-          </div>
-        )}
-
-        {/* Search and Filters Section */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Browse Suggestions</h2>
-          
-        <div className="mb-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input
-              type="text"
-              placeholder="Search suggestions..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          {allTags.length > 0 && (
-            <div className="flex-1">
-              <p className="text-sm text-muted-foreground mb-2">Filter by tags:</p>
-              <div className="flex flex-wrap gap-2">
-                {allTags.map((tag) => (
-                  <Badge
-                    key={tag}
-                    variant={selectedTags.includes(tag) ? "default" : "outline"}
-                    className="cursor-pointer"
-                    onClick={() => toggleTag(tag)}
-                  >
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Suggestions</h1>
+              <p className="text-muted-foreground">Browse and vote on community suggestions</p>
             </div>
-          )}
-          
-          <div className="sm:w-48">
-            <p className="text-sm text-muted-foreground mb-2">Sort by:</p>
-            <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
-              <SelectTrigger>
-                <SelectValue />
+            <Button onClick={() => navigate("/submit")}>
+              <Plus className="w-4 h-4 mr-2" />
+              Submit Suggestion
+            </Button>
+          </div>
+
+          <div className="flex gap-4 mb-6 flex-wrap">
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="All Categories" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">Newest First</SelectItem>
-                <SelectItem value="oldest">Oldest First</SelectItem>
-                <SelectItem value="momentum">Highest Momentum</SelectItem>
-                <SelectItem value="most-liked">Most Liked</SelectItem>
-                <SelectItem value="most-commented">Most Commented</SelectItem>
+              <SelectContent className="bg-background z-50">
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
-          </div>
-        </div>
-        </div>
 
-        {loading ? (
-          <div className="flex justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="All Statuses" />
+              </SelectTrigger>
+              <SelectContent className="bg-background z-50">
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="Open">Open</SelectItem>
+                <SelectItem value="Under Review">Under Review</SelectItem>
+                <SelectItem value="Planned">Planned</SelectItem>
+                <SelectItem value="In Progress">In Progress</SelectItem>
+                <SelectItem value="Completed">Completed</SelectItem>
+                <SelectItem value="Declined">Declined</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Badge
+              variant={showMyAssignments ? "default" : "outline"}
+              className="cursor-pointer px-4 py-2 text-sm"
+              onClick={() => setShowMyAssignments(!showMyAssignments)}
+            >
+              <User className="w-4 h-4 mr-2" />
+              My Assignments
+            </Badge>
           </div>
-        ) : sortedSuggestions.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground text-lg">
-              {searchQuery 
-                ? "No suggestions match your search."
-                : selectedTags.length > 0 
-                ? "No suggestions match the selected tags."
-                : selectedMomentum
-                ? "No suggestions at this momentum level."
-                : "No suggestions found."}
-            </p>
-          </div>
-        ) : (
-          <>
-            {suggestions.length === 0 && (
-              <div className="mb-4 p-4 bg-muted/50 rounded-lg border border-border">
-                <p className="text-sm text-muted-foreground text-center">
-                  👋 These are sample suggestions to help you get started. Submit your own to see them here!
-                </p>
-              </div>
-            )}
+
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin" />
+            </div>
+          ) : filteredSuggestions.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No suggestions found</p>
+            </div>
+          ) : (
             <div className="space-y-4">
-              {sortedSuggestions.map((suggestion) => (
+              {filteredSuggestions.map((suggestion: any) => (
                 <SuggestionCard
                   key={suggestion.id}
                   id={suggestion.id}
@@ -403,25 +175,21 @@ const Index = () => {
                   description={suggestion.description}
                   category={suggestion.category}
                   status={suggestion.status}
-                  likes={suggestion.likes_count}
-                  comments={suggestion.comments_count}
+                  likes={suggestion.likes}
+                  comments={suggestion.comments}
                   views={suggestion.views}
                   createdAt={suggestion.created_at}
-                  authorName={suggestion.profiles?.display_name || "Anonymous"}
+                  authorName={suggestion.profiles?.display_name || null}
+                  isAnonymous={suggestion.is_anonymous}
+                  assignedToUserName={suggestion.assigned_user?.profiles?.display_name || null}
+                  assignedToTeamName={suggestion.assigned_team?.name || null}
                   onClick={() => navigate(`/suggestion/${suggestion.id}`)}
                 />
               ))}
             </div>
-          </>
-        )}
-      </div>
-      
-      <footer className="py-6 text-center border-t border-border/40">
-        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-          <span>Created by</span>
-          <img src={vector56Logo} alt="Vector56" className="h-4 opacity-70" />
+          )}
         </div>
-      </footer>
+      </div>
     </div>
   );
 };
