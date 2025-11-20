@@ -47,6 +47,9 @@ export const Navbar = () => {
                   <DropdownMenuItem asChild>
                     <Link to="/my-suggestions">My Suggestions</Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/settings">Settings</Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={signOut}>
                     <LogOut className="w-4 h-4 mr-2" />
                     Sign Out
