@@ -4,6 +4,7 @@ import { Navbar } from "@/components/Navbar";
 import { MomentumDial } from "@/components/MomentumDial";
 import { TrendingUp, Users, Zap, Target, ArrowRight, BarChart3 } from "lucide-react";
 import logo from "@/assets/suggistit-logo.png";
+import centerIcon from "@/assets/suggestion-box-center.png";
 
 const Landing = () => {
   return (
@@ -15,7 +16,7 @@ const Landing = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
         <div className="container mx-auto px-4 py-20 lg:py-32 relative">
           <div className="max-w-4xl mx-auto text-center">
-            <img src={logo} alt="Suggistit" className="h-20 mx-auto mb-8" />
+            <img src={centerIcon} alt="Suggistit" className="h-32 mx-auto mb-8" />
             <h1 className="text-5xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
               Turn Ideas Into Action
             </h1>
