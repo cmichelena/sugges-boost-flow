@@ -59,7 +59,6 @@ const Index = () => {
       .from("suggestions")
       .select(`
         *,
-        profiles:user_id (display_name),
         likes:likes(count),
         comments:comments(count),
         assigned_user:assigned_to_user_id (
@@ -81,10 +80,34 @@ const Index = () => {
       return;
     }
 
+    // Get unique user IDs for profile lookup (excluding anonymous)
+    const userIds = [...new Set(
+      (data || [])
+        .filter(s => !s.is_anonymous && s.user_id)
+        .map(s => s.user_id)
+    )];
+
+    // Fetch profiles for these users
+    const profilesMap = new Map();
+    if (userIds.length > 0) {
+      const { data: profilesData } = await supabase
+        .from("profiles")
+        .select("id, display_name")
+        .in("id", userIds);
+        
+      profilesData?.forEach(profile => {
+        profilesMap.set(profile.id, profile.display_name);
+      });
+    }
+
+    // Map suggestions with profile data
     const suggestionsWithCounts = (data || []).map((suggestion: any) => ({
       ...suggestion,
       likes: suggestion.likes?.[0]?.count || 0,
       comments: suggestion.comments?.[0]?.count || 0,
+      profiles: suggestion.is_anonymous ? null : { 
+        display_name: profilesMap.get(suggestion.user_id) || null 
+      },
     }));
 
     setSuggestions(suggestionsWithCounts);
