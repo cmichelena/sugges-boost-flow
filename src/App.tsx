@@ -11,6 +11,7 @@ import SuggestionDetail from "./pages/SuggestionDetail";
 import MySuggestions from "./pages/MySuggestions";
 import HowItWorks from "./pages/HowItWorks";
 import Settings from "./pages/Settings";
+import Categories from "./pages/Categories";
 import AcceptInvitation from "./pages/AcceptInvitation";
 import NotFound from "./pages/NotFound";
 
@@ -29,9 +30,10 @@ const App = () => (
             <Route path="/submit" element={<Submit />} />
             <Route path="/suggestion/:id" element={<SuggestionDetail />} />
             <Route path="/my-suggestions" element={<MySuggestions />} />
-            <Route path="/how-it-works" element={<HowItWorks />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/accept-invitation" element={<AcceptInvitation />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/categories" element={<Categories />} />
+          <Route path="/accept-invitation" element={<AcceptInvitation />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
