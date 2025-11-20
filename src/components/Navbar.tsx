@@ -48,6 +48,9 @@ export const Navbar = () => {
                     <Link to="/my-suggestions">My Suggestions</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
+                    <Link to="/teams">Teams</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
                     <Link to="/settings">Settings</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={signOut}>

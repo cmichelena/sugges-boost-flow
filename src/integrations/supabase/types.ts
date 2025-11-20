@@ -305,6 +305,7 @@ export type Database = {
       }
       suggestion_categories: {
         Row: {
+          can_be_anonymous: boolean
           created_at: string
           display_order: number | null
           id: string
@@ -312,9 +313,11 @@ export type Database = {
           is_hidden: boolean | null
           name: string
           organization_id: string
+          responsible_team_id: string | null
           updated_at: string
         }
         Insert: {
+          can_be_anonymous?: boolean
           created_at?: string
           display_order?: number | null
           id?: string
@@ -322,9 +325,11 @@ export type Database = {
           is_hidden?: boolean | null
           name: string
           organization_id: string
+          responsible_team_id?: string | null
           updated_at?: string
         }
         Update: {
+          can_be_anonymous?: boolean
           created_at?: string
           display_order?: number | null
           id?: string
@@ -332,6 +337,7 @@ export type Database = {
           is_hidden?: boolean | null
           name?: string
           organization_id?: string
+          responsible_team_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -349,6 +355,13 @@ export type Database = {
             referencedRelation: "organizations_member_view"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "suggestion_categories_responsible_team_id_fkey"
+            columns: ["responsible_team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
         ]
       }
       suggestions: {
@@ -357,19 +370,22 @@ export type Database = {
           ai_improved_title: string | null
           ai_tags: string[] | null
           archived: boolean
+          assigned_team_id: string | null
+          assigned_to_user_id: string | null
           category: string
           category_id: string | null
           closure_comment_id: string | null
           created_at: string
           description: string
           id: string
+          is_anonymous: boolean
           organization_id: string | null
           original_description: string
           original_title: string
           status: string
           title: string
           updated_at: string
-          user_id: string
+          user_id: string | null
           views: number
         }
         Insert: {
@@ -377,19 +393,22 @@ export type Database = {
           ai_improved_title?: string | null
           ai_tags?: string[] | null
           archived?: boolean
+          assigned_team_id?: string | null
+          assigned_to_user_id?: string | null
           category: string
           category_id?: string | null
           closure_comment_id?: string | null
           created_at?: string
           description: string
           id?: string
+          is_anonymous?: boolean
           organization_id?: string | null
           original_description: string
           original_title: string
           status?: string
           title: string
           updated_at?: string
-          user_id: string
+          user_id?: string | null
           views?: number
         }
         Update: {
@@ -397,22 +416,32 @@ export type Database = {
           ai_improved_title?: string | null
           ai_tags?: string[] | null
           archived?: boolean
+          assigned_team_id?: string | null
+          assigned_to_user_id?: string | null
           category?: string
           category_id?: string | null
           closure_comment_id?: string | null
           created_at?: string
           description?: string
           id?: string
+          is_anonymous?: boolean
           organization_id?: string | null
           original_description?: string
           original_title?: string
           status?: string
           title?: string
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
           views?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "suggestions_assigned_team_id_fkey"
+            columns: ["assigned_team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "suggestions_category_id_fkey"
             columns: ["category_id"]
@@ -436,6 +465,80 @@ export type Database = {
           },
           {
             foreignKeyName: "suggestions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_member_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_members: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["team_role"]
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["team_role"]
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["team_role"]
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teams_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teams_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations_member_view"
@@ -558,6 +661,13 @@ export type Database = {
       }
     }
     Functions: {
+      auto_assign_suggestion_to_team: {
+        Args: { _category_id: string }
+        Returns: {
+          assigned_user_id: string
+          team_id: string
+        }[]
+      }
       get_user_organizations: {
         Args: { _user_id: string }
         Returns: {
@@ -603,6 +713,7 @@ export type Database = {
         | "trialing"
         | "incomplete"
       subscription_tier: "free" | "pro" | "business" | "enterprise"
+      team_role: "lead" | "member"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -740,6 +851,7 @@ export const Constants = {
         "incomplete",
       ],
       subscription_tier: ["free", "pro", "business", "enterprise"],
+      team_role: ["lead", "member"],
     },
   },
 } as const

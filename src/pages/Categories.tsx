@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Navbar } from "@/components/Navbar";
 import { toast } from "sonner";
-import { ChevronUp, ChevronDown, Eye, EyeOff, Plus, Pencil, Check, X } from "lucide-react";
+import { Loader2, Plus, GripVertical, Trash2, Eye, EyeOff, Users } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Category {
   id: string;
@@ -15,420 +18,295 @@ interface Category {
   is_default: boolean;
   is_hidden: boolean;
   display_order: number;
+  organization_id: string;
+  can_be_anonymous: boolean;
+  responsible_team_id: string | null;
 }
 
-export default function Categories() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
+interface Team {
+  id: string;
+  name: string;
+  is_active: boolean;
+}
+
+const Categories = () => {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [loading, setLoading] = useState(false);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [newCategoryName, setNewCategoryName] = useState("");
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingName, setEditingName] = useState("");
+  const [creatingCategory, setCreatingCategory] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) {
+    fetchData();
+  }, [navigate]);
+
+  const fetchData = async () => {
+    setLoading(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
       navigate("/auth");
       return;
     }
-    loadData();
-  }, [user, navigate]);
 
-  const loadData = async () => {
-    if (!user) return;
+    const { data: orgMember, error: orgError } = await supabase
+      .from("organization_members")
+      .select("organization_id")
+      .eq("user_id", session.user.id)
+      .eq("status", "active")
+      .single();
 
-    try {
-      setLoading(true);
-
-      // Get user's organization
-      const { data: memberData, error: memberError } = await supabase
-        .from("organization_members")
-        .select("organization_id")
-        .eq("user_id", user.id)
-        .eq("status", "active")
-        .single();
-
-      if (memberError) throw memberError;
-      if (!memberData) {
-        toast.error("No organization found");
-        return;
-      }
-
-      setOrganizationId(memberData.organization_id);
-
-      // Get user role
-      const { data: roleData, error: roleError } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .eq("organization_id", memberData.organization_id)
-        .single();
-
-      if (roleError) throw roleError;
-      setUserRole(roleData?.role || null);
-
-      // Check if user is admin or owner
-      if (roleData?.role !== "admin" && roleData?.role !== "owner") {
-        toast.error("You don't have permission to manage categories");
-        navigate("/");
-        return;
-      }
-
-      // Load all categories (including hidden ones for admins)
-      const { data: categoriesData, error: categoriesError } = await supabase
-        .from("suggestion_categories")
-        .select("*")
-        .eq("organization_id", memberData.organization_id)
-        .order("display_order");
-
-      if (categoriesError) throw categoriesError;
-      setCategories(categoriesData || []);
-    } catch (error) {
-      console.error("Error loading data:", error);
-      toast.error("Failed to load categories");
-    } finally {
+    if (orgError || !orgMember) {
+      toast.error("Failed to load organization");
       setLoading(false);
-    }
-  };
-
-  const handleAddCategory = async () => {
-    if (!organizationId || !newCategoryName.trim()) {
-      toast.error("Please enter a category name");
       return;
     }
 
-    try {
-      const maxOrder = Math.max(...categories.map(c => c.display_order), 0);
-      
-      const { error } = await supabase
-        .from("suggestion_categories")
-        .insert({
-          organization_id: organizationId,
-          name: newCategoryName.trim(),
-          is_default: false,
-          is_hidden: false,
-          display_order: maxOrder + 1,
-        });
+    setOrganizationId(orgMember.organization_id);
 
-      if (error) {
-        if (error.code === "23505") {
-          toast.error("A category with this name already exists");
-        } else {
-          throw error;
-        }
-        return;
-      }
+    // Load categories and teams
+    await loadCategories(orgMember.organization_id);
+    await loadTeams(orgMember.organization_id);
 
-      toast.success("Category added successfully");
+    setLoading(false);
+  };
+
+  const loadCategories = async (orgId: string) => {
+    const { data, error } = await supabase
+      .from("suggestion_categories")
+      .select("*")
+      .eq("organization_id", orgId)
+      .order("display_order");
+
+    if (error) {
+      toast.error("Failed to load categories");
+      return;
+    }
+
+    setCategories(data || []);
+  };
+
+  const loadTeams = async (orgId: string) => {
+    const { data, error } = await supabase
+      .from("teams")
+      .select("id, name, is_active")
+      .eq("organization_id", orgId)
+      .eq("is_active", true)
+      .order("name");
+
+    if (error) {
+      toast.error("Failed to load teams");
+      return;
+    }
+
+    setTeams(data || []);
+  };
+
+  const handleCreateCategory = async () => {
+    if (!newCategoryName.trim() || !organizationId) return;
+
+    setCreatingCategory(true);
+    const maxOrder = Math.max(...categories.map(c => c.display_order), 0);
+    
+    const { error } = await supabase
+      .from("suggestion_categories")
+      .insert({
+        organization_id: organizationId,
+        name: newCategoryName.trim(),
+        display_order: maxOrder + 1,
+      });
+
+    if (error) {
+      toast.error("Failed to create category");
+    } else {
+      toast.success("Category created successfully");
       setNewCategoryName("");
-      loadData();
-    } catch (error) {
-      console.error("Error adding category:", error);
-      toast.error("Failed to add category");
+      loadCategories(organizationId);
     }
+    setCreatingCategory(false);
   };
 
-  const handleToggleVisibility = async (category: Category) => {
-    try {
-      const { error } = await supabase
-        .from("suggestion_categories")
-        .update({ is_hidden: !category.is_hidden })
-        .eq("id", category.id);
+  const handleToggleHidden = async (categoryId: string, isHidden: boolean) => {
+    const { error } = await supabase
+      .from("suggestion_categories")
+      .update({ is_hidden: !isHidden })
+      .eq("id", categoryId);
 
-      if (error) throw error;
-
-      toast.success(category.is_hidden ? "Category shown" : "Category hidden");
-      loadData();
-    } catch (error) {
-      console.error("Error toggling visibility:", error);
+    if (error) {
       toast.error("Failed to update category");
+    } else {
+      toast.success(isHidden ? "Category shown" : "Category hidden");
+      if (organizationId) loadCategories(organizationId);
     }
   };
 
-  const handleMove = async (category: Category, direction: "up" | "down") => {
-    const currentIndex = categories.findIndex(c => c.id === category.id);
-    if (currentIndex === -1) return;
+  const handleAssignTeam = async (categoryId: string, teamId: string) => {
+    const { error } = await supabase
+      .from("suggestion_categories")
+      .update({ responsible_team_id: teamId || null })
+      .eq("id", categoryId);
 
-    const newIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
-    if (newIndex < 0 || newIndex >= categories.length) return;
-
-    const otherCategory = categories[newIndex];
-
-    try {
-      // Swap display orders
-      await supabase
-        .from("suggestion_categories")
-        .update({ display_order: otherCategory.display_order })
-        .eq("id", category.id);
-
-      await supabase
-        .from("suggestion_categories")
-        .update({ display_order: category.display_order })
-        .eq("id", otherCategory.id);
-
-      toast.success("Category order updated");
-      loadData();
-    } catch (error) {
-      console.error("Error moving category:", error);
-      toast.error("Failed to update order");
+    if (error) {
+      toast.error("Failed to assign team");
+    } else {
+      toast.success("Team assigned successfully");
+      if (organizationId) loadCategories(organizationId);
     }
   };
 
-  const startEdit = (category: Category) => {
-    setEditingId(category.id);
-    setEditingName(category.name);
-  };
+  const handleToggleAnonymous = async (categoryId: string, canBeAnonymous: boolean) => {
+    const { error } = await supabase
+      .from("suggestion_categories")
+      .update({ can_be_anonymous: canBeAnonymous })
+      .eq("id", categoryId);
 
-  const cancelEdit = () => {
-    setEditingId(null);
-    setEditingName("");
-  };
-
-  const saveEdit = async (categoryId: string) => {
-    if (!editingName.trim()) {
-      toast.error("Category name cannot be empty");
-      return;
+    if (error) {
+      toast.error("Failed to update category");
+    } else {
+      toast.success(canBeAnonymous ? "Anonymous submissions enabled" : "Anonymous submissions disabled");
+      if (organizationId) loadCategories(organizationId);
     }
+  };
 
-    try {
-      const { error } = await supabase
-        .from("suggestion_categories")
-        .update({ name: editingName.trim() })
-        .eq("id", categoryId);
+  const handleDeleteCategory = async (categoryId: string) => {
+    const { error } = await supabase
+      .from("suggestion_categories")
+      .delete()
+      .eq("id", categoryId);
 
-      if (error) {
-        if (error.code === "23505") {
-          toast.error("A category with this name already exists");
-        } else {
-          throw error;
-        }
-        return;
-      }
-
-      toast.success("Category renamed successfully");
-      setEditingId(null);
-      setEditingName("");
-      loadData();
-    } catch (error) {
-      console.error("Error renaming category:", error);
-      toast.error("Failed to rename category");
+    if (error) {
+      toast.error("Failed to delete category");
+    } else {
+      toast.success("Category deleted");
+      if (organizationId) loadCategories(organizationId);
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8 flex justify-center">
+          <Loader2 className="w-8 h-8 animate-spin" />
+        </div>
       </div>
     );
   }
 
-  const defaultCategories = categories.filter(c => c.is_default);
-  const customCategories = categories.filter(c => !c.is_default);
-
   return (
-    <div className="container max-w-4xl mx-auto py-8 px-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>Manage Suggestion Categories</CardTitle>
-          <CardDescription>
-            Customize categories for your organization. Hide, rename, reorder, or add new categories.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Default Categories */}
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Default Categories</h3>
-            <div className="space-y-2">
-              {defaultCategories.map((category, index) => (
-                <div
-                  key={category.id}
-                  className={`flex items-center justify-between p-3 rounded-lg border ${
-                    category.is_hidden ? "bg-muted opacity-60" : "bg-background"
-                  }`}
-                >
-                  <div className="flex items-center gap-3 flex-1">
-                    {editingId === category.id ? (
-                      <div className="flex items-center gap-2 flex-1">
-                        <Input
-                          value={editingName}
-                          onChange={(e) => setEditingName(e.target.value)}
-                          className="max-w-xs"
-                          autoFocus
-                        />
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => saveEdit(category.id)}
-                        >
-                          <Check className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={cancelEdit}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <>
-                        <span className="font-medium">{category.name}</span>
-                        <Badge variant="secondary">Default</Badge>
-                      </>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {editingId !== category.id && (
-                      <>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => startEdit(category)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleToggleVisibility(category)}
-                        >
-                          {category.is_hidden ? (
-                            <Eye className="h-4 w-4" />
-                          ) : (
-                            <EyeOff className="h-4 w-4" />
-                          )}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          disabled={index === 0}
-                          onClick={() => handleMove(category, "up")}
-                        >
-                          <ChevronUp className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          disabled={index === defaultCategories.length - 1}
-                          onClick={() => handleMove(category, "down")}
-                        >
-                          <ChevronDown className="h-4 w-4" />
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ))}
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold">Categories</h1>
+              <p className="text-muted-foreground">Manage suggestion categories and assignments</p>
             </div>
           </div>
 
-          {/* Custom Categories */}
-          {customCategories.length > 0 && (
-            <div>
-              <h3 className="text-lg font-semibold mb-3">Custom Categories</h3>
-              <div className="space-y-2">
-                {customCategories.map((category, index) => (
-                  <div
-                    key={category.id}
-                    className={`flex items-center justify-between p-3 rounded-lg border ${
-                      category.is_hidden ? "bg-muted opacity-60" : "bg-background"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3 flex-1">
-                      {editingId === category.id ? (
-                        <div className="flex items-center gap-2 flex-1">
-                          <Input
-                            value={editingName}
-                            onChange={(e) => setEditingName(e.target.value)}
-                            className="max-w-xs"
-                            autoFocus
-                          />
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => saveEdit(category.id)}
-                          >
-                            <Check className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={cancelEdit}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <span className="font-medium">{category.name}</span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {editingId !== category.id && (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => startEdit(category)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleToggleVisibility(category)}
-                          >
-                            {category.is_hidden ? (
-                              <Eye className="h-4 w-4" />
-                            ) : (
-                              <EyeOff className="h-4 w-4" />
-                            )}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            disabled={index === 0}
-                            onClick={() => handleMove(category, "up")}
-                          >
-                            <ChevronUp className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            disabled={index === customCategories.length - 1}
-                            onClick={() => handleMove(category, "down")}
-                          >
-                            <ChevronDown className="h-4 w-4" />
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                ))}
+          {/* Create Category */}
+          <Card className="p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Plus className="w-5 h-5" />
+              Create New Category
+            </h2>
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <Input
+                  placeholder="Category name"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleCreateCategory()}
+                />
               </div>
-            </div>
-          )}
-
-          {/* Add New Category */}
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Add New Category</h3>
-            <div className="flex gap-2">
-              <Input
-                placeholder="Enter category name"
-                value={newCategoryName}
-                onChange={(e) => setNewCategoryName(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleAddCategory()}
-              />
-              <Button onClick={handleAddCategory}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Category
+              <Button onClick={handleCreateCategory} disabled={creatingCategory || !newCategoryName.trim()}>
+                {creatingCategory && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Create Category
               </Button>
             </div>
+          </Card>
+
+          {/* Categories List */}
+          <div className="space-y-4">
+            {categories.length === 0 ? (
+              <Card className="p-8 text-center">
+                <p className="text-muted-foreground">No categories yet. Create your first category above.</p>
+              </Card>
+            ) : (
+              <Card className="p-6">
+                <h2 className="text-xl font-semibold mb-4">All Categories</h2>
+                <div className="space-y-3">
+                  {categories.map((category) => (
+                    <div key={category.id} className="p-4 bg-muted/30 rounded-lg space-y-3">
+                      <div className="flex items-center gap-4">
+                        <GripVertical className="w-5 h-5 text-muted-foreground cursor-move" />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{category.name}</span>
+                            {category.is_default && <Badge variant="secondary">Default</Badge>}
+                            {category.is_hidden && <Badge variant="outline">Hidden</Badge>}
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleToggleHidden(category.id, category.is_hidden)}
+                          >
+                            {category.is_hidden ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                          </Button>
+                          {!category.is_default && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteCategory(category.id)}
+                            >
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4 pl-9">
+                        <div className="flex items-center gap-2 flex-1">
+                          <Users className="w-4 h-4 text-muted-foreground" />
+                          <Select 
+                            value={category.responsible_team_id || "none"} 
+                            onValueChange={(val) => handleAssignTeam(category.id, val === "none" ? "" : val)}
+                          >
+                            <SelectTrigger className="w-48">
+                              <SelectValue placeholder="No team assigned" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-background z-50">
+                              <SelectItem value="none">No team assigned</SelectItem>
+                              {teams.map(team => (
+                                <SelectItem key={team.id} value={team.id}>{team.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Switch 
+                            checked={category.can_be_anonymous}
+                            onCheckedChange={(checked) => handleToggleAnonymous(category.id, checked)}
+                          />
+                          <Label className="text-sm">Allow anonymous</Label>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
-}
+};
+
+export default Categories;
