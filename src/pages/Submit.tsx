@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, ScrollText } from "lucide-react";
 import { z } from "zod";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SuggestionDisclaimer } from "@/components/SuggestionDisclaimer";
@@ -195,14 +195,18 @@ const Submit = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <Label htmlFor="title">Title</Label>
-                <Input
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                  placeholder="Brief summary of your suggestion"
-                  maxLength={100}
-                />
+                <div className="relative">
+                  <ScrollText className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    required
+                    placeholder="Brief summary of your suggestion"
+                    maxLength={100}
+                    className="pl-10"
+                  />
+                </div>
               </div>
 
               <div>
