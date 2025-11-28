@@ -187,7 +187,10 @@ const Submit = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           <Card className="p-8">
-            <h1 className="text-3xl font-bold mb-2">Submit a Suggestion</h1>
+            <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
+              <ScrollText className="h-8 w-8" />
+              Submit a Suggestion
+            </h1>
             <p className="text-muted-foreground mb-6">
               Share your ideas to improve our organization. AI will help refine your suggestion.
             </p>
@@ -195,18 +198,14 @@ const Submit = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <Label htmlFor="title">Title</Label>
-                <div className="relative">
-                  <ScrollText className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                    placeholder="Brief summary of your suggestion"
-                    maxLength={100}
-                    className="pl-10"
-                  />
-                </div>
+                <Input
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
+                  placeholder="Brief summary of your suggestion"
+                  maxLength={100}
+                />
               </div>
 
               <div>
