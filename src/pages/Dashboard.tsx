@@ -10,7 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { MomentumActivityDashboard } from "@/components/MomentumActivityDashboard";
 import { SuggestionJourneyChart } from "@/components/SuggestionJourneyChart";
-import { calculateMomentum, getMomentumLevel, type MomentumLevel } from "@/lib/momentum";
+import { calculateMomentum, getMomentumLevel, calculateReactionScore, type MomentumLevel } from "@/lib/momentum";
+
+interface ReactionCounts {
+  champion: number;
+  support: number;
+  neutral: number;
+  concerns: number;
+}
 
 const Dashboard = () => {
   const [suggestions, setSuggestions] = useState<any[]>([]);
@@ -86,7 +93,6 @@ const Dashboard = () => {
       .from("suggestions")
       .select(`
         *,
-        likes:likes(count),
         comments:comments!comments_suggestion_id_fkey(count),
         assigned_team:assigned_team_id (
           id,
@@ -102,6 +108,28 @@ const Dashboard = () => {
       setLoading(false);
       return;
     }
+
+    // Get suggestion IDs for reactions lookup
+    const suggestionIds = (data || []).map(s => s.id);
+    
+    // Fetch reactions for all suggestions
+    const { data: reactionsData } = await supabase
+      .from("reactions")
+      .select("suggestion_id, reaction_type")
+      .in("suggestion_id", suggestionIds);
+
+    // Aggregate reactions by suggestion
+    const reactionsMap = new Map<string, ReactionCounts>();
+    suggestionIds.forEach(id => {
+      reactionsMap.set(id, { champion: 0, support: 0, neutral: 0, concerns: 0 });
+    });
+    
+    (reactionsData || []).forEach(r => {
+      const counts = reactionsMap.get(r.suggestion_id);
+      if (counts && r.reaction_type in counts) {
+        counts[r.reaction_type as keyof ReactionCounts]++;
+      }
+    });
 
     // Get unique user IDs for profile lookup (including assigned users)
     const userIds = [...new Set(
@@ -126,20 +154,23 @@ const Dashboard = () => {
       });
     }
 
-    // Map suggestions with profile data
-    const suggestionsWithCounts = (data || []).map((suggestion: any) => ({
-      ...suggestion,
-      likes: suggestion.likes?.[0]?.count || 0,
-      comments: suggestion.comments?.[0]?.count || 0,
-      profiles: suggestion.is_anonymous ? null : { 
-        display_name: profilesMap.get(suggestion.user_id) || null 
-      },
-      assigned_user: suggestion.assigned_to_user_id ? {
-        profiles: {
-          display_name: profilesMap.get(suggestion.assigned_to_user_id) || null
-        }
-      } : null
-    }));
+    // Map suggestions with profile data and reactions
+    const suggestionsWithCounts = (data || []).map((suggestion: any) => {
+      const reactions = reactionsMap.get(suggestion.id) || { champion: 0, support: 0, neutral: 0, concerns: 0 };
+      return {
+        ...suggestion,
+        reactions,
+        comments: suggestion.comments?.[0]?.count || 0,
+        profiles: suggestion.is_anonymous ? null : { 
+          display_name: profilesMap.get(suggestion.user_id) || null 
+        },
+        assigned_user: suggestion.assigned_to_user_id ? {
+          profiles: {
+            display_name: profilesMap.get(suggestion.assigned_to_user_id) || null
+          }
+        } : null
+      };
+    });
 
     setSuggestions(suggestionsWithCounts);
     setLoading(false);
@@ -149,8 +180,14 @@ const Dashboard = () => {
     const result = { fresh: 0, warming: 0, heating: 0, fire: 0 };
     
     for (const s of suggestions) {
+      const reactionScore = calculateReactionScore(
+        s.reactions?.champion ?? 0,
+        s.reactions?.support ?? 0,
+        s.reactions?.neutral ?? 0,
+        s.reactions?.concerns ?? 0
+      );
       const score = calculateMomentum(
-        s.likes ?? 0,
+        reactionScore,
         s.comments ?? 0,
         s.views ?? 0,
         new Date(s.created_at)
@@ -167,7 +204,7 @@ const Dashboard = () => {
     let inProgress = 0;
     let completed = 0;
     let declined = 0;
-    let totalLikes = 0;
+    let totalReactionScore = 0;
     let totalComments = 0;
 
     for (const s of suggestions) {
@@ -177,19 +214,31 @@ const Dashboard = () => {
       if (status === "Completed") completed++;
       if (status === "Declined") declined++;
 
-      totalLikes += s.likes ?? 0;
+      const reactionScore = calculateReactionScore(
+        s.reactions?.champion ?? 0,
+        s.reactions?.support ?? 0,
+        s.reactions?.neutral ?? 0,
+        s.reactions?.concerns ?? 0
+      );
+      totalReactionScore += reactionScore;
       totalComments += s.comments ?? 0;
     }
 
-    return { total, open, inProgress, completed, declined, totalLikes, totalComments };
+    return { total, open, inProgress, completed, declined, totalLikes: totalReactionScore, totalComments };
   }, [suggestions]);
 
   let filteredSuggestions = suggestions;
 
   if (selectedMomentum) {
     filteredSuggestions = filteredSuggestions.filter((s) => {
+      const reactionScore = calculateReactionScore(
+        s.reactions?.champion ?? 0,
+        s.reactions?.support ?? 0,
+        s.reactions?.neutral ?? 0,
+        s.reactions?.concerns ?? 0
+      );
       const score = calculateMomentum(
-        s.likes ?? 0,
+        reactionScore,
         s.comments ?? 0,
         s.views ?? 0,
         new Date(s.created_at)
@@ -301,7 +350,7 @@ const Dashboard = () => {
                   description={suggestion.description}
                   category={suggestion.category}
                   status={suggestion.status}
-                  likes={suggestion.likes}
+                  reactions={suggestion.reactions}
                   comments={suggestion.comments}
                   views={suggestion.views}
                   createdAt={suggestion.created_at}

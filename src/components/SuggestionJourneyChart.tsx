@@ -1,17 +1,24 @@
 import { useMemo, useState } from "react";
 import { Card, CardContent } from "./ui/card";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
-import { calculateMomentum } from "@/lib/momentum";
-import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval, isSameDay } from "date-fns";
+import { calculateMomentum, calculateReactionScore } from "@/lib/momentum";
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval } from "date-fns";
 import { CalendarDays, TrendingUp } from "lucide-react";
 import { Button } from "./ui/button";
+
+interface ReactionCounts {
+  champion: number;
+  support: number;
+  neutral: number;
+  concerns: number;
+}
 
 interface Suggestion {
   id: string;
   title: string;
   status: string;
   created_at: string;
-  likes: number;
+  reactions?: ReactionCounts;
   comments: number;
   views: number;
 }
@@ -73,8 +80,14 @@ export const SuggestionJourneyChart = ({ suggestions }: SuggestionJourneyChartPr
         const createdAt = new Date(s.created_at);
         // Suggestion appears from its creation date onwards
         if (createdAt <= day) {
+          const reactionScore = calculateReactionScore(
+            s.reactions?.champion ?? 0,
+            s.reactions?.support ?? 0,
+            s.reactions?.neutral ?? 0,
+            s.reactions?.concerns ?? 0
+          );
           const momentum = calculateMomentum(
-            s.likes ?? 0,
+            reactionScore,
             s.comments ?? 0,
             s.views ?? 0,
             createdAt
