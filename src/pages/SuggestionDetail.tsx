@@ -8,12 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { MomentumDial } from "@/components/MomentumDial";
 import { calculateMomentum, getMomentumLevel } from "@/lib/momentum";
-import { Heart, MessageCircle, Eye, ArrowLeft, Send, Trash2, CheckCircle, XCircle } from "lucide-react";
+import { Heart, MessageCircle, Eye, ArrowLeft, Send, Trash2, CheckCircle, XCircle, Paperclip } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { z } from "zod";
+import { AttachmentList } from "@/components/AttachmentList";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,12 +38,22 @@ interface Comment {
   } | null;
 }
 
+interface Attachment {
+  id: string;
+  file_name: string;
+  file_path: string;
+  file_size: number;
+  mime_type: string;
+  uploaded_by: string | null;
+}
+
 const SuggestionDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [suggestion, setSuggestion] = useState<any>(null);
   const [comments, setComments] = useState<Comment[]>([]);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [likesCount, setLikesCount] = useState(0);
   const [hasLiked, setHasLiked] = useState(false);
   const [newComment, setNewComment] = useState("");
@@ -84,7 +95,7 @@ const SuggestionDetail = () => {
 
       if (error) throw error;
 
-      const [{ data: profile }, { count: likesCount }, { data: commentsData }, userLike] =
+      const [{ data: profile }, { count: likesCount }, { data: commentsData }, { data: attachmentsData }, userLike] =
         await Promise.all([
           supabase
             .from("profiles")
@@ -97,6 +108,11 @@ const SuggestionDetail = () => {
             .eq("suggestion_id", id),
           supabase
             .from("comments")
+            .select("*")
+            .eq("suggestion_id", id)
+            .order("created_at", { ascending: true }),
+          supabase
+            .from("suggestion_attachments")
             .select("*")
             .eq("suggestion_id", id)
             .order("created_at", { ascending: true }),
@@ -124,6 +140,7 @@ const SuggestionDetail = () => {
       setSuggestion({ ...suggestionData, profiles: profile });
       setLikesCount(likesCount || 0);
       setComments(commentsWithProfiles);
+      setAttachments(attachmentsData || []);
       setHasLiked(!!userLike.data);
       setIsOwner(user?.id === suggestionData.user_id);
     } catch (error) {
@@ -273,6 +290,32 @@ const SuggestionDetail = () => {
     }
   };
 
+  const handleDeleteAttachment = async (attachmentId: string) => {
+    const attachment = attachments.find(a => a.id === attachmentId);
+    if (!attachment) return;
+
+    try {
+      // Delete from storage
+      await supabase.storage
+        .from('suggestion-attachments')
+        .remove([attachment.file_path]);
+
+      // Delete from database
+      const { error } = await supabase
+        .from('suggestion_attachments')
+        .delete()
+        .eq('id', attachmentId);
+
+      if (error) throw error;
+
+      setAttachments(attachments.filter(a => a.id !== attachmentId));
+      toast.success("Attachment deleted");
+    } catch (error) {
+      console.error("Error deleting attachment:", error);
+      toast.error("Failed to delete attachment");
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -344,6 +387,16 @@ const SuggestionDetail = () => {
               <div className="prose max-w-none mb-6">
                 <p className="text-foreground whitespace-pre-wrap">{suggestion.description}</p>
               </div>
+
+              {attachments.length > 0 && (
+                <div className="mb-6">
+                  <AttachmentList 
+                    attachments={attachments} 
+                    canDelete={isOwner}
+                    onDelete={handleDeleteAttachment}
+                  />
+                </div>
+              )}
 
               {suggestion.ai_tags && suggestion.ai_tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-4">
