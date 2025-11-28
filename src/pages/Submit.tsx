@@ -211,9 +211,25 @@ const Submit = () => {
               <div>
                 <Label>Category</Label>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {categories.map((cat) => {
+                  {categories.map((cat, index) => {
                     const isSelected = categoryId === cat.id;
                     const isPrivate = cat.name.toLowerCase().includes('private');
+                    
+                    // Color palette for categories
+                    const colorVariants = [
+                      { bg: 'bg-blue-500/10', border: 'border-blue-500', text: 'text-blue-600 dark:text-blue-400', hoverBg: 'hover:bg-blue-500/5' },
+                      { bg: 'bg-emerald-500/10', border: 'border-emerald-500', text: 'text-emerald-600 dark:text-emerald-400', hoverBg: 'hover:bg-emerald-500/5' },
+                      { bg: 'bg-amber-500/10', border: 'border-amber-500', text: 'text-amber-600 dark:text-amber-400', hoverBg: 'hover:bg-amber-500/5' },
+                      { bg: 'bg-rose-500/10', border: 'border-rose-500', text: 'text-rose-600 dark:text-rose-400', hoverBg: 'hover:bg-rose-500/5' },
+                      { bg: 'bg-cyan-500/10', border: 'border-cyan-500', text: 'text-cyan-600 dark:text-cyan-400', hoverBg: 'hover:bg-cyan-500/5' },
+                      { bg: 'bg-orange-500/10', border: 'border-orange-500', text: 'text-orange-600 dark:text-orange-400', hoverBg: 'hover:bg-orange-500/5' },
+                      { bg: 'bg-indigo-500/10', border: 'border-indigo-500', text: 'text-indigo-600 dark:text-indigo-400', hoverBg: 'hover:bg-indigo-500/5' },
+                      { bg: 'bg-pink-500/10', border: 'border-pink-500', text: 'text-pink-600 dark:text-pink-400', hoverBg: 'hover:bg-pink-500/5' },
+                    ];
+                    
+                    // Private category always gets purple
+                    const privateColor = { bg: 'bg-purple-500/10', border: 'border-purple-500', text: 'text-purple-600 dark:text-purple-400', hoverBg: 'hover:bg-purple-500/5' };
+                    const color = isPrivate ? privateColor : colorVariants[index % colorVariants.length];
                     
                     return (
                       <button
@@ -229,10 +245,8 @@ const Submit = () => {
                           px-4 py-2 rounded-full text-sm font-medium transition-all duration-200
                           border-2 hover:scale-105 active:scale-95
                           ${isSelected 
-                            ? isPrivate
-                              ? 'bg-purple-500/10 border-purple-500 text-purple-600 dark:text-purple-400'
-                              : 'bg-primary/10 border-primary text-primary'
-                            : 'bg-muted/50 border-transparent text-muted-foreground hover:bg-muted hover:text-foreground'
+                            ? `${color.bg} ${color.border} ${color.text}`
+                            : `bg-muted/30 border-muted-foreground/20 ${color.text} opacity-60 hover:opacity-100 ${color.hoverBg}`
                           }
                         `}
                       >
