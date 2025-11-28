@@ -211,17 +211,6 @@ const Dashboard = () => {
       
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          <div className="mb-8">
-            <MomentumActivityDashboard
-              momentumStats={momentumStats}
-              activityStats={activityStats}
-              selectedMomentum={selectedMomentum}
-              onMomentumClick={(level) =>
-                setSelectedMomentum((current) => (current === level ? null : level))
-              }
-            />
-          </div>
-
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="text-4xl font-bold mb-2">
@@ -234,6 +223,17 @@ const Dashboard = () => {
                 }
               </p>
             </div>
+          </div>
+
+          <div className="mb-8">
+            <MomentumActivityDashboard
+              momentumStats={momentumStats}
+              activityStats={activityStats}
+              selectedMomentum={selectedMomentum}
+              onMomentumClick={(level) =>
+                setSelectedMomentum((current) => (current === level ? null : level))
+              }
+            />
           </div>
 
           <Onboarding 
