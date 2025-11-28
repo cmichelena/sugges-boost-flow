@@ -7,8 +7,9 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { MomentumDial } from "@/components/MomentumDial";
-import { calculateMomentum, getMomentumLevel } from "@/lib/momentum";
-import { Heart, MessageCircle, Eye, ArrowLeft, Send, Trash2, CheckCircle, XCircle, Paperclip } from "lucide-react";
+import { ReactionButtons } from "@/components/ReactionButtons";
+import { calculateMomentum, getMomentumLevel, calculateReactionScore } from "@/lib/momentum";
+import { MessageCircle, Eye, ArrowLeft, Send, Trash2, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
@@ -47,6 +48,15 @@ interface Attachment {
   uploaded_by: string | null;
 }
 
+interface ReactionCounts {
+  champion: number;
+  support: number;
+  neutral: number;
+  concerns: number;
+}
+
+type ReactionType = "champion" | "support" | "neutral" | "concerns";
+
 const SuggestionDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -54,8 +64,8 @@ const SuggestionDetail = () => {
   const [suggestion, setSuggestion] = useState<any>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
-  const [likesCount, setLikesCount] = useState(0);
-  const [hasLiked, setHasLiked] = useState(false);
+  const [reactionCounts, setReactionCounts] = useState<ReactionCounts>({ champion: 0, support: 0, neutral: 0, concerns: 0 });
+  const [userReaction, setUserReaction] = useState<ReactionType | null>(null);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(true);
   const [submittingComment, setSubmittingComment] = useState(false);
@@ -95,17 +105,32 @@ const SuggestionDetail = () => {
 
       if (error) throw error;
 
-      const [{ data: profile }, { count: likesCount }, { data: commentsData }, { data: attachmentsData }, userLike] =
+      // Fetch reactions
+      const { data: reactionsData } = await supabase
+        .from("reactions")
+        .select("reaction_type, user_id")
+        .eq("suggestion_id", id);
+
+      // Aggregate reaction counts
+      const counts: ReactionCounts = { champion: 0, support: 0, neutral: 0, concerns: 0 };
+      let currentUserReaction: ReactionType | null = null;
+      
+      (reactionsData || []).forEach(r => {
+        if (r.reaction_type in counts) {
+          counts[r.reaction_type as keyof ReactionCounts]++;
+        }
+        if (user && r.user_id === user.id) {
+          currentUserReaction = r.reaction_type as ReactionType;
+        }
+      });
+
+      const [{ data: profile }, { data: commentsData }, { data: attachmentsData }] =
         await Promise.all([
           supabase
             .from("profiles")
             .select("display_name")
             .eq("id", suggestionData.user_id)
             .single(),
-          supabase
-            .from("likes")
-            .select("*", { count: "exact", head: true })
-            .eq("suggestion_id", id),
           supabase
             .from("comments")
             .select("*")
@@ -116,14 +141,6 @@ const SuggestionDetail = () => {
             .select("*")
             .eq("suggestion_id", id)
             .order("created_at", { ascending: true }),
-          user
-            ? supabase
-                .from("likes")
-                .select("id")
-                .eq("suggestion_id", id)
-                .eq("user_id", user.id)
-                .maybeSingle()
-            : Promise.resolve({ data: null }),
         ]);
 
       const commentsWithProfiles = await Promise.all(
@@ -138,10 +155,10 @@ const SuggestionDetail = () => {
       );
 
       setSuggestion({ ...suggestionData, profiles: profile });
-      setLikesCount(likesCount || 0);
+      setReactionCounts(counts);
+      setUserReaction(currentUserReaction);
       setComments(commentsWithProfiles);
       setAttachments(attachmentsData || []);
-      setHasLiked(!!userLike.data);
       setIsOwner(user?.id === suggestionData.user_id);
     } catch (error) {
       console.error("Error loading suggestion:", error);
@@ -152,33 +169,9 @@ const SuggestionDetail = () => {
     }
   };
 
-  const toggleLike = async () => {
-    if (!user) {
-      toast.error("Please sign in to like suggestions");
-      navigate("/auth");
-      return;
-    }
-
-    try {
-      if (hasLiked) {
-        await supabase
-          .from("likes")
-          .delete()
-          .eq("suggestion_id", id)
-          .eq("user_id", user.id);
-        setLikesCount((prev) => prev - 1);
-        setHasLiked(false);
-      } else {
-        await supabase
-          .from("likes")
-          .insert({ suggestion_id: id, user_id: user.id });
-        setLikesCount((prev) => prev + 1);
-        setHasLiked(true);
-      }
-    } catch (error) {
-      console.error("Error toggling like:", error);
-      toast.error("Failed to update like");
-    }
+  const handleReactionChange = (newCounts: ReactionCounts, newUserReaction: ReactionType | null) => {
+    setReactionCounts(newCounts);
+    setUserReaction(newUserReaction);
   };
 
   const submitComment = async (withStatusChange?: "accept" | "reject") => {
@@ -218,7 +211,7 @@ const SuggestionDetail = () => {
 
       // If this is a status change, update the suggestion
       if (withStatusChange) {
-        const newStatus = withStatusChange === "accept" ? "Accepted" : "Rejected";
+        const newStatus = withStatusChange === "accept" ? "Completed" : "Declined";
         const { error: statusError } = await supabase
           .from("suggestions")
           .update({ 
@@ -332,8 +325,14 @@ const SuggestionDetail = () => {
 
   if (!suggestion) return null;
 
+  const reactionScore = calculateReactionScore(
+    reactionCounts.champion,
+    reactionCounts.support,
+    reactionCounts.neutral,
+    reactionCounts.concerns
+  );
   const momentumScore = calculateMomentum(
-    likesCount,
+    reactionScore,
     comments.length,
     suggestion.views,
     new Date(suggestion.created_at)
@@ -408,23 +407,22 @@ const SuggestionDetail = () => {
                 </div>
               )}
 
-              <div className="flex items-center gap-6 pt-4 border-t">
-                <Button
-                  variant={hasLiked ? "default" : "outline"}
-                  size="sm"
-                  onClick={toggleLike}
-                  className="gap-2"
-                >
-                  <Heart className={`w-4 h-4 ${hasLiked ? "fill-current" : ""}`} />
-                  {likesCount}
-                </Button>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <MessageCircle className="w-4 h-4" />
-                  <span>{comments.length}</span>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Eye className="w-4 h-4" />
-                  <span>{suggestion.views}</span>
+              <div className="pt-4 border-t space-y-4">
+                <ReactionButtons
+                  suggestionId={id!}
+                  initialCounts={reactionCounts}
+                  userReaction={userReaction}
+                  onReactionChange={handleReactionChange}
+                />
+                <div className="flex items-center gap-6 text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <MessageCircle className="w-4 h-4" />
+                    <span>{comments.length} comments</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Eye className="w-4 h-4" />
+                    <span>{suggestion.views} views</span>
+                  </div>
                 </div>
               </div>
             </Card>
@@ -539,7 +537,7 @@ const SuggestionDetail = () => {
                       <AlertDialogTitle>Delete Suggestion</AlertDialogTitle>
                       <AlertDialogDescription>
                         Are you sure you want to delete this suggestion? This action cannot be undone.
-                        All comments and likes will also be removed.
+                        All comments and reactions will also be removed.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

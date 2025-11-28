@@ -249,6 +249,41 @@ export type Database = {
         }
         Relationships: []
       }
+      reactions: {
+        Row: {
+          created_at: string
+          id: string
+          reaction_type: Database["public"]["Enums"]["reaction_type"]
+          suggestion_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reaction_type: Database["public"]["Enums"]["reaction_type"]
+          suggestion_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reaction_type?: Database["public"]["Enums"]["reaction_type"]
+          suggestion_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reactions_suggestion_id_fkey"
+            columns: ["suggestion_id"]
+            isOneToOne: false
+            referencedRelation: "suggestions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_plans: {
         Row: {
           advanced_analytics_enabled: boolean
@@ -718,6 +753,7 @@ export type Database = {
           team_id: string
         }[]
       }
+      get_reaction_score: { Args: { p_suggestion_id: string }; Returns: number }
       get_user_organizations: {
         Args: { _user_id: string }
         Returns: {
@@ -756,6 +792,7 @@ export type Database = {
     Enums: {
       app_role: "owner" | "admin" | "member" | "viewer"
       member_status: "pending" | "active" | "removed"
+      reaction_type: "champion" | "support" | "neutral" | "concerns"
       subscription_status:
         | "active"
         | "past_due"
@@ -893,6 +930,7 @@ export const Constants = {
     Enums: {
       app_role: ["owner", "admin", "member", "viewer"],
       member_status: ["pending", "active", "removed"],
+      reaction_type: ["champion", "support", "neutral", "concerns"],
       subscription_status: [
         "active",
         "past_due",

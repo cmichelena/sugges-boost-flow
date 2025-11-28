@@ -6,6 +6,13 @@ import { SuggestionCard } from "@/components/SuggestionCard";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
+interface ReactionCounts {
+  champion: number;
+  support: number;
+  neutral: number;
+  concerns: number;
+}
+
 interface Suggestion {
   id: string;
   title: string;
@@ -17,7 +24,7 @@ interface Suggestion {
   profiles: {
     display_name: string;
   } | null;
-  likes_count: number;
+  reactions: ReactionCounts;
   comments_count: number;
 }
 
@@ -47,19 +54,37 @@ const MySuggestions = () => {
 
       if (error) throw error;
 
+      // Get all suggestion IDs
+      const suggestionIds = (suggestionsData || []).map(s => s.id);
+
+      // Fetch reactions for all suggestions
+      const { data: reactionsData } = await supabase
+        .from("reactions")
+        .select("suggestion_id, reaction_type")
+        .in("suggestion_id", suggestionIds);
+
+      // Aggregate reactions by suggestion
+      const reactionsMap = new Map<string, ReactionCounts>();
+      suggestionIds.forEach(id => {
+        reactionsMap.set(id, { champion: 0, support: 0, neutral: 0, concerns: 0 });
+      });
+      
+      (reactionsData || []).forEach(r => {
+        const counts = reactionsMap.get(r.suggestion_id);
+        if (counts && r.reaction_type in counts) {
+          counts[r.reaction_type as keyof ReactionCounts]++;
+        }
+      });
+
       const suggestionsWithCounts = await Promise.all(
         (suggestionsData || []).map(async (suggestion) => {
-          const [{ data: profile }, { count: likesCount }, { count: commentsCount }] =
+          const [{ data: profile }, { count: commentsCount }] =
             await Promise.all([
               supabase
                 .from("profiles")
                 .select("display_name")
                 .eq("id", suggestion.user_id)
                 .single(),
-              supabase
-                .from("likes")
-                .select("*", { count: "exact", head: true })
-                .eq("suggestion_id", suggestion.id),
               supabase
                 .from("comments")
                 .select("*", { count: "exact", head: true })
@@ -69,7 +94,7 @@ const MySuggestions = () => {
           return {
             ...suggestion,
             profiles: profile,
-            likes_count: likesCount || 0,
+            reactions: reactionsMap.get(suggestion.id) || { champion: 0, support: 0, neutral: 0, concerns: 0 },
             comments_count: commentsCount || 0,
           };
         })
@@ -115,7 +140,7 @@ const MySuggestions = () => {
                 description={suggestion.description}
                 category={suggestion.category}
                 status={suggestion.status}
-                likes={suggestion.likes_count}
+                reactions={suggestion.reactions}
                 comments={suggestion.comments_count}
                 views={suggestion.views}
                 createdAt={suggestion.created_at}
