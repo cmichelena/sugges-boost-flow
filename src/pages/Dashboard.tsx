@@ -9,6 +9,7 @@ import { Loader2, User } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { MomentumActivityDashboard } from "@/components/MomentumActivityDashboard";
+import { SuggestionJourneyChart } from "@/components/SuggestionJourneyChart";
 import { calculateMomentum, getMomentumLevel, type MomentumLevel } from "@/lib/momentum";
 
 const Dashboard = () => {
@@ -227,7 +228,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="mb-8">
+          <div className="mb-6 space-y-4">
             <MomentumActivityDashboard
               momentumStats={momentumStats}
               activityStats={activityStats}
@@ -236,6 +237,7 @@ const Dashboard = () => {
                 setSelectedMomentum((current) => (current === level ? null : level))
               }
             />
+            <SuggestionJourneyChart suggestions={suggestions} />
           </div>
 
           <Onboarding 
