@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Navbar } from "@/components/Navbar";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -210,29 +209,42 @@ const Submit = () => {
               </div>
 
               <div>
-                <Label htmlFor="category">Category</Label>
-                <Select 
-                  value={categoryId} 
-                  onValueChange={(val) => {
-                    setCategoryId(val);
-                    const category = categories.find(c => c.id === val);
-                    if (!category?.can_be_anonymous) {
-                      setIsAnonymous(false);
-                    }
-                  }} 
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background z-50">
-                    {categories.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id}>
+                <Label>Category</Label>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {categories.map((cat) => {
+                    const isSelected = categoryId === cat.id;
+                    const isPrivate = cat.name.toLowerCase().includes('private');
+                    
+                    return (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => {
+                          setCategoryId(cat.id);
+                          if (!cat.can_be_anonymous) {
+                            setIsAnonymous(false);
+                          }
+                        }}
+                        className={`
+                          px-4 py-2 rounded-full text-sm font-medium transition-all duration-200
+                          border-2 hover:scale-105 active:scale-95
+                          ${isSelected 
+                            ? isPrivate
+                              ? 'bg-purple-500/10 border-purple-500 text-purple-600 dark:text-purple-400'
+                              : 'bg-primary/10 border-primary text-primary'
+                            : 'bg-muted/50 border-transparent text-muted-foreground hover:bg-muted hover:text-foreground'
+                          }
+                        `}
+                      >
+                        {isPrivate && <span className="mr-1">🔒</span>}
                         {cat.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                      </button>
+                    );
+                  })}
+                </div>
+                {!categoryId && (
+                  <p className="text-xs text-muted-foreground mt-2">Please select a category</p>
+                )}
               </div>
 
               {categoryId && categories.find(c => c.id === categoryId)?.can_be_anonymous && (
