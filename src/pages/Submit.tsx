@@ -189,8 +189,11 @@ const Submit = () => {
         <div className="max-w-2xl mx-auto">
           <Card className="p-8">
             <h1 className="text-3xl font-bold mb-2">Submit a Suggestion</h1>
-            <p className="text-muted-foreground mb-6">
+            <p className="text-muted-foreground mb-4">
               Share your ideas to improve our organization. AI will help refine your suggestion.
+            </p>
+            <p className="text-sm text-muted-foreground mb-6 bg-muted/50 p-3 rounded-md border border-border">
+              <span className="font-medium">Need to share something confidential?</span> You can do it here by selecting <span className="font-semibold text-foreground">Private (HR visible only)</span> from the category dropdown.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-6">
