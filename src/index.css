@@ -52,6 +52,12 @@ All colors MUST be HSL.
     --chart-3: 227 7% 39.8%;
     --chart-4: 84 18.9% 82.8%;
     --chart-5: 70 18.8% 76.9%;
+    
+    /* Status colors */
+    --status-open: 200 70% 55%;
+    --status-closed: 142 71% 45%;
+    --status-accepted: 142 71% 45%;
+    --status-rejected: 0 72% 51%;
     --sidebar: 248 0.3% 98.4%;
     --sidebar-foreground: 265 4% 12.9%;
     --sidebar-primary: 266 4% 20.8%;
@@ -114,6 +120,12 @@ All colors MUST be HSL.
     --chart-3: 70 18.8% 76.9%;
     --chart-4: 304 26.5% 62.7%;
     --chart-5: 16 24.6% 64.5%;
+    
+    /* Status colors */
+    --status-open: 200 70% 55%;
+    --status-closed: 142 71% 45%;
+    --status-accepted: 142 71% 45%;
+    --status-rejected: 0 72% 51%;
     --sidebar: 266 4% 20.8%;
     --sidebar-foreground: 248 0.3% 98.4%;
     --sidebar-primary: 264 24.3% 48.8%;

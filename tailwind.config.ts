@@ -47,12 +47,18 @@ export default {
   				DEFAULT: 'hsl(var(--card))',
   				foreground: 'hsl(var(--card-foreground))'
   			},
-  			momentum: {
-  				fresh: 'hsl(var(--momentum-fresh))',
-  				warming: 'hsl(var(--momentum-warming))',
-  				heating: 'hsl(var(--momentum-heating))',
-  				fire: 'hsl(var(--momentum-fire))'
-  			}
+			momentum: {
+				fresh: 'hsl(var(--momentum-fresh))',
+				warming: 'hsl(var(--momentum-warming))',
+				heating: 'hsl(var(--momentum-heating))',
+				fire: 'hsl(var(--momentum-fire))'
+			},
+			status: {
+				open: 'hsl(var(--status-open))',
+				closed: 'hsl(var(--status-closed))',
+				accepted: 'hsl(var(--status-accepted))',
+				rejected: 'hsl(var(--status-rejected))'
+			}
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
