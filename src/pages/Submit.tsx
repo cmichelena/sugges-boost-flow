@@ -261,22 +261,6 @@ const Submit = () => {
                 )}
               </div>
 
-              {categoryId && categories.find(c => c.id === categoryId)?.can_be_anonymous && (
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="anonymous"
-                    checked={isAnonymous}
-                    onCheckedChange={(checked) => setIsAnonymous(checked === true)}
-                  />
-                  <Label
-                    htmlFor="anonymous"
-                    className="text-sm font-normal cursor-pointer"
-                  >
-                    Submit anonymously
-                  </Label>
-                </div>
-              )}
-
               <div>
                 <Label htmlFor="description">Description</Label>
                 <Textarea
@@ -303,6 +287,22 @@ const Submit = () => {
                   disabled={loading}
                 />
               </div>
+
+              {categoryId && categories.find(c => c.id === categoryId)?.can_be_anonymous && (
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="anonymous"
+                    checked={isAnonymous}
+                    onCheckedChange={(checked) => setIsAnonymous(checked === true)}
+                  />
+                  <Label
+                    htmlFor="anonymous"
+                    className="text-sm font-normal cursor-pointer"
+                  >
+                    Submit anonymously
+                  </Label>
+                </div>
+              )}
 
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
