@@ -165,20 +165,22 @@ const Dashboard = () => {
     let open = 0;
     let inProgress = 0;
     let completed = 0;
+    let declined = 0;
     let totalLikes = 0;
     let totalComments = 0;
 
     for (const s of suggestions) {
       const status = s.status || "";
       if (status === "Open" || status === "") open++;
-      if (status === "In Progress") inProgress++;
+      if (status === "In Progress" || status === "Under Review" || status === "Planned") inProgress++;
       if (status === "Completed") completed++;
+      if (status === "Declined") declined++;
 
       totalLikes += s.likes ?? 0;
       totalComments += s.comments ?? 0;
     }
 
-    return { total, open, inProgress, completed, totalLikes, totalComments };
+    return { total, open, inProgress, completed, declined, totalLikes, totalComments };
   }, [suggestions]);
 
   let filteredSuggestions = suggestions;

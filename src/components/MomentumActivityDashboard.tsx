@@ -1,7 +1,8 @@
 import { MomentumDial } from "./MomentumDial";
 import { Card, CardContent } from "./ui/card";
 import type { MomentumLevel } from "@/lib/momentum";
-import { TrendingUp, MessageSquare, ThumbsUp } from "lucide-react";
+import { TrendingUp, MessageSquare, ThumbsUp, CheckCircle2, XCircle, Clock, Target } from "lucide-react";
+import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
 interface MomentumStats {
   fresh: number;
@@ -15,6 +16,7 @@ interface ActivityStats {
   open: number;
   inProgress: number;
   completed: number;
+  declined: number;
   totalLikes: number;
   totalComments: number;
 }
@@ -26,115 +28,189 @@ interface MomentumActivityDashboardProps {
   onMomentumClick: (level: MomentumLevel) => void;
 }
 
+const MiniDonutChart = ({ 
+  data, 
+  colors, 
+  centerValue, 
+  centerLabel 
+}: { 
+  data: { name: string; value: number }[]; 
+  colors: string[]; 
+  centerValue: string; 
+  centerLabel: string;
+}) => {
+  const total = data.reduce((sum, item) => sum + item.value, 0);
+  
+  if (total === 0) {
+    return (
+      <div className="relative w-20 h-20 flex items-center justify-center">
+        <div className="w-full h-full rounded-full border-4 border-muted" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-lg font-bold text-muted-foreground">—</span>
+          <span className="text-[10px] text-muted-foreground">{centerLabel}</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative w-20 h-20">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={data}
+            cx="50%"
+            cy="50%"
+            innerRadius={25}
+            outerRadius={38}
+            paddingAngle={2}
+            dataKey="value"
+            strokeWidth={0}
+          >
+            {data.map((_, index) => (
+              <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+            ))}
+          </Pie>
+        </PieChart>
+      </ResponsiveContainer>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-sm font-bold text-foreground">{centerValue}</span>
+        <span className="text-[9px] text-muted-foreground leading-tight">{centerLabel}</span>
+      </div>
+    </div>
+  );
+};
+
 export const MomentumActivityDashboard = ({
   momentumStats,
   activityStats,
   selectedMomentum,
   onMomentumClick,
 }: MomentumActivityDashboardProps) => {
+  // Calculate closure stats (Open vs Closed)
+  const closedCount = activityStats.completed + activityStats.declined;
+  const closureRate = activityStats.total > 0 
+    ? Math.round((closedCount / activityStats.total) * 100) 
+    : 0;
+  
+  const closureData = [
+    { name: "Closed", value: closedCount },
+    { name: "Open", value: activityStats.open + activityStats.inProgress },
+  ];
+
+  // Calculate adoption stats (Accepted vs Rejected from closed suggestions)
+  const adoptionRate = closedCount > 0 
+    ? Math.round((activityStats.completed / closedCount) * 100) 
+    : 0;
+  
+  const adoptionData = [
+    { name: "Accepted", value: activityStats.completed },
+    { name: "Rejected", value: activityStats.declined },
+  ];
+
   return (
-    <Card className="border-border/40 bg-card/50 backdrop-blur-sm">
-      <CardContent className="p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <Card className="border-border/40 bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-sm overflow-hidden">
+      <CardContent className="p-4 sm:p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Momentum Breakdown */}
           <div className="lg:col-span-2">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-4 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4" />
-              Momentum Breakdown
+            <h3 className="text-xs font-semibold text-muted-foreground mb-3 flex items-center gap-2 uppercase tracking-wider">
+              <TrendingUp className="w-3.5 h-3.5" />
+              Momentum
             </h3>
-            <div className="flex flex-wrap items-center justify-start gap-6 sm:gap-8">
-              <button
-                onClick={() => onMomentumClick("fresh")}
-                className={`flex flex-col items-center gap-2 transition-opacity ${
-                  selectedMomentum && selectedMomentum !== "fresh" ? "opacity-40" : "opacity-100"
-                } hover:opacity-100 cursor-pointer ${
-                  selectedMomentum === "fresh" ? "ring-2 ring-momentum-fresh ring-offset-2 ring-offset-background rounded-full" : ""
-                }`}
-              >
-                <MomentumDial level="fresh" score={momentumStats.fresh} size="sm" />
-                <span className="text-xs text-muted-foreground">Fresh</span>
-              </button>
-              
-              <button
-                onClick={() => onMomentumClick("warming")}
-                className={`flex flex-col items-center gap-2 transition-opacity ${
-                  selectedMomentum && selectedMomentum !== "warming" ? "opacity-40" : "opacity-100"
-                } hover:opacity-100 cursor-pointer ${
-                  selectedMomentum === "warming" ? "ring-2 ring-momentum-warming ring-offset-2 ring-offset-background rounded-full" : ""
-                }`}
-              >
-                <MomentumDial level="warming" score={momentumStats.warming} size="sm" />
-                <span className="text-xs text-muted-foreground">Warming</span>
-              </button>
-              
-              <button
-                onClick={() => onMomentumClick("heating")}
-                className={`flex flex-col items-center gap-2 transition-opacity ${
-                  selectedMomentum && selectedMomentum !== "heating" ? "opacity-40" : "opacity-100"
-                } hover:opacity-100 cursor-pointer ${
-                  selectedMomentum === "heating" ? "ring-2 ring-momentum-heating ring-offset-2 ring-offset-background rounded-full" : ""
-                }`}
-              >
-                <MomentumDial level="heating" score={momentumStats.heating} size="sm" />
-                <span className="text-xs text-muted-foreground">Heating</span>
-              </button>
-              
-              <button
-                onClick={() => onMomentumClick("fire")}
-                className={`flex flex-col items-center gap-2 transition-opacity ${
-                  selectedMomentum && selectedMomentum !== "fire" ? "opacity-40" : "opacity-100"
-                } hover:opacity-100 cursor-pointer ${
-                  selectedMomentum === "fire" ? "ring-2 ring-momentum-fire ring-offset-2 ring-offset-background rounded-full" : ""
-                }`}
-              >
-                <MomentumDial level="fire" score={momentumStats.fire} size="sm" />
-                <span className="text-xs text-muted-foreground">On Fire</span>
-              </button>
+            <div className="flex flex-wrap items-center justify-start gap-4 sm:gap-6">
+              {(["fresh", "warming", "heating", "fire"] as const).map((level) => (
+                <button
+                  key={level}
+                  onClick={() => onMomentumClick(level)}
+                  className={`flex flex-col items-center gap-1.5 transition-all duration-200 ${
+                    selectedMomentum && selectedMomentum !== level ? "opacity-40 scale-95" : "opacity-100"
+                  } hover:opacity-100 hover:scale-105 cursor-pointer ${
+                    selectedMomentum === level ? "ring-2 ring-offset-2 ring-offset-background rounded-full" : ""
+                  }`}
+                  style={{
+                    ...(selectedMomentum === level && {
+                      boxShadow: `0 0 20px hsl(var(--momentum-${level}) / 0.4)`
+                    })
+                  }}
+                >
+                  <MomentumDial level={level} score={momentumStats[level]} size="sm" />
+                  <span className="text-[10px] text-muted-foreground capitalize">{level === "fire" ? "On Fire" : level}</span>
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Activity Stats */}
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-3">Status Overview</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Total</span>
-                  <span className="text-lg font-semibold text-foreground">{activityStats.total}</span>
+          {/* Closure & Adoption Charts */}
+          <div className="flex gap-6 items-start">
+            <div className="flex flex-col items-center gap-2">
+              <MiniDonutChart
+                data={closureData}
+                colors={["hsl(142 71% 45%)", "hsl(200 70% 55%)"]}
+                centerValue={`${closureRate}%`}
+                centerLabel="Closed"
+              />
+              <div className="flex items-center gap-3 text-[10px]">
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-status-closed" />
+                  <span className="text-muted-foreground">{closedCount}</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">Open</span>
-                  <span className="text-sm font-medium text-foreground">{activityStats.open}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">In Progress</span>
-                  <span className="text-sm font-medium text-foreground">{activityStats.inProgress}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">Completed</span>
-                  <span className="text-sm font-medium text-foreground">{activityStats.completed}</span>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-status-open" />
+                  <span className="text-muted-foreground">{activityStats.open + activityStats.inProgress}</span>
                 </div>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-border/40">
-              <h3 className="text-sm font-semibold text-muted-foreground mb-3">Engagement</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <ThumbsUp className="w-3.5 h-3.5 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">Likes</span>
-                  </div>
-                  <span className="text-sm font-medium text-foreground">{activityStats.totalLikes}</span>
+            <div className="flex flex-col items-center gap-2">
+              <MiniDonutChart
+                data={adoptionData}
+                colors={["hsl(142 71% 45%)", "hsl(0 72% 51%)"]}
+                centerValue={`${adoptionRate}%`}
+                centerLabel="Adopted"
+              />
+              <div className="flex items-center gap-3 text-[10px]">
+                <div className="flex items-center gap-1">
+                  <CheckCircle2 className="w-2.5 h-2.5 text-status-accepted" />
+                  <span className="text-muted-foreground">{activityStats.completed}</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="w-3.5 h-3.5 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">Comments</span>
-                  </div>
-                  <span className="text-sm font-medium text-foreground">{activityStats.totalComments}</span>
+                <div className="flex items-center gap-1">
+                  <XCircle className="w-2.5 h-2.5 text-status-rejected" />
+                  <span className="text-muted-foreground">{activityStats.declined}</span>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Quick Stats */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-muted/30 rounded-lg p-3 text-center">
+              <div className="flex items-center justify-center gap-1.5 mb-1">
+                <Target className="w-3.5 h-3.5 text-muted-foreground" />
+              </div>
+              <div className="text-xl font-bold text-foreground">{activityStats.total}</div>
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Total</div>
+            </div>
+            <div className="bg-muted/30 rounded-lg p-3 text-center">
+              <div className="flex items-center justify-center gap-1.5 mb-1">
+                <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+              </div>
+              <div className="text-xl font-bold text-foreground">{activityStats.inProgress}</div>
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wider">In Progress</div>
+            </div>
+            <div className="bg-muted/30 rounded-lg p-3 text-center">
+              <div className="flex items-center justify-center gap-1.5 mb-1">
+                <ThumbsUp className="w-3.5 h-3.5 text-muted-foreground" />
+              </div>
+              <div className="text-xl font-bold text-foreground">{activityStats.totalLikes}</div>
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Likes</div>
+            </div>
+            <div className="bg-muted/30 rounded-lg p-3 text-center">
+              <div className="flex items-center justify-center gap-1.5 mb-1">
+                <MessageSquare className="w-3.5 h-3.5 text-muted-foreground" />
+              </div>
+              <div className="text-xl font-bold text-foreground">{activityStats.totalComments}</div>
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Comments</div>
             </div>
           </div>
         </div>
