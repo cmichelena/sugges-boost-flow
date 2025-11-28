@@ -301,10 +301,15 @@ const Submit = () => {
                 </div>
               )}
 
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                {loading ? "Submitting..." : "Submit Suggestion"}
-              </Button>
+              <div className="flex gap-3">
+                <Button type="button" variant="outline" className="flex-1" onClick={() => navigate(-1)}>
+                  Cancel
+                </Button>
+                <Button type="submit" className="flex-1" disabled={loading}>
+                  {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                  {loading ? "Submitting..." : "Submit Suggestion"}
+                </Button>
+              </div>
             </form>
 
             <SuggestionDisclaimer />
