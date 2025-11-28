@@ -13,6 +13,7 @@ import { Loader2 } from "lucide-react";
 import { z } from "zod";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SuggestionDisclaimer } from "@/components/SuggestionDisclaimer";
+import { FileUpload } from "@/components/FileUpload";
 
 const suggestionSchema = z.object({
   title: z.string().trim().min(5, 'Title must be at least 5 characters').max(100, 'Title must be less than 100 characters'),
@@ -34,6 +35,7 @@ const Submit = () => {
   const [loading, setLoading] = useState(false);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const [attachments, setAttachments] = useState<File[]>([]);
   const navigate = useNavigate();
 
   // Fetch user's organization and categories on mount
@@ -124,7 +126,7 @@ const Submit = () => {
         .rpc('auto_assign_suggestion_to_team', { _category_id: categoryId });
 
       // Insert the suggestion with category_id and assignment
-      const { error } = await supabase.from("suggestions").insert({
+      const { data: suggestionData, error } = await supabase.from("suggestions").insert({
         user_id: isAnonymous ? null : session.user.id,
         organization_id: organizationId,
         title: improved?.improved_title || title,
@@ -140,9 +142,35 @@ const Submit = () => {
         is_anonymous: isAnonymous,
         assigned_team_id: assignmentData?.[0]?.team_id || null,
         assigned_to_user_id: assignmentData?.[0]?.assigned_user_id || null,
-      });
+      }).select('id').single();
 
       if (error) throw error;
+
+      // Upload attachments if any
+      if (attachments.length > 0 && suggestionData) {
+        for (const file of attachments) {
+          const fileExt = file.name.split('.').pop();
+          const filePath = `${session.user.id}/${suggestionData.id}/${crypto.randomUUID()}.${fileExt}`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from('suggestion-attachments')
+            .upload(filePath, file);
+
+          if (uploadError) {
+            console.error('Upload error:', uploadError);
+            continue;
+          }
+
+          await supabase.from('suggestion_attachments').insert({
+            suggestion_id: suggestionData.id,
+            file_name: file.name,
+            file_path: filePath,
+            file_size: file.size,
+            mime_type: file.type,
+            uploaded_by: session.user.id,
+          });
+        }
+      }
 
       toast.success("Suggestion submitted successfully!");
       navigate("/");
@@ -234,6 +262,17 @@ const Submit = () => {
                 <p className="text-sm text-muted-foreground mt-1">
                   {description.length}/2000 characters
                 </p>
+              </div>
+
+              <div>
+                <Label>Attachments (optional)</Label>
+                <FileUpload
+                  files={attachments}
+                  onFilesChange={setAttachments}
+                  maxFiles={5}
+                  maxSizeMB={10}
+                  disabled={loading}
+                />
               </div>
 
               <Button type="submit" className="w-full" disabled={loading}>
