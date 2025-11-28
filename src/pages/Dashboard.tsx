@@ -224,9 +224,10 @@ const Dashboard = () => {
 
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-4xl font-bold mb-2">
+              <p className="text-muted-foreground mb-1">
                 {isNewUser ? "Welcome to Suggistit! 🎉" : "Welcome back!"}
-              </h1>
+              </p>
+              <h1 className="text-4xl font-bold mb-2">Dashboard</h1>
               <p className="text-muted-foreground">
                 {isNewUser 
                   ? "Start exploring suggestions and share your ideas with the community"
