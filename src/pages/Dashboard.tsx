@@ -269,18 +269,8 @@ const Dashboard = () => {
       
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-4xl font-bold mb-2">
-                {isNewUser ? "Welcome to Suggistit! 🎉" : "Welcome back!"}
-              </h1>
-              <p className="text-muted-foreground">
-                {isNewUser 
-                  ? "Start exploring suggestions and share your ideas with the community"
-                  : "Browse and vote on community suggestions"
-                }
-              </p>
-            </div>
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold">Dashboard</h1>
           </div>
 
           <div className="mb-6 space-y-4">
@@ -310,6 +300,19 @@ const Dashboard = () => {
             open={showOnboarding} 
             onComplete={() => setShowOnboarding(false)} 
           />
+
+          {/* Welcome message above suggestions */}
+          <div className="mb-4">
+            <h2 className="text-2xl font-semibold mb-1">
+              {isNewUser ? "Welcome to Suggistit! 🎉" : "Welcome back!"}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {isNewUser 
+                ? "Start exploring suggestions and share your ideas with the community"
+                : "Browse and vote on community suggestions"
+              }
+            </p>
+          </div>
 
           {/* Filters */}
           <div ref={suggestionsRef} className="mb-6 scroll-mt-4 flex flex-wrap items-center gap-3">
