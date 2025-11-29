@@ -15,7 +15,7 @@ const HowItWorks = () => {
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-4">How Suggistit Works</h1>
+            <h1 className="font-bold mb-4">How Suggistit Works</h1>
             <p className="text-xl text-muted-foreground">
               If you see something, Suggistit
             </p>

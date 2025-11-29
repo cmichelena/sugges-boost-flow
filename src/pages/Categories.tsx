@@ -202,7 +202,7 @@ const Categories = () => {
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold">Categories</h1>
+              <h1 className="font-bold">Categories</h1>
               <p className="text-muted-foreground">Manage suggestion categories and assignments</p>
             </div>
           </div>

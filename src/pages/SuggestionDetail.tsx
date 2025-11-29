@@ -357,7 +357,7 @@ const SuggestionDetail = () => {
                   <Badge>{suggestion.category}</Badge>
                   <Badge variant="outline">{suggestion.status}</Badge>
                 </div>
-                <h1 className="text-3xl font-bold">{suggestion.title}</h1>
+                <h1 className="font-bold">{suggestion.title}</h1>
                 <p className="text-muted-foreground">
                   by {suggestion.profiles?.display_name || "Anonymous"} •{" "}
                   {formatDistanceToNow(new Date(suggestion.created_at), { addSuffix: true })}
