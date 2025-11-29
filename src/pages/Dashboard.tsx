@@ -6,8 +6,6 @@ import { Navbar } from "@/components/Navbar";
 import { Onboarding } from "@/components/Onboarding";
 import { toast } from "sonner";
 import { Loader2, User } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { MomentumActivityDashboard } from "@/components/MomentumActivityDashboard";
 import { SuggestionJourneyChart } from "@/components/SuggestionJourneyChart";
 import { calculateMomentum, getMomentumLevel, calculateReactionScore, type MomentumLevel } from "@/lib/momentum";
@@ -294,42 +292,93 @@ const Dashboard = () => {
             onComplete={() => setShowOnboarding(false)} 
           />
 
-          <div className="flex gap-4 mb-6 flex-wrap">
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="All Categories" />
-              </SelectTrigger>
-              <SelectContent className="bg-background z-50">
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* Category Filter Bubbles */}
+          <div className="mb-4">
+            <p className="text-xs text-muted-foreground mb-2">Category</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-wrap gap-1.5">
+              <button
+                onClick={() => setCategoryFilter("all")}
+                className={`
+                  px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200
+                  border hover:scale-105 active:scale-95 truncate
+                  ${categoryFilter === "all"
+                    ? "bg-primary border-primary text-primary-foreground"
+                    : "bg-muted/30 border-muted-foreground/20 text-muted-foreground opacity-60 hover:opacity-100 hover:bg-muted/50"
+                  }
+                `}
+              >
+                All
+              </button>
+              {categories.map((cat) => {
+                const isSelected = categoryFilter === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setCategoryFilter(isSelected ? "all" : cat.id)}
+                    className={`
+                      px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200
+                      border hover:scale-105 active:scale-95 truncate
+                      ${isSelected
+                        ? "bg-primary border-primary text-primary-foreground"
+                        : "bg-muted/30 border-muted-foreground/20 text-muted-foreground opacity-60 hover:opacity-100 hover:bg-muted/50"
+                      }
+                    `}
+                  >
+                    {cat.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="All Statuses" />
-              </SelectTrigger>
-              <SelectContent className="bg-background z-50">
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="Open">Open</SelectItem>
-                <SelectItem value="Under Review">Under Review</SelectItem>
-                <SelectItem value="Planned">Planned</SelectItem>
-                <SelectItem value="In Progress">In Progress</SelectItem>
-                <SelectItem value="Completed">Completed</SelectItem>
-                <SelectItem value="Declined">Declined</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Badge
-              variant={showMyAssignments ? "default" : "outline"}
-              className="cursor-pointer px-4 py-2 text-sm"
-              onClick={() => setShowMyAssignments(!showMyAssignments)}
-            >
-              <User className="w-4 h-4 mr-2" />
-              My Assignments
-            </Badge>
+          {/* Status Filter Bubbles */}
+          <div className="mb-6">
+            <p className="text-xs text-muted-foreground mb-2">Status</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:flex md:flex-wrap gap-1.5">
+              {[
+                { value: "all", label: "All" },
+                { value: "Open", label: "Open" },
+                { value: "Under Review", label: "Under Review" },
+                { value: "Planned", label: "Planned" },
+                { value: "In Progress", label: "In Progress" },
+                { value: "Completed", label: "Completed" },
+                { value: "Declined", label: "Declined" },
+              ].map((status) => {
+                const isSelected = statusFilter === status.value;
+                return (
+                  <button
+                    key={status.value}
+                    onClick={() => setStatusFilter(isSelected && status.value !== "all" ? "all" : status.value)}
+                    className={`
+                      px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200
+                      border hover:scale-105 active:scale-95 truncate
+                      ${isSelected
+                        ? "bg-primary border-primary text-primary-foreground"
+                        : "bg-muted/30 border-muted-foreground/20 text-muted-foreground opacity-60 hover:opacity-100 hover:bg-muted/50"
+                      }
+                    `}
+                  >
+                    {status.label}
+                  </button>
+                );
+              })}
+              
+              {/* My Assignments */}
+              <button
+                onClick={() => setShowMyAssignments(!showMyAssignments)}
+                className={`
+                  px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200
+                  border hover:scale-105 active:scale-95 flex items-center gap-1
+                  ${showMyAssignments
+                    ? "bg-primary border-primary text-primary-foreground"
+                    : "bg-muted/30 border-muted-foreground/20 text-muted-foreground opacity-60 hover:opacity-100 hover:bg-muted/50"
+                  }
+                `}
+              >
+                <User className="w-3 h-3" />
+                My Assignments
+              </button>
+            </div>
           </div>
 
           {loading ? (
