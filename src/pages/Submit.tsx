@@ -210,7 +210,7 @@ const Submit = () => {
 
               <div>
                 <Label>Category</Label>
-                <div className="flex flex-wrap gap-2 mt-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-wrap gap-1.5 mt-2">
                   {categories.map((cat, index) => {
                     const isSelected = categoryId === cat.id;
                     const isPrivate = cat.name.toLowerCase().includes('private');
@@ -242,8 +242,8 @@ const Submit = () => {
                           }
                         }}
                         className={`
-                          px-4 py-2 rounded-full text-sm font-medium transition-all duration-200
-                          border-2 hover:scale-105 active:scale-95
+                          px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200
+                          border hover:scale-105 active:scale-95 truncate
                           ${isSelected 
                             ? `${color.bg} ${color.border} ${color.text}`
                             : `bg-muted/30 border-muted-foreground/20 ${color.text} opacity-60 hover:opacity-100 ${color.hoverBg}`
