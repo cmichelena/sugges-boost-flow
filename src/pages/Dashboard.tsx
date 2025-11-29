@@ -1,11 +1,11 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { SuggestionCard } from "@/components/SuggestionCard";
 import { Navbar } from "@/components/Navbar";
 import { Onboarding } from "@/components/Onboarding";
 import { toast } from "sonner";
-import { Loader2, User } from "lucide-react";
+import { Loader2, User, ChevronDown } from "lucide-react";
 import { MomentumActivityDashboard } from "@/components/MomentumActivityDashboard";
 import { SuggestionJourneyChart } from "@/components/SuggestionJourneyChart";
 import { calculateMomentum, getMomentumLevel, calculateReactionScore, type MomentumLevel } from "@/lib/momentum";
@@ -29,6 +29,11 @@ const Dashboard = () => {
   const [isNewUser, setIsNewUser] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const navigate = useNavigate();
+  const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  const scrollToSuggestions = () => {
+    suggestionsRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   useEffect(() => {
     loadSuggestions();
@@ -275,6 +280,15 @@ const Dashboard = () => {
             </div>
           </div>
 
+          {/* Browse Suggestions Button - Mobile Only */}
+          <button
+            onClick={scrollToSuggestions}
+            className="md:hidden w-full flex items-center justify-center gap-2 py-2 mb-4 text-sm text-muted-foreground hover:text-foreground transition-colors border-b border-border/30"
+          >
+            Browse Suggestions
+            <ChevronDown className="w-4 h-4 animate-bounce" />
+          </button>
+
           <div className="mb-6 space-y-4">
             <MomentumActivityDashboard
               momentumStats={momentumStats}
@@ -293,7 +307,7 @@ const Dashboard = () => {
           />
 
           {/* Category Filter Bubbles */}
-          <div className="mb-4">
+          <div ref={suggestionsRef} className="mb-4 scroll-mt-4">
             <p className="text-xs text-muted-foreground mb-2">Category</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-wrap gap-1.5">
               <button
