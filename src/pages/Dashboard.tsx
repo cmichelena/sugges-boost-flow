@@ -270,7 +270,7 @@ const Dashboard = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold">Dashboard</h1>
+            <h1 className="font-bold">Dashboard</h1>
           </div>
 
           <div className="mb-6 space-y-4">

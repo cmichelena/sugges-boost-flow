@@ -42,7 +42,7 @@ const Landing = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold mb-4">Watch Ideas Gain Momentum</h2>
+              <h2 className="font-bold mb-4">Watch Ideas Gain Momentum</h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                 Our intelligent momentum system tracks engagement and time to surface the ideas your team cares about most
               </p>
@@ -71,7 +71,7 @@ const Landing = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold mb-4">Everything You Need</h2>
+              <h2 className="font-bold mb-4">Everything You Need</h2>
               <p className="text-xl text-muted-foreground">Powerful features to manage suggestions effectively</p>
             </div>
             
@@ -144,7 +144,7 @@ const Landing = () => {
       <section className="py-20 bg-gradient-to-br from-primary/10 via-accent/5 to-primary/10">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-4xl font-bold mb-6">Ready to Get Started?</h2>
+            <h2 className="font-bold mb-6">Ready to Get Started?</h2>
             <p className="text-xl text-muted-foreground mb-8">
               Join teams already using Suggistit to capture and act on their best ideas
             </p>
