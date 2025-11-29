@@ -32,18 +32,23 @@ const MiniDonutChart = ({
   data, 
   colors, 
   centerValue, 
-  centerLabel 
+  centerLabel,
+  size = "default"
 }: { 
   data: { name: string; value: number }[]; 
   colors: string[]; 
   centerValue: string; 
   centerLabel: string;
+  size?: "default" | "large";
 }) => {
   const total = data.reduce((sum, item) => sum + item.value, 0);
+  const dimensions = size === "large" ? "w-28 h-28 sm:w-20 sm:h-20" : "w-20 h-20";
+  const innerRadius = size === "large" ? 35 : 25;
+  const outerRadius = size === "large" ? 52 : 38;
   
   if (total === 0) {
     return (
-      <div className="relative w-20 h-20 flex items-center justify-center">
+      <div className={`relative ${dimensions} flex items-center justify-center`}>
         <div className="w-full h-full rounded-full border-4 border-muted" />
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-lg font-bold text-muted-foreground">—</span>
@@ -54,15 +59,15 @@ const MiniDonutChart = ({
   }
 
   return (
-    <div className="relative w-20 h-20">
+    <div className={`relative ${dimensions}`}>
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
             data={data}
             cx="50%"
             cy="50%"
-            innerRadius={25}
-            outerRadius={38}
+            innerRadius={innerRadius}
+            outerRadius={outerRadius}
             paddingAngle={2}
             dataKey="value"
             strokeWidth={0}
@@ -74,7 +79,7 @@ const MiniDonutChart = ({
         </PieChart>
       </ResponsiveContainer>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-sm font-bold text-foreground">{centerValue}</span>
+        <span className={`font-bold text-foreground ${size === "large" ? "text-base sm:text-sm" : "text-sm"}`}>{centerValue}</span>
         <span className="text-[9px] text-muted-foreground leading-tight">{centerLabel}</span>
       </div>
     </div>
@@ -111,7 +116,107 @@ export const MomentumActivityDashboard = ({
   return (
     <Card className="border-border/40 bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-sm overflow-hidden">
       <CardContent className="p-4 sm:p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Mobile Layout: Stacked vertical sections */}
+        <div className="flex flex-col gap-5 md:hidden">
+          {/* Row 1: Momentum Breakdown - centered full width */}
+          <div className="w-full">
+            <h3 className="text-xs font-semibold text-muted-foreground mb-3 flex items-center justify-center gap-2 uppercase tracking-wider">
+              <TrendingUp className="w-3.5 h-3.5" />
+              Momentum
+            </h3>
+            <div className="flex items-center justify-center gap-4">
+              {(["fresh", "warming", "heating", "fire"] as const).map((level) => (
+                <button
+                  key={level}
+                  onClick={() => onMomentumClick(level)}
+                  className={`flex flex-col items-center gap-1.5 transition-all duration-200 ${
+                    selectedMomentum && selectedMomentum !== level ? "opacity-40 scale-95" : "opacity-100"
+                  } hover:opacity-100 hover:scale-105 cursor-pointer ${
+                    selectedMomentum === level ? "ring-2 ring-offset-2 ring-offset-background rounded-full" : ""
+                  }`}
+                  style={{
+                    ...(selectedMomentum === level && {
+                      boxShadow: `0 0 20px hsl(var(--momentum-${level}) / 0.4)`
+                    })
+                  }}
+                >
+                  <MomentumDial level={level} score={momentumStats[level]} size="sm" />
+                  <span className="text-[10px] text-muted-foreground capitalize">{level === "fire" ? "On Fire" : level}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Row 2: Pie Charts - bigger and centered */}
+          <div className="flex justify-center gap-8">
+            <div className="flex flex-col items-center gap-2">
+              <MiniDonutChart
+                data={closureData}
+                colors={["hsl(142 71% 45%)", "hsl(200 70% 55%)"]}
+                centerValue={`${closureRate}%`}
+                centerLabel="Closed"
+                size="large"
+              />
+              <div className="flex items-center gap-3 text-[10px]">
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-status-closed" />
+                  <span className="text-muted-foreground">{closedCount}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-status-open" />
+                  <span className="text-muted-foreground">{activityStats.open + activityStats.inProgress}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center gap-2">
+              <MiniDonutChart
+                data={adoptionData}
+                colors={["hsl(142 71% 45%)", "hsl(0 72% 51%)"]}
+                centerValue={`${adoptionRate}%`}
+                centerLabel="Adopted"
+                size="large"
+              />
+              <div className="flex items-center gap-3 text-[10px]">
+                <div className="flex items-center gap-1">
+                  <CheckCircle2 className="w-2.5 h-2.5 text-status-accepted" />
+                  <span className="text-muted-foreground">{activityStats.completed}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <XCircle className="w-2.5 h-2.5 text-status-rejected" />
+                  <span className="text-muted-foreground">{activityStats.declined}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Row 3: Quick Stats - 4 in one row */}
+          <div className="grid grid-cols-4 gap-2">
+            <div className="bg-muted/30 rounded-lg p-2 text-center">
+              <Target className="w-3 h-3 text-muted-foreground mx-auto mb-0.5" />
+              <div className="text-base font-bold text-foreground">{activityStats.total}</div>
+              <div className="text-[8px] text-muted-foreground uppercase tracking-wider">Total</div>
+            </div>
+            <div className="bg-muted/30 rounded-lg p-2 text-center">
+              <Clock className="w-3 h-3 text-muted-foreground mx-auto mb-0.5" />
+              <div className="text-base font-bold text-foreground">{activityStats.inProgress}</div>
+              <div className="text-[8px] text-muted-foreground uppercase tracking-wider">Progress</div>
+            </div>
+            <div className="bg-muted/30 rounded-lg p-2 text-center">
+              <ThumbsUp className="w-3 h-3 text-muted-foreground mx-auto mb-0.5" />
+              <div className="text-base font-bold text-foreground">{activityStats.totalLikes}</div>
+              <div className="text-[8px] text-muted-foreground uppercase tracking-wider">Likes</div>
+            </div>
+            <div className="bg-muted/30 rounded-lg p-2 text-center">
+              <MessageSquare className="w-3 h-3 text-muted-foreground mx-auto mb-0.5" />
+              <div className="text-base font-bold text-foreground">{activityStats.totalComments}</div>
+              <div className="text-[8px] text-muted-foreground uppercase tracking-wider">Comments</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop Layout: Original horizontal grid */}
+        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Momentum Breakdown */}
           <div className="lg:col-span-2">
             <h3 className="text-xs font-semibold text-muted-foreground mb-3 flex items-center gap-2 uppercase tracking-wider">
