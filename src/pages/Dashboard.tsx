@@ -29,10 +29,12 @@ const Dashboard = () => {
   const [selectedMomentum, setSelectedMomentum] = useState<MomentumLevel | null>(null);
   const [isNewUser, setIsNewUser] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showBrowseButton, setShowBrowseButton] = useState(true);
   const navigate = useNavigate();
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
   const scrollToSuggestions = () => {
+    setShowBrowseButton(false);
     suggestionsRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -293,13 +295,15 @@ const Dashboard = () => {
             <SuggestionJourneyChart suggestions={suggestions} />
             
             {/* Browse Suggestions Button - Mobile Only */}
-            <button
-              onClick={scrollToSuggestions}
-              className="md:hidden w-full flex items-center justify-center gap-2 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors border-t border-border/30"
-            >
-              Browse Suggestions
-              <ChevronDown className="w-4 h-4 animate-bounce" />
-            </button>
+            {showBrowseButton && (
+              <button
+                onClick={scrollToSuggestions}
+                className="md:hidden w-full flex items-center justify-center gap-2 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors border-t border-border/30"
+              >
+                Browse Suggestions
+                <ChevronDown className="w-4 h-4 animate-bounce" />
+              </button>
+            )}
           </div>
 
           <Onboarding 
