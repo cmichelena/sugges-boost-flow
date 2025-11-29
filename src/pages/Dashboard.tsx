@@ -9,6 +9,7 @@ import { Loader2, User, ChevronDown } from "lucide-react";
 import { MomentumActivityDashboard } from "@/components/MomentumActivityDashboard";
 import { SuggestionJourneyChart } from "@/components/SuggestionJourneyChart";
 import { calculateMomentum, getMomentumLevel, calculateReactionScore, type MomentumLevel } from "@/lib/momentum";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface ReactionCounts {
   champion: number;
@@ -306,93 +307,52 @@ const Dashboard = () => {
             onComplete={() => setShowOnboarding(false)} 
           />
 
-          {/* Category Filter Bubbles */}
-          <div ref={suggestionsRef} className="mb-4 scroll-mt-4">
-            <p className="text-xs text-muted-foreground mb-2">Category</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-wrap gap-1.5">
-              <button
-                onClick={() => setCategoryFilter("all")}
-                className={`
-                  px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200
-                  border hover:scale-105 active:scale-95 truncate
-                  ${categoryFilter === "all"
-                    ? "bg-primary border-primary text-primary-foreground"
-                    : "bg-muted/30 border-muted-foreground/20 text-muted-foreground opacity-60 hover:opacity-100 hover:bg-muted/50"
-                  }
-                `}
-              >
-                All
-              </button>
-              {categories.map((cat) => {
-                const isSelected = categoryFilter === cat.id;
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => setCategoryFilter(isSelected ? "all" : cat.id)}
-                    className={`
-                      px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200
-                      border hover:scale-105 active:scale-95 truncate
-                      ${isSelected
-                        ? "bg-primary border-primary text-primary-foreground"
-                        : "bg-muted/30 border-muted-foreground/20 text-muted-foreground opacity-60 hover:opacity-100 hover:bg-muted/50"
-                      }
-                    `}
-                  >
+          {/* Filters */}
+          <div ref={suggestionsRef} className="mb-6 scroll-mt-4 flex flex-wrap items-center gap-3">
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-[160px] bg-background">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent className="bg-background z-50">
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id}>
                     {cat.name}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-          {/* Status Filter Bubbles */}
-          <div className="mb-6">
-            <p className="text-xs text-muted-foreground mb-2">Status</p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 md:flex md:flex-wrap gap-1.5">
-              {[
-                { value: "all", label: "All" },
-                { value: "Open", label: "Open" },
-                { value: "Under Review", label: "Under Review" },
-                { value: "Planned", label: "Planned" },
-                { value: "In Progress", label: "In Progress" },
-                { value: "Completed", label: "Completed" },
-                { value: "Declined", label: "Declined" },
-              ].map((status) => {
-                const isSelected = statusFilter === status.value;
-                return (
-                  <button
-                    key={status.value}
-                    onClick={() => setStatusFilter(isSelected && status.value !== "all" ? "all" : status.value)}
-                    className={`
-                      px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200
-                      border hover:scale-105 active:scale-95 truncate
-                      ${isSelected
-                        ? "bg-primary border-primary text-primary-foreground"
-                        : "bg-muted/30 border-muted-foreground/20 text-muted-foreground opacity-60 hover:opacity-100 hover:bg-muted/50"
-                      }
-                    `}
-                  >
-                    {status.label}
-                  </button>
-                );
-              })}
-              
-              {/* My Assignments */}
-              <button
-                onClick={() => setShowMyAssignments(!showMyAssignments)}
-                className={`
-                  px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200
-                  border hover:scale-105 active:scale-95 flex items-center gap-1
-                  ${showMyAssignments
-                    ? "bg-primary border-primary text-primary-foreground"
-                    : "bg-muted/30 border-muted-foreground/20 text-muted-foreground opacity-60 hover:opacity-100 hover:bg-muted/50"
-                  }
-                `}
-              >
-                <User className="w-3 h-3" />
-                My Assignments
-              </button>
-            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[140px] bg-background">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent className="bg-background z-50">
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="Open">Open</SelectItem>
+                <SelectItem value="Under Review">Under Review</SelectItem>
+                <SelectItem value="Planned">Planned</SelectItem>
+                <SelectItem value="In Progress">In Progress</SelectItem>
+                <SelectItem value="Completed">Completed</SelectItem>
+                <SelectItem value="Declined">Declined</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* My Assignments */}
+            <button
+              onClick={() => setShowMyAssignments(!showMyAssignments)}
+              className={`
+                px-3 py-2 rounded-md text-sm font-medium transition-all duration-200
+                border flex items-center gap-1.5
+                ${showMyAssignments
+                  ? "bg-primary border-primary text-primary-foreground"
+                  : "bg-background border-input text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                }
+              `}
+            >
+              <User className="w-4 h-4" />
+              My Assignments
+            </button>
           </div>
 
           {loading ? (
