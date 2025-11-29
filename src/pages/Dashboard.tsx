@@ -281,15 +281,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Browse Suggestions Button - Mobile Only */}
-          <button
-            onClick={scrollToSuggestions}
-            className="md:hidden w-full flex items-center justify-center gap-2 py-2 mb-4 text-sm text-muted-foreground hover:text-foreground transition-colors border-b border-border/30"
-          >
-            Browse Suggestions
-            <ChevronDown className="w-4 h-4 animate-bounce" />
-          </button>
-
           <div className="mb-6 space-y-4">
             <MomentumActivityDashboard
               momentumStats={momentumStats}
@@ -300,6 +291,15 @@ const Dashboard = () => {
               }
             />
             <SuggestionJourneyChart suggestions={suggestions} />
+            
+            {/* Browse Suggestions Button - Mobile Only */}
+            <button
+              onClick={scrollToSuggestions}
+              className="md:hidden w-full flex items-center justify-center gap-2 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors border-t border-border/30"
+            >
+              Browse Suggestions
+              <ChevronDown className="w-4 h-4 animate-bounce" />
+            </button>
           </div>
 
           <Onboarding 
