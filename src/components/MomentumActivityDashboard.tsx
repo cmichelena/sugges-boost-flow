@@ -39,12 +39,12 @@ const MiniDonutChart = ({
   colors: string[]; 
   centerValue: string; 
   centerLabel: string;
-  size?: "default" | "large";
+  size?: "default" | "large" | "desktop";
 }) => {
   const total = data.reduce((sum, item) => sum + item.value, 0);
-  const dimensions = size === "large" ? "w-28 h-28 sm:w-20 sm:h-20" : "w-20 h-20";
-  const innerRadius = size === "large" ? 35 : 25;
-  const outerRadius = size === "large" ? 52 : 38;
+  const dimensions = size === "desktop" ? "w-24 h-24" : size === "large" ? "w-28 h-28" : "w-20 h-20";
+  const innerRadius = size === "desktop" ? 30 : size === "large" ? 35 : 25;
+  const outerRadius = size === "desktop" ? 45 : size === "large" ? 52 : 38;
   
   if (total === 0) {
     return (
@@ -79,7 +79,7 @@ const MiniDonutChart = ({
         </PieChart>
       </ResponsiveContainer>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className={`font-bold text-foreground ${size === "large" ? "text-base sm:text-sm" : "text-sm"}`}>{centerValue}</span>
+        <span className={`font-bold text-foreground ${size === "large" ? "text-base" : size === "desktop" ? "text-sm" : "text-sm"}`}>{centerValue}</span>
         <span className="text-[9px] text-muted-foreground leading-tight">{centerLabel}</span>
       </div>
     </div>
@@ -249,13 +249,14 @@ export const MomentumActivityDashboard = ({
             </div>
 
             {/* Pie Charts */}
-            <div className="flex gap-6 items-start">
+            <div className="flex gap-4 items-start">
               <div className="flex flex-col items-center gap-2">
                 <MiniDonutChart
                   data={closureData}
                   colors={["hsl(142 71% 45%)", "hsl(200 70% 55%)"]}
                   centerValue={`${closureRate}%`}
                   centerLabel="Closed"
+                  size="desktop"
                 />
                 <div className="flex items-center gap-3 text-[10px]">
                   <div className="flex items-center gap-1">
@@ -275,6 +276,7 @@ export const MomentumActivityDashboard = ({
                   colors={["hsl(142 71% 45%)", "hsl(0 72% 51%)"]}
                   centerValue={`${adoptionRate}%`}
                   centerLabel="Adopted"
+                  size="desktop"
                 />
                 <div className="flex items-center gap-3 text-[10px]">
                   <div className="flex items-center gap-1">
