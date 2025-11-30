@@ -215,80 +215,83 @@ export const MomentumActivityDashboard = ({
           </div>
         </div>
 
-        {/* Desktop Layout: Original horizontal grid */}
-        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Momentum Breakdown */}
-          <div className="lg:col-span-2">
-            <h3 className="text-xs font-semibold text-muted-foreground mb-3 flex items-center gap-2 uppercase tracking-wider">
-              <TrendingUp className="w-3.5 h-3.5" />
-              Momentum
-            </h3>
-            <div className="flex flex-wrap items-center justify-start gap-4 sm:gap-6">
-              {(["fresh", "warming", "heating", "fire"] as const).map((level) => (
-                <button
-                  key={level}
-                  onClick={() => onMomentumClick(level)}
-                  className={`flex flex-col items-center gap-1.5 transition-all duration-200 ${
-                    selectedMomentum && selectedMomentum !== level ? "opacity-40 scale-95" : "opacity-100"
-                  } hover:opacity-100 hover:scale-105 cursor-pointer ${
-                    selectedMomentum === level ? "ring-2 ring-offset-2 ring-offset-background rounded-full" : ""
-                  }`}
-                  style={{
-                    ...(selectedMomentum === level && {
-                      boxShadow: `0 0 20px hsl(var(--momentum-${level}) / 0.4)`
-                    })
-                  }}
-                >
-                  <MomentumDial level={level} score={momentumStats[level]} size="sm" />
-                  <span className="text-[10px] text-muted-foreground capitalize">{level === "fire" ? "On Fire" : level}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Closure & Adoption Charts */}
-          <div className="flex gap-6 items-start">
-            <div className="flex flex-col items-center gap-2">
-              <MiniDonutChart
-                data={closureData}
-                colors={["hsl(142 71% 45%)", "hsl(200 70% 55%)"]}
-                centerValue={`${closureRate}%`}
-                centerLabel="Closed"
-              />
-              <div className="flex items-center gap-3 text-[10px]">
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-status-closed" />
-                  <span className="text-muted-foreground">{closedCount}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-status-open" />
-                  <span className="text-muted-foreground">{activityStats.open + activityStats.inProgress}</span>
-                </div>
+        {/* Desktop Layout: 3 rows - momentum+pies, stats, journey */}
+        <div className="hidden md:flex md:flex-col gap-6">
+          {/* Row 1: Momentum + Pie Charts */}
+          <div className="flex items-start justify-between gap-6">
+            {/* Momentum Breakdown */}
+            <div>
+              <h3 className="text-xs font-semibold text-muted-foreground mb-3 flex items-center gap-2 uppercase tracking-wider">
+                <TrendingUp className="w-3.5 h-3.5" />
+                Momentum
+              </h3>
+              <div className="flex flex-wrap items-center justify-start gap-4 sm:gap-6">
+                {(["fresh", "warming", "heating", "fire"] as const).map((level) => (
+                  <button
+                    key={level}
+                    onClick={() => onMomentumClick(level)}
+                    className={`flex flex-col items-center gap-1.5 transition-all duration-200 ${
+                      selectedMomentum && selectedMomentum !== level ? "opacity-40 scale-95" : "opacity-100"
+                    } hover:opacity-100 hover:scale-105 cursor-pointer ${
+                      selectedMomentum === level ? "ring-2 ring-offset-2 ring-offset-background rounded-full" : ""
+                    }`}
+                    style={{
+                      ...(selectedMomentum === level && {
+                        boxShadow: `0 0 20px hsl(var(--momentum-${level}) / 0.4)`
+                      })
+                    }}
+                  >
+                    <MomentumDial level={level} score={momentumStats[level]} size="sm" />
+                    <span className="text-[10px] text-muted-foreground capitalize">{level === "fire" ? "On Fire" : level}</span>
+                  </button>
+                ))}
               </div>
             </div>
 
-            <div className="flex flex-col items-center gap-2">
-              <MiniDonutChart
-                data={adoptionData}
-                colors={["hsl(142 71% 45%)", "hsl(0 72% 51%)"]}
-                centerValue={`${adoptionRate}%`}
-                centerLabel="Adopted"
-              />
-              <div className="flex items-center gap-3 text-[10px]">
-                <div className="flex items-center gap-1">
-                  <CheckCircle2 className="w-2.5 h-2.5 text-status-accepted" />
-                  <span className="text-muted-foreground">{activityStats.completed}</span>
+            {/* Pie Charts */}
+            <div className="flex gap-6 items-start">
+              <div className="flex flex-col items-center gap-2">
+                <MiniDonutChart
+                  data={closureData}
+                  colors={["hsl(142 71% 45%)", "hsl(200 70% 55%)"]}
+                  centerValue={`${closureRate}%`}
+                  centerLabel="Closed"
+                />
+                <div className="flex items-center gap-3 text-[10px]">
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-status-closed" />
+                    <span className="text-muted-foreground">{closedCount}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-status-open" />
+                    <span className="text-muted-foreground">{activityStats.open + activityStats.inProgress}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <XCircle className="w-2.5 h-2.5 text-status-rejected" />
-                  <span className="text-muted-foreground">{activityStats.declined}</span>
+              </div>
+
+              <div className="flex flex-col items-center gap-2">
+                <MiniDonutChart
+                  data={adoptionData}
+                  colors={["hsl(142 71% 45%)", "hsl(0 72% 51%)"]}
+                  centerValue={`${adoptionRate}%`}
+                  centerLabel="Adopted"
+                />
+                <div className="flex items-center gap-3 text-[10px]">
+                  <div className="flex items-center gap-1">
+                    <CheckCircle2 className="w-2.5 h-2.5 text-status-accepted" />
+                    <span className="text-muted-foreground">{activityStats.completed}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <XCircle className="w-2.5 h-2.5 text-status-rejected" />
+                    <span className="text-muted-foreground">{activityStats.declined}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Quick Stats */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* Row 2: Quick Stats - 4 in one row */}
+          <div className="grid grid-cols-4 gap-4">
             <div className="bg-muted/30 rounded-lg p-3 text-center">
               <div className="flex items-center justify-center gap-1.5 mb-1">
                 <Target className="w-3.5 h-3.5 text-muted-foreground" />
