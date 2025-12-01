@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { Loader2, Users, Crown, Calendar, Mail, CheckCircle, Clock, Sparkles, BarChart3, Palette, Headphones, Check } from "lucide-react";
 import { z } from "zod";
+import { PlanUsageCard } from "@/components/PlanUsageCard";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 
@@ -243,8 +244,6 @@ const Settings = () => {
     );
   }
 
-  const trialDays = getTrialDaysRemaining();
-
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -273,32 +272,17 @@ const Settings = () => {
           </div>
         </Card>
 
-        {/* Current Plan */}
-        <Card className="p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Current Plan</h2>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label className="text-muted-foreground">Subscription Tier</Label>
-                <p className="text-lg font-medium capitalize">{organization?.subscription_tier}</p>
-              </div>
-              <Badge variant={organization?.subscription_status === "trialing" ? "default" : "secondary"}>
-                {organization?.subscription_status}
-              </Badge>
-            </div>
-            
-            {organization?.subscription_status === "trialing" && (
-              <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-                <p className="text-sm font-medium">
-                  Trial ends in <span className="text-primary font-bold">{trialDays} days</span>
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Upgrade to continue using premium features after your trial ends
-                </p>
-              </div>
-            )}
+        {/* Subscription & Usage */}
+        {organization && (
+          <div className="mb-6">
+            <PlanUsageCard
+              organizationId={organization.id}
+              dbSubscriptionTier={organization.subscription_tier}
+              dbSubscriptionStatus={organization.subscription_status}
+              trialEndsAt={organization.trial_ends_at}
+            />
           </div>
-        </Card>
+        )}
 
         {/* Pricing Plans - Only for Admins/Owners */}
         {(userRole === "admin" || userRole === "owner") && plans.length > 0 && (
