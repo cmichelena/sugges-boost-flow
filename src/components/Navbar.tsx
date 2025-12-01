@@ -2,16 +2,19 @@ import { Link } from "react-router-dom";
 import { Plus, User, LogOut, Info, DollarSign } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "react-i18next";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 import logo from "@/assets/suggistit-logo.png";
 
 export const Navbar = () => {
   const { user, signOut } = useAuth();
+  const { t } = useTranslation();
 
   return (
     <nav className="sticky top-0 z-50 border-b bg-card">
@@ -24,23 +27,25 @@ export const Navbar = () => {
           <Button variant="ghost" size="sm" asChild>
             <Link to="/how-it-works">
               <Info className="w-4 h-4 mr-2" />
-              How it Works
+              {t("nav.howItWorks")}
             </Link>
           </Button>
 
           <Button variant="ghost" size="sm" asChild>
             <Link to="/pricing">
               <DollarSign className="w-4 h-4 mr-2" />
-              Pricing
+              {t("nav.pricing")}
             </Link>
           </Button>
+
+          <LanguageSwitcher />
 
           {user && (
             <>
               <Button variant="default" size="sm" asChild>
                 <Link to="/submit">
                   <Plus className="w-4 h-4 mr-2" />
-                  Submit
+                  {t("common.submit")}
                 </Link>
               </Button>
 
@@ -52,17 +57,17 @@ export const Navbar = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem asChild>
-                    <Link to="/my-suggestions">My Suggestions</Link>
+                    <Link to="/my-suggestions">{t("nav.mySuggestions")}</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/teams">Teams</Link>
+                    <Link to="/teams">{t("nav.teams")}</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/settings">Settings</Link>
+                    <Link to="/settings">{t("common.settings")}</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={signOut}>
                     <LogOut className="w-4 h-4 mr-2" />
-                    Sign Out
+                    {t("common.signOut")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -71,7 +76,7 @@ export const Navbar = () => {
 
           {!user && (
             <Button variant="default" size="sm" asChild>
-              <Link to="/auth">Sign In</Link>
+              <Link to="/auth">{t("common.signIn")}</Link>
             </Button>
           )}
         </div>

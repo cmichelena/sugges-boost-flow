@@ -11,6 +11,7 @@ import { MomentumActivityDashboard } from "@/components/MomentumActivityDashboar
 import { SuggestionJourneyChart } from "@/components/SuggestionJourneyChart";
 import { calculateMomentum, getMomentumLevel, calculateReactionScore, type MomentumLevel } from "@/lib/momentum";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useTranslation } from "react-i18next";
 
 interface ReactionCounts {
   champion: number;
@@ -34,6 +35,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const suggestionsRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   // Check for subscription success message
   useEffect(() => {
@@ -286,7 +288,7 @@ const Dashboard = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-            <h1 className="font-bold">Dashboard</h1>
+            <h1 className="font-bold">{t("common.dashboard")}</h1>
             <div className="w-full sm:w-72">
               <SubscriptionStatusCard />
             </div>
@@ -309,7 +311,7 @@ const Dashboard = () => {
                 onClick={scrollToSuggestions}
                 className="md:hidden w-full flex items-center justify-center gap-2 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors border-t border-border/30"
               >
-                Browse Suggestions
+                {t("dashboard.recentSuggestions")}
                 <ChevronDown className="w-4 h-4 animate-bounce" />
               </button>
             )}
@@ -323,12 +325,12 @@ const Dashboard = () => {
           {/* Welcome message above suggestions */}
           <div className="mb-4">
             <h2 className="text-2xl font-semibold mb-1">
-              {isNewUser ? "Welcome to Suggistit! 🎉" : "Welcome back!"}
+              {isNewUser ? t("dashboard.welcomeNew") : t("dashboard.welcomeBack")}
             </h2>
             <p className="text-sm text-muted-foreground">
               {isNewUser 
-                ? "Start exploring suggestions and share your ideas with the community"
-                : "Browse and vote on community suggestions"
+                ? t("dashboard.beFirst")
+                : t("dashboard.recentSuggestions")
               }
             </p>
           </div>
@@ -337,10 +339,10 @@ const Dashboard = () => {
           <div ref={suggestionsRef} className="mb-6 scroll-mt-4 flex flex-wrap items-center gap-3">
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-[160px] bg-background">
-                <SelectValue placeholder="Category" />
+                <SelectValue placeholder={t("suggestion.category")} />
               </SelectTrigger>
               <SelectContent className="bg-background z-50">
-                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="all">{t("dashboard.all")}</SelectItem>
                 {categories.map((cat) => (
                   <SelectItem key={cat.id} value={cat.id}>
                     {cat.name}
@@ -351,16 +353,16 @@ const Dashboard = () => {
 
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[140px] bg-background">
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder={t("status.open")} />
               </SelectTrigger>
               <SelectContent className="bg-background z-50">
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="Open">Open</SelectItem>
-                <SelectItem value="Under Review">Under Review</SelectItem>
-                <SelectItem value="Planned">Planned</SelectItem>
-                <SelectItem value="In Progress">In Progress</SelectItem>
-                <SelectItem value="Completed">Completed</SelectItem>
-                <SelectItem value="Declined">Declined</SelectItem>
+                <SelectItem value="all">{t("dashboard.all")}</SelectItem>
+                <SelectItem value="Open">{t("status.open")}</SelectItem>
+                <SelectItem value="Under Review">{t("status.acknowledged")}</SelectItem>
+                <SelectItem value="Planned">{t("status.planned")}</SelectItem>
+                <SelectItem value="In Progress">{t("status.inProgress")}</SelectItem>
+                <SelectItem value="Completed">{t("status.completed")}</SelectItem>
+                <SelectItem value="Declined">{t("status.declined")}</SelectItem>
               </SelectContent>
             </Select>
 
@@ -377,7 +379,7 @@ const Dashboard = () => {
               `}
             >
               <User className="w-4 h-4" />
-              My Assignments
+              {t("dashboard.myAssignments")}
             </button>
           </div>
 
@@ -387,7 +389,7 @@ const Dashboard = () => {
             </div>
           ) : filteredSuggestions.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">No suggestions found</p>
+              <p className="text-muted-foreground">{t("dashboard.noSuggestions")}</p>
             </div>
           ) : (
             <div className="space-y-4">

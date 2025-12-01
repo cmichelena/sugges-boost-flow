@@ -2,11 +2,13 @@ import { Navbar } from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Lightbulb, Users, MessageCircle, TrendingUp, CheckCircle, Filter, UserCircle, Shield, Sparkles, Camera, FileText, Mic, Crown, ThumbsUp, AlertTriangle, Minus, Lock } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { Lightbulb, Users, TrendingUp, CheckCircle, Filter, UserCircle, Shield, Sparkles, Camera, FileText, Mic, Crown, ThumbsUp, AlertTriangle, Minus, Lock } from "lucide-react";
 import { MomentumDial } from "@/components/MomentumDial";
 
 const HowItWorks = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen bg-background">
@@ -15,9 +17,9 @@ const HowItWorks = () => {
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <h1 className="font-bold mb-4">How Suggistit Works</h1>
+            <h1 className="font-bold mb-4">{t("howItWorks.pageTitle")}</h1>
             <p className="text-xl text-muted-foreground">
-              If you see something, Suggistit
+              {t("howItWorks.tagline")}
             </p>
           </div>
 
@@ -28,23 +30,22 @@ const HowItWorks = () => {
                   <Lightbulb className="w-6 h-6 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2">1. Submit Your Suggestion</h3>
+                  <h3 className="text-xl font-semibold mb-2">1. {t("howItWorks.step1Title")}</h3>
                   <p className="text-muted-foreground mb-3">
-                    Click "Submit Suggestion" and share your idea with a title, description, and category. 
-                    Attach photos, documents, or voice recordings to support your idea.
+                    {t("howItWorks.step1Desc")}
                   </p>
                   <ul className="space-y-2 text-muted-foreground text-sm">
                     <li className="flex items-start gap-2">
                       <Shield className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span><strong>Anonymous Option:</strong> Some categories allow anonymous submissions to encourage honest feedback</span>
+                      <span><strong>{t("suggestion.anonymous")}:</strong> {t("suggestion.anonymousHint")}</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Lock className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span><strong>Private HR:</strong> Submit sensitive feedback directly to HR with restricted visibility</span>
+                      <span><strong>Private HR:</strong> Submit sensitive feedback directly to HR</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Users className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span><strong>Auto-Routing:</strong> Suggestions automatically assigned to responsible teams based on category</span>
+                      <span><strong>Auto-Routing:</strong> Suggestions automatically assigned to teams</span>
                     </li>
                   </ul>
                 </div>
@@ -57,22 +58,22 @@ const HowItWorks = () => {
                   <Camera className="w-6 h-6 text-amber-500" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2">2. Rich Attachments</h3>
+                  <h3 className="text-xl font-semibold mb-2">2. {t("howItWorks.step2Title")}</h3>
                   <p className="text-muted-foreground mb-3">
-                    Support your suggestions with multiple file types to provide context and evidence:
+                    {t("howItWorks.step2Desc")}
                   </p>
                   <ul className="space-y-2 text-muted-foreground text-sm">
                     <li className="flex items-start gap-2">
                       <Camera className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span><strong>Photos:</strong> Capture images directly or select from your gallery</span>
+                      <span><strong>{t("suggestion.addPhoto")}:</strong> Capture images or select from gallery</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <FileText className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span><strong>Documents:</strong> Attach PDFs, spreadsheets, or other supporting files</span>
+                      <span><strong>{t("suggestion.addDocument")}:</strong> Attach PDFs or spreadsheets</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Mic className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span><strong>Voice Messages:</strong> Record audio explanations for complex ideas</span>
+                      <span><strong>{t("suggestion.addVoice")}:</strong> Record audio explanations</span>
                     </li>
                   </ul>
                 </div>
@@ -86,21 +87,20 @@ const HowItWorks = () => {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-xl font-semibold">3. AI-Powered Improvements</h3>
-                    <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full font-medium">Pro</span>
+                    <h3 className="text-xl font-semibold">3. {t("howItWorks.step3Title")}</h3>
+                    <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full font-medium">{t("pricing.tiers.pro")}</span>
                   </div>
                   <p className="text-muted-foreground mb-3">
-                    Let AI enhance your suggestions with better clarity and professional language. 
-                    Available on Pro plans and above.
+                    {t("howItWorks.step3Desc")}
                   </p>
                   <ul className="space-y-2 text-muted-foreground text-sm">
                     <li className="flex items-start gap-2">
                       <Sparkles className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span><strong>Smart Enhancement:</strong> AI polishes your title and description for maximum impact</span>
+                      <span><strong>{t("suggestion.aiImprove")}:</strong> {t("suggestion.aiImproveHint")}</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span><strong>One-Click:</strong> Simply toggle "AI Improvements" when submitting</span>
+                      <span><strong>One-Click:</strong> Toggle when submitting</span>
                     </li>
                   </ul>
                 </div>
@@ -113,27 +113,26 @@ const HowItWorks = () => {
                   <ThumbsUp className="w-6 h-6 text-secondary" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2">4. Nuanced Reactions</h3>
+                  <h3 className="text-xl font-semibold mb-2">4. {t("howItWorks.step4Title")}</h3>
                   <p className="text-muted-foreground mb-3">
-                    Express your opinion with our 4-tier reaction system. Each reaction type carries 
-                    different weight in momentum calculations:
+                    {t("howItWorks.step4Desc")}
                   </p>
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div className="flex items-center gap-2 p-2 rounded-lg bg-amber-500/10">
                       <Crown className="w-4 h-4 text-amber-500" />
-                      <span><strong>Champion</strong> (+2)</span>
+                      <span><strong>{t("reactions.champion")}</strong> (+2)</span>
                     </div>
                     <div className="flex items-center gap-2 p-2 rounded-lg bg-green-500/10">
                       <ThumbsUp className="w-4 h-4 text-green-500" />
-                      <span><strong>Support</strong> (+1)</span>
+                      <span><strong>{t("reactions.support")}</strong> (+1)</span>
                     </div>
                     <div className="flex items-center gap-2 p-2 rounded-lg bg-muted">
                       <Minus className="w-4 h-4 text-muted-foreground" />
-                      <span><strong>Neutral</strong> (0)</span>
+                      <span><strong>{t("reactions.neutral")}</strong> (0)</span>
                     </div>
                     <div className="flex items-center gap-2 p-2 rounded-lg bg-orange-500/10">
                       <AlertTriangle className="w-4 h-4 text-orange-500" />
-                      <span><strong>Concerns</strong> (-1)</span>
+                      <span><strong>{t("reactions.concerns")}</strong> (-1)</span>
                     </div>
                   </div>
                 </div>
@@ -146,27 +145,26 @@ const HowItWorks = () => {
                   <TrendingUp className="w-6 h-6 text-momentum-fire" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2">5. Momentum Tracking</h3>
+                  <h3 className="text-xl font-semibold mb-2">5. {t("howItWorks.step5Title")}</h3>
                   <p className="text-muted-foreground mb-4">
-                    Each suggestion has a momentum level based on weighted reactions, comments, views, and 
-                    time since submission. Click momentum levels in the dashboard to filter suggestions.
+                    {t("howItWorks.step5Desc")}
                   </p>
                   <div className="flex items-center gap-4 flex-wrap">
                     <div className="flex items-center gap-2">
                       <MomentumDial level="fresh" score={25} size="sm" />
-                      <span className="text-sm">Fresh</span>
+                      <span className="text-sm">{t("momentum.fresh")}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <MomentumDial level="warming" score={100} size="sm" />
-                      <span className="text-sm">Warming Up</span>
+                      <span className="text-sm">{t("momentum.warming")}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <MomentumDial level="heating" score={200} size="sm" />
-                      <span className="text-sm">Heating Up</span>
+                      <span className="text-sm">{t("momentum.heating")}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <MomentumDial level="fire" score={350} size="sm" />
-                      <span className="text-sm">On Fire</span>
+                      <span className="text-sm">{t("momentum.fire")}</span>
                     </div>
                   </div>
                 </div>
@@ -179,22 +177,22 @@ const HowItWorks = () => {
                   <UserCircle className="w-6 h-6 text-blue-500" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2">6. Team Management & Assignments</h3>
+                  <h3 className="text-xl font-semibold mb-2">6. {t("howItWorks.step6Title")}</h3>
                   <p className="text-muted-foreground mb-3">
-                    Organizations can create teams and assign members to handle specific suggestion categories:
+                    {t("howItWorks.step6Desc")}
                   </p>
                   <ul className="space-y-2 text-muted-foreground text-sm">
                     <li className="flex items-start gap-2">
                       <Users className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span><strong>Team Routing:</strong> Suggestions automatically assigned to responsible teams based on category</span>
+                      <span><strong>{t("nav.teams")}:</strong> Auto-assigned based on category</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <UserCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span><strong>Individual Assignment:</strong> Team leads can assign specific suggestions to team members</span>
+                      <span><strong>Assignment:</strong> Team leads assign to members</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Filter className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span><strong>My Assignments:</strong> Quickly view suggestions assigned to you with the filter badge</span>
+                      <span><strong>{t("dashboard.myAssignments")}:</strong> View your assigned suggestions</span>
                     </li>
                   </ul>
                 </div>
@@ -207,19 +205,17 @@ const HowItWorks = () => {
                   <CheckCircle className="w-6 h-6 text-green-500" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2">7. Status Workflow & Closure</h3>
+                  <h3 className="text-xl font-semibold mb-2">7. {t("howItWorks.step7Title")}</h3>
                   <p className="text-muted-foreground mb-3">
-                    Suggestions flow through a clear status workflow. Admins and assigned team members can update 
-                    status to keep everyone informed. When closing a suggestion as Completed or Declined, a comment 
-                    explaining the outcome is required to maintain transparency.
+                    {t("howItWorks.step7Desc")}
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    <span className="px-3 py-1 bg-muted rounded-full text-sm">Open</span>
-                    <span className="px-3 py-1 bg-blue-500/10 text-blue-600 rounded-full text-sm">Acknowledged</span>
-                    <span className="px-3 py-1 bg-purple-500/10 text-purple-600 rounded-full text-sm">Planned</span>
-                    <span className="px-3 py-1 bg-amber-500/10 text-amber-600 rounded-full text-sm">In Progress</span>
-                    <span className="px-3 py-1 bg-green-500/10 text-green-600 rounded-full text-sm">Completed</span>
-                    <span className="px-3 py-1 bg-gray-500/10 text-gray-600 rounded-full text-sm">Declined</span>
+                    <span className="px-3 py-1 bg-muted rounded-full text-sm">{t("status.open")}</span>
+                    <span className="px-3 py-1 bg-blue-500/10 text-blue-600 rounded-full text-sm">{t("status.acknowledged")}</span>
+                    <span className="px-3 py-1 bg-purple-500/10 text-purple-600 rounded-full text-sm">{t("status.planned")}</span>
+                    <span className="px-3 py-1 bg-amber-500/10 text-amber-600 rounded-full text-sm">{t("status.inProgress")}</span>
+                    <span className="px-3 py-1 bg-green-500/10 text-green-600 rounded-full text-sm">{t("status.completed")}</span>
+                    <span className="px-3 py-1 bg-gray-500/10 text-gray-600 rounded-full text-sm">{t("status.declined")}</span>
                   </div>
                 </div>
               </div>
@@ -231,26 +227,22 @@ const HowItWorks = () => {
                   <Filter className="w-6 h-6 text-purple-500" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2">8. Powerful Filtering</h3>
+                  <h3 className="text-xl font-semibold mb-2">8. {t("howItWorks.step8Title")}</h3>
                   <p className="text-muted-foreground mb-3">
-                    Quickly find what matters most with powerful filtering options:
+                    {t("howItWorks.step8Desc")}
                   </p>
                   <ul className="space-y-2 text-muted-foreground text-sm">
                     <li className="flex items-start gap-2">
                       <TrendingUp className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span><strong>Momentum Levels:</strong> Click momentum circles in the activity dashboard to filter by heat level</span>
+                      <span><strong>{t("dashboard.momentum")}:</strong> Click to filter by heat level</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Filter className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span><strong>Categories:</strong> Filter suggestions by category using the dropdown menu</span>
+                      <span><strong>{t("nav.categories")}:</strong> Filter by category</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span><strong>Status:</strong> View suggestions at specific workflow stages (Open, In Progress, etc.)</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <UserCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span><strong>My Assignments:</strong> Toggle to see only suggestions assigned to you</span>
+                      <span><strong>Status:</strong> Filter by workflow stage</span>
                     </li>
                   </ul>
                 </div>
@@ -263,26 +255,26 @@ const HowItWorks = () => {
                   <Crown className="w-6 h-6 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2">Subscription Plans</h3>
+                  <h3 className="text-xl font-semibold mb-2">{t("pricing.title")}</h3>
                   <p className="text-muted-foreground mb-3">
-                    Choose the plan that fits your organization's needs:
+                    {t("pricing.subtitle")}
                   </p>
                   <div className="grid sm:grid-cols-2 gap-3 text-sm">
                     <div className="p-3 rounded-lg bg-background border">
-                      <div className="font-semibold mb-1">Free</div>
+                      <div className="font-semibold mb-1">{t("pricing.tiers.free")}</div>
                       <p className="text-muted-foreground text-xs">25 suggestions/mo, 5 members</p>
                     </div>
                     <div className="p-3 rounded-lg bg-background border">
-                      <div className="font-semibold mb-1">Forever Lifetime</div>
+                      <div className="font-semibold mb-1">{t("pricing.tiers.forever")}</div>
                       <p className="text-muted-foreground text-xs">200 suggestions/mo, 10 members</p>
                     </div>
                     <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
-                      <div className="font-semibold mb-1 flex items-center gap-1">Pro <Sparkles className="w-3 h-3" /></div>
-                      <p className="text-muted-foreground text-xs">500 suggestions/mo, 50 members, AI features</p>
+                      <div className="font-semibold mb-1 flex items-center gap-1">{t("pricing.tiers.pro")} <Sparkles className="w-3 h-3" /></div>
+                      <p className="text-muted-foreground text-xs">500 suggestions/mo, 50 members, AI</p>
                     </div>
                     <div className="p-3 rounded-lg bg-background border">
-                      <div className="font-semibold mb-1">Business</div>
-                      <p className="text-muted-foreground text-xs">Unlimited suggestions, 200 members, all features</p>
+                      <div className="font-semibold mb-1">{t("pricing.tiers.business")}</div>
+                      <p className="text-muted-foreground text-xs">Unlimited, 200 members</p>
                     </div>
                   </div>
                 </div>
@@ -291,16 +283,16 @@ const HowItWorks = () => {
           </div>
 
           <div className="mt-12 text-center">
-            <h2 className="text-2xl font-bold mb-4">Ready to share your ideas?</h2>
+            <h2 className="text-2xl font-bold mb-4">{t("howItWorks.ctaTitle")}</h2>
             <div className="flex flex-wrap justify-center gap-4">
               <Button size="lg" onClick={() => navigate("/submit")}>
-                Submit a Suggestion
+                {t("nav.submitSuggestion")}
               </Button>
               <Button size="lg" variant="outline" onClick={() => navigate("/")}>
-                Browse Suggestions
+                {t("howItWorks.browseSuggestions")}
               </Button>
               <Button size="lg" variant="secondary" onClick={() => navigate("/pricing")}>
-                View Pricing
+                {t("howItWorks.viewPricing")}
               </Button>
             </div>
           </div>

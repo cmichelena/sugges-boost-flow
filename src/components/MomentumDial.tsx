@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 type MomentumLevel = "fresh" | "warming" | "heating" | "fire";
 
 interface MomentumDialProps {
@@ -9,34 +11,35 @@ interface MomentumDialProps {
 const levelConfig: Record<
   MomentumLevel,
   {
-    label: string;
+    labelKey: string;
     color: string;
     percentage: number;
   }
 > = {
   fresh: {
-    label: "Fresh",
+    labelKey: "momentum.fresh",
     color: "hsl(var(--momentum-fresh))",
     percentage: 25,
   },
   warming: {
-    label: "Warming Up",
+    labelKey: "momentum.warming",
     color: "hsl(var(--momentum-warming))",
     percentage: 50,
   },
   heating: {
-    label: "Heating Up",
+    labelKey: "momentum.heating",
     color: "hsl(var(--momentum-heating))",
     percentage: 75,
   },
   fire: {
-    label: "On Fire",
+    labelKey: "momentum.fire",
     color: "hsl(var(--momentum-fire))",
     percentage: 100,
   },
 };
 
 export const MomentumDial = ({ level, score, size = "sm" }: MomentumDialProps) => {
+  const { t } = useTranslation();
   const config = levelConfig[level];
   const isSmall = size === "sm";
   
@@ -95,7 +98,7 @@ export const MomentumDial = ({ level, score, size = "sm" }: MomentumDialProps) =
       {!isSmall && (
         <div className="text-center mt-2">
           <div className="font-semibold" style={{ color: config.color }}>
-            {config.label}
+            {t(config.labelKey)}
           </div>
           <div className="text-sm text-muted-foreground">{score} points</div>
         </div>
