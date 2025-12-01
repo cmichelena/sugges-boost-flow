@@ -6,13 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Navbar } from "@/components/Navbar";
 import { toast } from "sonner";
-import { Loader2, ScrollText } from "lucide-react";
+import { Loader2, ScrollText, Sparkles, Lock } from "lucide-react";
 import { z } from "zod";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SuggestionDisclaimer } from "@/components/SuggestionDisclaimer";
 import { FileUpload } from "@/components/FileUpload";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { UpgradePrompt } from "@/components/UpgradePrompt";
 
 const suggestionSchema = z.object({
   title: z.string().trim().min(5, 'Title must be at least 5 characters').max(100, 'Title must be less than 100 characters'),
@@ -35,7 +38,11 @@ const Submit = () => {
   const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const navigate = useNavigate();
+  const { hasAccess, loading: featureLoading, tier } = useFeatureAccess();
+
+  const hasAIAccess = hasAccess("ai_improvements");
 
   // Fetch user's organization and categories on mount
   useEffect(() => {
@@ -104,20 +111,26 @@ const Submit = () => {
         return;
       }
 
-      // Call AI to improve the suggestion with explicit auth header
-      const { data: improved, error: aiError } = await supabase.functions.invoke(
-        "improve-suggestion",
-        {
-          body: { title, description, category: selectedCategory?.name || "Other" },
-          headers: {
-            Authorization: `Bearer ${session.access_token}`
-          }
-        }
-      );
+      let improved = null;
 
-      if (aiError) {
-        console.error("AI improvement error:", aiError);
-        toast.error("Failed to improve suggestion with AI");
+      // Only call AI if user has access to AI improvements
+      if (hasAIAccess) {
+        const { data: aiData, error: aiError } = await supabase.functions.invoke(
+          "improve-suggestion",
+          {
+            body: { title, description, category: selectedCategory?.name || "Other" },
+            headers: {
+              Authorization: `Bearer ${session.access_token}`
+            }
+          }
+        );
+
+        if (aiError) {
+          console.error("AI improvement error:", aiError);
+          // Don't block submission, just log the error
+        } else {
+          improved = aiData;
+        }
       }
 
       // Get auto-assignment data
@@ -134,8 +147,8 @@ const Submit = () => {
         original_description: description,
         category: selectedCategory?.name || "Other",
         category_id: categoryId,
-        ai_improved_title: improved?.improved_title,
-        ai_improved_description: improved?.improved_description,
+        ai_improved_title: improved?.improved_title || null,
+        ai_improved_description: improved?.improved_description || null,
         ai_tags: improved?.tags || [],
         status: "Open",
         is_anonymous: isAnonymous,
@@ -171,7 +184,11 @@ const Submit = () => {
         }
       }
 
-      toast.success("Suggestion submitted successfully!");
+      toast.success(
+        hasAIAccess 
+          ? "Suggestion submitted and enhanced with AI!" 
+          : "Suggestion submitted successfully!"
+      );
       navigate("/");
     } catch (error: any) {
       toast.error(error.message);
@@ -192,8 +209,64 @@ const Submit = () => {
               Submit a Suggestion
             </h1>
             <p className="text-muted-foreground mb-6">
-              Share your ideas to improve our organization. AI will help refine your suggestion.
+              Share your ideas to improve our organization.
+              {hasAIAccess && " AI will help refine your suggestion."}
             </p>
+
+            {/* AI Enhancement Status */}
+            {!featureLoading && (
+              <div className={`mb-6 p-4 rounded-lg border ${
+                hasAIAccess 
+                  ? "bg-primary/5 border-primary/20" 
+                  : "bg-amber-500/5 border-amber-500/20"
+              }`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {hasAIAccess ? (
+                      <>
+                        <div className="p-2 rounded-full bg-primary/10">
+                          <Sparkles className="w-4 h-4 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">AI Enhancement Active</p>
+                          <p className="text-xs text-muted-foreground">
+                            Your suggestion will be automatically improved
+                          </p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="p-2 rounded-full bg-amber-500/10">
+                          <Lock className="w-4 h-4 text-amber-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium flex items-center gap-2">
+                            AI Enhancement
+                            <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-600 border-amber-500/20">
+                              Pro+
+                            </Badge>
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Upgrade to get AI-powered improvements
+                          </p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  {!hasAIAccess && (
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => setShowUpgradePrompt(true)}
+                      className="shrink-0"
+                    >
+                      <Sparkles className="w-3 h-3 mr-1" />
+                      Upgrade
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
@@ -323,6 +396,12 @@ const Submit = () => {
           </Card>
         </div>
       </div>
+
+      <UpgradePrompt
+        feature="ai_improvements"
+        open={showUpgradePrompt}
+        onClose={() => setShowUpgradePrompt(false)}
+      />
     </div>
   );
 };
