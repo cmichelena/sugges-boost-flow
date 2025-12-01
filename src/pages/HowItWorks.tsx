@@ -2,7 +2,7 @@ import { Navbar } from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Lightbulb, Users, Heart, MessageCircle, TrendingUp, CheckCircle, Filter, UserCircle, Shield } from "lucide-react";
+import { Lightbulb, Users, MessageCircle, TrendingUp, CheckCircle, Filter, UserCircle, Shield, Sparkles, Camera, FileText, Mic, Crown, ThumbsUp, AlertTriangle, Minus, Lock } from "lucide-react";
 import { MomentumDial } from "@/components/MomentumDial";
 
 const HowItWorks = () => {
@@ -31,7 +31,7 @@ const HowItWorks = () => {
                   <h3 className="text-xl font-semibold mb-2">1. Submit Your Suggestion</h3>
                   <p className="text-muted-foreground mb-3">
                     Click "Submit Suggestion" and share your idea with a title, description, and category. 
-                    Each category may have different settings:
+                    Attach photos, documents, or voice recordings to support your idea.
                   </p>
                   <ul className="space-y-2 text-muted-foreground text-sm">
                     <li className="flex items-start gap-2">
@@ -39,8 +39,68 @@ const HowItWorks = () => {
                       <span><strong>Anonymous Option:</strong> Some categories allow anonymous submissions to encourage honest feedback</span>
                     </li>
                     <li className="flex items-start gap-2">
+                      <Lock className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <span><strong>Private HR:</strong> Submit sensitive feedback directly to HR with restricted visibility</span>
+                    </li>
+                    <li className="flex items-start gap-2">
                       <Users className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span><strong>Team Assignment:</strong> Suggestions are automatically routed to responsible teams based on category</span>
+                      <span><strong>Auto-Routing:</strong> Suggestions automatically assigned to responsible teams based on category</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center flex-shrink-0">
+                  <Camera className="w-6 h-6 text-amber-500" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold mb-2">2. Rich Attachments</h3>
+                  <p className="text-muted-foreground mb-3">
+                    Support your suggestions with multiple file types to provide context and evidence:
+                  </p>
+                  <ul className="space-y-2 text-muted-foreground text-sm">
+                    <li className="flex items-start gap-2">
+                      <Camera className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <span><strong>Photos:</strong> Capture images directly or select from your gallery</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <FileText className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <span><strong>Documents:</strong> Attach PDFs, spreadsheets, or other supporting files</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Mic className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <span><strong>Voice Messages:</strong> Record audio explanations for complex ideas</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6 border-primary/20">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Sparkles className="w-6 h-6 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="text-xl font-semibold">3. AI-Powered Improvements</h3>
+                    <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full font-medium">Pro</span>
+                  </div>
+                  <p className="text-muted-foreground mb-3">
+                    Let AI enhance your suggestions with better clarity and professional language. 
+                    Available on Pro plans and above.
+                  </p>
+                  <ul className="space-y-2 text-muted-foreground text-sm">
+                    <li className="flex items-start gap-2">
+                      <Sparkles className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <span><strong>Smart Enhancement:</strong> AI polishes your title and description for maximum impact</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <span><strong>One-Click:</strong> Simply toggle "AI Improvements" when submitting</span>
                     </li>
                   </ul>
                 </div>
@@ -50,24 +110,32 @@ const HowItWorks = () => {
             <Card className="p-6">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center flex-shrink-0">
-                  <Heart className="w-6 h-6 text-secondary" />
+                  <ThumbsUp className="w-6 h-6 text-secondary" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2">2. Community Engagement</h3>
+                  <h3 className="text-xl font-semibold mb-2">4. Nuanced Reactions</h3>
                   <p className="text-muted-foreground mb-3">
-                    Browse suggestions, like the ones you support, and share your thoughts through comments. 
-                    Every interaction helps build momentum and surface the best ideas.
+                    Express your opinion with our 4-tier reaction system. Each reaction type carries 
+                    different weight in momentum calculations:
                   </p>
-                  <ul className="space-y-2 text-muted-foreground text-sm">
-                    <li className="flex items-start gap-2">
-                      <Heart className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span><strong>Likes:</strong> Show support for suggestions you agree with</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <MessageCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span><strong>Comments:</strong> Share your thoughts, ask questions, or provide feedback</span>
-                    </li>
-                  </ul>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="flex items-center gap-2 p-2 rounded-lg bg-amber-500/10">
+                      <Crown className="w-4 h-4 text-amber-500" />
+                      <span><strong>Champion</strong> (+2)</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-2 rounded-lg bg-green-500/10">
+                      <ThumbsUp className="w-4 h-4 text-green-500" />
+                      <span><strong>Support</strong> (+1)</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-2 rounded-lg bg-muted">
+                      <Minus className="w-4 h-4 text-muted-foreground" />
+                      <span><strong>Neutral</strong> (0)</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-2 rounded-lg bg-orange-500/10">
+                      <AlertTriangle className="w-4 h-4 text-orange-500" />
+                      <span><strong>Concerns</strong> (-1)</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </Card>
@@ -78,11 +146,10 @@ const HowItWorks = () => {
                   <TrendingUp className="w-6 h-6 text-momentum-fire" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2">3. Momentum Tracking</h3>
+                  <h3 className="text-xl font-semibold mb-2">5. Momentum Tracking</h3>
                   <p className="text-muted-foreground mb-4">
-                    Each suggestion has a momentum level based on likes, comments, views, and 
-                    time since submission. The activity dashboard shows momentum distribution and 
-                    you can click momentum levels to filter suggestions by their heat level.
+                    Each suggestion has a momentum level based on weighted reactions, comments, views, and 
+                    time since submission. Click momentum levels in the dashboard to filter suggestions.
                   </p>
                   <div className="flex items-center gap-4 flex-wrap">
                     <div className="flex items-center gap-2">
@@ -112,7 +179,7 @@ const HowItWorks = () => {
                   <UserCircle className="w-6 h-6 text-blue-500" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2">4. Team Management & Assignments</h3>
+                  <h3 className="text-xl font-semibold mb-2">6. Team Management & Assignments</h3>
                   <p className="text-muted-foreground mb-3">
                     Organizations can create teams and assign members to handle specific suggestion categories:
                   </p>
@@ -140,7 +207,7 @@ const HowItWorks = () => {
                   <CheckCircle className="w-6 h-6 text-green-500" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2">5. Status Workflow & Closure</h3>
+                  <h3 className="text-xl font-semibold mb-2">7. Status Workflow & Closure</h3>
                   <p className="text-muted-foreground mb-3">
                     Suggestions flow through a clear status workflow. Admins and assigned team members can update 
                     status to keep everyone informed. When closing a suggestion as Completed or Declined, a comment 
@@ -148,7 +215,7 @@ const HowItWorks = () => {
                   </p>
                   <div className="flex flex-wrap gap-2">
                     <span className="px-3 py-1 bg-muted rounded-full text-sm">Open</span>
-                    <span className="px-3 py-1 bg-blue-500/10 text-blue-600 rounded-full text-sm">Under Review</span>
+                    <span className="px-3 py-1 bg-blue-500/10 text-blue-600 rounded-full text-sm">Acknowledged</span>
                     <span className="px-3 py-1 bg-purple-500/10 text-purple-600 rounded-full text-sm">Planned</span>
                     <span className="px-3 py-1 bg-amber-500/10 text-amber-600 rounded-full text-sm">In Progress</span>
                     <span className="px-3 py-1 bg-green-500/10 text-green-600 rounded-full text-sm">Completed</span>
@@ -164,7 +231,7 @@ const HowItWorks = () => {
                   <Filter className="w-6 h-6 text-purple-500" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2">6. Powerful Filtering</h3>
+                  <h3 className="text-xl font-semibold mb-2">8. Powerful Filtering</h3>
                   <p className="text-muted-foreground mb-3">
                     Quickly find what matters most with powerful filtering options:
                   </p>
@@ -189,16 +256,51 @@ const HowItWorks = () => {
                 </div>
               </div>
             </Card>
+
+            <Card className="p-6 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Crown className="w-6 h-6 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold mb-2">Subscription Plans</h3>
+                  <p className="text-muted-foreground mb-3">
+                    Choose the plan that fits your organization's needs:
+                  </p>
+                  <div className="grid sm:grid-cols-2 gap-3 text-sm">
+                    <div className="p-3 rounded-lg bg-background border">
+                      <div className="font-semibold mb-1">Free</div>
+                      <p className="text-muted-foreground text-xs">25 suggestions/mo, 5 members</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-background border">
+                      <div className="font-semibold mb-1">Forever Lifetime</div>
+                      <p className="text-muted-foreground text-xs">200 suggestions/mo, 10 members</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+                      <div className="font-semibold mb-1 flex items-center gap-1">Pro <Sparkles className="w-3 h-3" /></div>
+                      <p className="text-muted-foreground text-xs">500 suggestions/mo, 50 members, AI features</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-background border">
+                      <div className="font-semibold mb-1">Business</div>
+                      <p className="text-muted-foreground text-xs">Unlimited suggestions, 200 members, all features</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
           </div>
 
           <div className="mt-12 text-center">
             <h2 className="text-2xl font-bold mb-4">Ready to share your ideas?</h2>
-            <div className="flex justify-center gap-4">
+            <div className="flex flex-wrap justify-center gap-4">
               <Button size="lg" onClick={() => navigate("/submit")}>
                 Submit a Suggestion
               </Button>
               <Button size="lg" variant="outline" onClick={() => navigate("/")}>
                 Browse Suggestions
+              </Button>
+              <Button size="lg" variant="secondary" onClick={() => navigate("/pricing")}>
+                View Pricing
               </Button>
             </div>
           </div>
