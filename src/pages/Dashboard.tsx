@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { SuggestionCard } from "@/components/SuggestionCard";
 import { Navbar } from "@/components/Navbar";
 import { Onboarding } from "@/components/Onboarding";
+import { SubscriptionStatusCard } from "@/components/SubscriptionStatusCard";
 import { toast } from "sonner";
 import { Loader2, User, ChevronDown } from "lucide-react";
 import { MomentumActivityDashboard } from "@/components/MomentumActivityDashboard";
@@ -31,7 +32,22 @@ const Dashboard = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showBrowseButton, setShowBrowseButton] = useState(true);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  // Check for subscription success message
+  useEffect(() => {
+    const subscriptionStatus = searchParams.get("subscription");
+    const tier = searchParams.get("tier");
+    
+    if (subscriptionStatus === "success" && tier) {
+      toast.success(`Welcome to ${tier.charAt(0).toUpperCase() + tier.slice(1)}! 🎉`, {
+        description: "Your subscription is now active.",
+      });
+      // Clear the URL params
+      window.history.replaceState({}, "", "/dashboard");
+    }
+  }, [searchParams]);
 
   const scrollToSuggestions = () => {
     setShowBrowseButton(false);
@@ -269,8 +285,11 @@ const Dashboard = () => {
       
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          <div className="mb-8">
+          <div className="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <h1 className="font-bold">Dashboard</h1>
+            <div className="w-full sm:w-72">
+              <SubscriptionStatusCard />
+            </div>
           </div>
 
           <div className="mb-6 space-y-4">
