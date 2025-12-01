@@ -102,15 +102,15 @@ export const useFeatureAccess = (): FeatureAccessState => {
 
     try {
       // First check Stripe subscription status
-      const { data: stripeData } = await supabase.functions.invoke("check-subscription");
+      const { data: stripeData, error: stripeError } = await supabase.functions.invoke("check-subscription");
       
-      if (stripeData?.subscribed && stripeData?.tier) {
+      if (!stripeError && stripeData?.subscribed && stripeData?.tier) {
         setTier(stripeData.tier);
         setLoading(false);
         return;
       }
 
-      // Fall back to database subscription tier
+      // Fall back to database subscription tier (also handles auth errors gracefully)
       const { data: orgMember } = await supabase
         .from("organization_members")
         .select("organization_id")
@@ -131,6 +131,8 @@ export const useFeatureAccess = (): FeatureAccessState => {
       }
     } catch (error) {
       console.error("Error loading subscription tier:", error);
+      // On any error, default to free tier
+      setTier("free");
     } finally {
       setLoading(false);
     }
