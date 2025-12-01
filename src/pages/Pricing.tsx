@@ -1,11 +1,15 @@
 import { useState } from "react";
-import { Check, Crown } from "lucide-react";
+import { Check, Crown, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+import { STRIPE_TIERS, getStripePriceId, type StripeTier } from "@/lib/stripe-config";
 
 interface PricingTier {
   name: string;
@@ -18,11 +22,14 @@ interface PricingTier {
   features: string[];
   maxMembers: number | null;
   maxSuggestions: number | null;
+  stripeEnabled?: boolean;
 }
 
 const Pricing = () => {
   const [isAnnual, setIsAnnual] = useState(false);
+  const [loadingTier, setLoadingTier] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const tiers: PricingTier[] = [
     {
@@ -63,7 +70,8 @@ const Pricing = () => {
       priceMonthly: 69,
       priceAnnual: 650,
       isLifetime: false,
-      comingSoon: true,
+      comingSoon: false,
+      stripeEnabled: true,
       features: [
         "Up to 50 team members",
         "500 suggestions/month",
@@ -80,7 +88,8 @@ const Pricing = () => {
       priceMonthly: 199,
       priceAnnual: 1990,
       isLifetime: false,
-      comingSoon: true,
+      comingSoon: false,
+      stripeEnabled: true,
       popular: true,
       features: [
         "Up to 200 team members",
@@ -140,13 +149,86 @@ const Pricing = () => {
     return percentage > 0 ? `Save ${percentage}%` : null;
   };
 
-  const handleGetStarted = (tier: PricingTier) => {
+  const handleGetStarted = async (tier: PricingTier) => {
     if (tier.comingSoon) {
-      return; // Disabled for coming soon tiers
+      return;
     }
+
     if (tier.tier === "free") {
       navigate("/auth");
+      return;
     }
+
+    if (tier.stripeEnabled && (tier.tier === "pro" || tier.tier === "business")) {
+      // Require authentication for paid tiers
+      if (!user) {
+        toast({
+          title: "Sign in required",
+          description: "Please sign in to subscribe to a paid plan.",
+          variant: "destructive",
+        });
+        navigate("/auth");
+        return;
+      }
+
+      setLoadingTier(tier.tier);
+
+      try {
+        const priceId = getStripePriceId(tier.tier as StripeTier, isAnnual);
+        
+        const { data, error } = await supabase.functions.invoke("create-checkout", {
+          body: {
+            priceId,
+            tier: tier.tier,
+            billingPeriod: isAnnual ? "annual" : "monthly",
+          },
+        });
+
+        if (error) {
+          throw error;
+        }
+
+        if (data?.url) {
+          window.open(data.url, "_blank");
+        } else {
+          throw new Error("No checkout URL returned");
+        }
+      } catch (error) {
+        console.error("Checkout error:", error);
+        toast({
+          title: "Checkout failed",
+          description: "There was a problem starting the checkout process. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingTier(null);
+      }
+    }
+  };
+
+  const getButtonText = (tier: PricingTier) => {
+    if (loadingTier === tier.tier) {
+      return (
+        <>
+          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          Loading...
+        </>
+      );
+    }
+    
+    if (tier.comingSoon) {
+      return "Join Waitlist";
+    }
+    
+    if (tier.tier === "enterprise") {
+      return "Contact Sales";
+    }
+    
+    if (tier.stripeEnabled) {
+      return "Subscribe Now";
+    }
+    
+    return "Get Started";
   };
 
   return (
@@ -235,14 +317,10 @@ const Pricing = () => {
                 <Button
                   className="w-full"
                   variant={tier.popular ? "default" : "outline"}
-                  disabled={tier.comingSoon}
+                  disabled={tier.comingSoon || loadingTier === tier.tier}
                   onClick={() => handleGetStarted(tier)}
                 >
-                  {tier.comingSoon
-                    ? "Join Waitlist"
-                    : tier.tier === "enterprise"
-                    ? "Contact Sales"
-                    : "Get Started"}
+                  {getButtonText(tier)}
                 </Button>
               </CardFooter>
             </Card>
@@ -252,7 +330,7 @@ const Pricing = () => {
         {/* FAQ or Additional Info */}
         <div className="mt-16 text-center">
           <p className="text-muted-foreground">
-            All paid plans are coming soon. Join our waitlist to be notified when they launch.
+            Questions about pricing? Contact us at support@suggistit.com
           </p>
         </div>
       </div>
