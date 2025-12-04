@@ -168,6 +168,9 @@ const Landing = () => {
               <Link to="/how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
                 {t("nav.howItWorks")}
               </Link>
+              <Link to="/privacy-policy" className="text-sm text-muted-foreground/70 hover:text-foreground transition-colors">
+                Privacy Policy
+              </Link>
             </div>
           </div>
         </div>
