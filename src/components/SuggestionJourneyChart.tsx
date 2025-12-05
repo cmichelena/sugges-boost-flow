@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Card, CardContent } from "./ui/card";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { calculateMomentum, calculateReactionScore } from "@/lib/momentum";
-import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval } from "date-fns";
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import { CalendarDays, TrendingUp } from "lucide-react";
 import { Button } from "./ui/button";
 
@@ -62,10 +62,11 @@ export const SuggestionJourneyChart = ({ suggestions }: SuggestionJourneyChartPr
     
     const days = eachDayOfInterval(interval);
     
-    // Filter suggestions created within the time range
+    // Include all suggestions that were created before or during the time range
+    // (i.e., suggestions that exist during this period)
     const relevantSuggestions = suggestions.filter(s => {
       const createdAt = new Date(s.created_at);
-      return isWithinInterval(createdAt, interval);
+      return createdAt <= interval.end;
     });
 
     // Create data points for each day
