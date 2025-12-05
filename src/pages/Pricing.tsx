@@ -127,16 +127,16 @@ const Pricing = () => {
     }
     
     if (tier.isLifetime) {
-      return `£${tier.priceMonthly} one-time`;
+      return `€${tier.priceMonthly} one-time`;
     }
 
     if (tier.priceMonthly === 0) {
-      return "£0/mo";
+      return "€0/mo";
     }
 
     const price = isAnnual ? tier.priceAnnual : tier.priceMonthly;
     const period = isAnnual ? "/yr" : "/mo";
-    return `£${price}${period}`;
+    return `€${price}${period}`;
   };
 
   const getSavings = (tier: PricingTier) => {
