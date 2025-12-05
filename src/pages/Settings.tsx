@@ -10,9 +10,19 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Loader2, Users, Crown, Calendar, Mail, CheckCircle, Clock, Sparkles, BarChart3, Palette, Headphones, Check } from "lucide-react";
+import { Loader2, Users, Crown, Calendar, Mail, CheckCircle, Clock, Sparkles, BarChart3, Palette, Headphones, Check, Trash2, AlertTriangle } from "lucide-react";
 import { z } from "zod";
 import { PlanUsageCard } from "@/components/PlanUsageCard";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 
@@ -63,6 +73,9 @@ const Settings = () => {
   const [inviteEmail, setInviteEmail] = useState("");
   const [userRole, setUserRole] = useState<string | null>(null);
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [memberToDelete, setMemberToDelete] = useState<Member | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -231,6 +244,38 @@ const Settings = () => {
     const now = new Date();
     const diff = trialEnd.getTime() - now.getTime();
     return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  };
+
+  const handleDeleteMember = async () => {
+    if (!memberToDelete || !organization) return;
+    
+    setDeleting(true);
+    try {
+      const { error } = await supabase.functions.invoke("delete-user-account", {
+        body: {
+          targetUserId: memberToDelete.user_id,
+          organizationId: organization.id,
+        },
+      });
+
+      if (error) throw error;
+
+      toast.success("User account and data deleted successfully");
+      setDeleteDialogOpen(false);
+      setMemberToDelete(null);
+      await loadOrganizationData();
+    } catch (error: unknown) {
+      console.error("Error deleting member:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to delete user account";
+      toast.error(errorMessage);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const openDeleteDialog = (member: Member) => {
+    setMemberToDelete(member);
+    setDeleteDialogOpen(true);
   };
 
   if (loading) {
@@ -403,23 +448,40 @@ const Settings = () => {
           <h2 className="text-xl font-semibold mb-4">Team Members ({members.length})</h2>
           
           <div className="space-y-3 mb-6">
-            {members.map((member) => (
-              <div key={member.id} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex-1">
-                  <p className="font-medium">{member.profiles?.display_name || "Unknown User"}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {member.status === "active" 
-                      ? `Joined ${member.joined_at ? new Date(member.joined_at).toLocaleDateString() : "N/A"}`
-                      : `Invited ${new Date(member.invited_at).toLocaleDateString()}`
-                    }
-                  </p>
+            {members.map((member) => {
+              const memberRole = member.user_roles[0]?.role;
+              const isOwner = memberRole === "owner";
+              const isSelf = member.user_id === user?.id;
+              const canDelete = (userRole === "admin" || userRole === "owner") && !isOwner && !isSelf;
+              
+              return (
+                <div key={member.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex-1">
+                    <p className="font-medium">{member.profiles?.display_name || "Unknown User"}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {member.status === "active" 
+                        ? `Joined ${member.joined_at ? new Date(member.joined_at).toLocaleDateString() : "N/A"}`
+                        : `Invited ${new Date(member.invited_at).toLocaleDateString()}`
+                      }
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {getStatusBadge(member.status)}
+                    {memberRole && getRoleBadge(memberRole)}
+                    {canDelete && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => openDeleteDialog(member)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {getStatusBadge(member.status)}
-                  {member.user_roles[0] && getRoleBadge(member.user_roles[0].role)}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {(userRole === "admin" || userRole === "owner") && (
@@ -459,6 +521,53 @@ const Settings = () => {
             </>
           )}
         </Card>
+
+        {/* Delete User Confirmation Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+                <AlertTriangle className="w-5 h-5" />
+                Delete User Account
+              </AlertDialogTitle>
+              <AlertDialogDescription className="space-y-3">
+                <p>
+                  Are you sure you want to delete <strong>{memberToDelete?.profiles?.display_name || "this user"}</strong>'s account?
+                </p>
+                <p className="text-destructive font-medium">
+                  This action will permanently delete:
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  <li>All suggestions submitted by this user</li>
+                  <li>All comments and reactions</li>
+                  <li>All uploaded attachments</li>
+                  <li>Team memberships</li>
+                  <li>Their user profile and authentication data</li>
+                </ul>
+                <p className="font-semibold text-destructive">
+                  This action cannot be undone.
+                </p>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteMember}
+                disabled={deleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {deleting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  "Delete Account"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
