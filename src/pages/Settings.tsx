@@ -196,7 +196,7 @@ const Settings = () => {
       }
 
       // Call edge function to send invitation
-      const { error } = await supabase.functions.invoke("send-invitation", {
+      const { data, error } = await supabase.functions.invoke("send-invitation", {
         body: {
           email: inviteEmail,
           organizationId: organization.id,
@@ -208,7 +208,21 @@ const Settings = () => {
         throw error;
       }
 
-      toast.success("Invitation sent successfully!");
+      // Check if email was sent or if we need to show the link manually
+      if (data?.acceptUrl) {
+        // Email couldn't be sent, show the link to copy
+        toast.success(
+          <div className="space-y-2">
+            <p>Invitation created! Email could not be sent.</p>
+            <p className="text-xs">Share this link with the invitee:</p>
+            <code className="block text-xs bg-muted p-2 rounded break-all">{data.acceptUrl}</code>
+          </div>,
+          { duration: 15000 }
+        );
+      } else {
+        toast.success("Invitation sent successfully!");
+      }
+      
       setInviteEmail("");
       
       // Reload members list
