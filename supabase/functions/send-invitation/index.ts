@@ -123,36 +123,50 @@ serve(async (req) => {
       throw new Error("Failed to create invitation");
     }
 
-    // Send email
+    // Generate accept URL
     const acceptUrl = `${req.headers.get("origin") || "https://suggistit.lovable.app"}/accept-invitation?token=${token_value}`;
     
-    const { error: emailError } = await resend.emails.send({
-      from: "Suggistit <onboarding@resend.dev>",
-      to: [email],
-      subject: `You've been invited to join ${org.name} on Suggistit`,
-      html: `
-        <h1>You've been invited!</h1>
-        <p>You've been invited to join <strong>${org.name}</strong> on Suggistit as a ${role}.</p>
-        <p>Click the link below to accept the invitation:</p>
-        <a href="${acceptUrl}" style="display: inline-block; padding: 12px 24px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; margin: 16px 0;">Accept Invitation</a>
-        <p>Or copy and paste this link into your browser:</p>
-        <p>${acceptUrl}</p>
-        <p>This invitation will expire in 7 days.</p>
-        <p>If you didn't expect this invitation, you can safely ignore this email.</p>
-        <hr style="margin: 24px 0; border: none; border-top: 1px solid #ccc;">
-        <p style="color: #666; font-size: 12px;">Sent by Suggistit</p>
-      `,
-    });
+    // Try to send email, but don't fail if it doesn't work (for testing with unverified domains)
+    let emailSent = false;
+    try {
+      const { error: emailError } = await resend.emails.send({
+        from: "Suggistit <onboarding@resend.dev>",
+        to: [email],
+        subject: `You've been invited to join ${org.name} on Suggistit`,
+        html: `
+          <h1>You've been invited!</h1>
+          <p>You've been invited to join <strong>${org.name}</strong> on Suggistit as a ${role}.</p>
+          <p>Click the link below to accept the invitation:</p>
+          <a href="${acceptUrl}" style="display: inline-block; padding: 12px 24px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; margin: 16px 0;">Accept Invitation</a>
+          <p>Or copy and paste this link into your browser:</p>
+          <p>${acceptUrl}</p>
+          <p>This invitation will expire in 7 days.</p>
+          <p>If you didn't expect this invitation, you can safely ignore this email.</p>
+          <hr style="margin: 24px 0; border: none; border-top: 1px solid #ccc;">
+          <p style="color: #666; font-size: 12px;">Sent by Suggistit</p>
+        `,
+      });
 
-    if (emailError) {
-      console.error("Error sending email:", emailError);
-      throw new Error("Failed to send invitation email");
+      if (emailError) {
+        console.warn("Email sending failed (domain not verified?):", emailError);
+      } else {
+        emailSent = true;
+        console.log("Invitation email sent successfully");
+      }
+    } catch (emailErr) {
+      console.warn("Email sending error:", emailErr);
     }
 
-    console.log("Invitation sent successfully");
+    console.log("Invitation created successfully", { emailSent, acceptUrl });
 
     return new Response(
-      JSON.stringify({ success: true, message: "Invitation sent successfully" }),
+      JSON.stringify({ 
+        success: true, 
+        message: emailSent 
+          ? "Invitation sent successfully" 
+          : "Invitation created. Email could not be sent (share the link manually).",
+        acceptUrl: emailSent ? undefined : acceptUrl // Return URL only if email failed
+      }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
