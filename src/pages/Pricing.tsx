@@ -10,18 +10,15 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
-
-interface PricingTier {
-  name: string;
-  tier: string;
-  priceMonthly: number;
-  priceAnnual: number;
-  popular?: boolean;
-  features: string[];
-  maxMembers: number | null;
-  maxSuggestions: number | null;
-  isEnterprise?: boolean;
-}
+import { useGeoLocation } from "@/hooks/useGeoLocation";
+import { 
+  PRICING_TIERS, 
+  CURRENCIES,
+  formatPrice,
+  getAnnualSavings,
+  type Currency,
+  type PricingTier 
+} from "@/lib/pricing-config";
 
 const Pricing = () => {
   const [isAnnual, setIsAnnual] = useState(false);
@@ -29,108 +26,30 @@ const Pricing = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { tier: currentTier } = useSubscription();
+  const { currency, isEU, loading: geoLoading } = useGeoLocation();
 
-  const tiers: PricingTier[] = [
-    {
-      name: "Free",
-      tier: "free",
-      priceMonthly: 0,
-      priceAnnual: 0,
-      features: [
-        "25 suggestions per month",
-        "Up to 3 team members",
-        "Basic insights only",
-        "Suggistit branding",
-      ],
-      maxMembers: 3,
-      maxSuggestions: 25,
-    },
-    {
-      name: "Starter",
-      tier: "starter",
-      priceMonthly: 39,
-      priceAnnual: 390,
-      features: [
-        "250 suggestions per month",
-        "Up to 10 team members",
-        "AI-powered improvements",
-        "Basic analytics",
-        "Email support",
-      ],
-      maxMembers: 10,
-      maxSuggestions: 250,
-    },
-    {
-      name: "Pro",
-      tier: "pro",
-      priceMonthly: 199,
-      priceAnnual: 1990,
-      popular: true,
-      features: [
-        "1,500 suggestions per month",
-        "Up to 25 team members",
-        "Advanced analytics",
-        "Priority support",
-        "Light custom branding",
-      ],
-      maxMembers: 25,
-      maxSuggestions: 1500,
-    },
-    {
-      name: "Business",
-      tier: "business",
-      priceMonthly: 799,
-      priceAnnual: 7990,
-      features: [
-        "5,000+ suggestions per month",
-        "Up to 100 team members",
-        "Full analytics suite",
-        "Custom branding",
-        "SLA-backed priority support",
-        "Admin and governance controls",
-      ],
-      maxMembers: 100,
-      maxSuggestions: 5000,
-    },
-    {
-      name: "Enterprise",
-      tier: "enterprise",
-      priceMonthly: 0,
-      priceAnnual: 0,
-      isEnterprise: true,
-      features: [
-        "Unlimited suggestions",
-        "Unlimited team members",
-        "SSO / enterprise security",
-        "Data governance and compliance",
-        "Dedicated account support",
-      ],
-      maxMembers: null,
-      maxSuggestions: null,
-    },
-  ];
-
-  const formatPrice = (tier: PricingTier) => {
+  const getDisplayPrice = (tier: PricingTier): string => {
     if (tier.isEnterprise) {
       return "Custom";
     }
 
-    if (tier.priceMonthly === 0) {
-      return "$0";
+    const priceData = isAnnual ? tier.priceAnnual : tier.priceMonthly;
+    const amount = priceData[currency];
+
+    if (amount === 0) {
+      return `${CURRENCIES[currency].symbol}0`;
     }
 
-    const price = isAnnual ? Math.round(tier.priceAnnual / 12) : tier.priceMonthly;
-    return `$${price}`;
+    return formatPrice(amount, currency);
   };
 
-  const getSavings = (tier: PricingTier) => {
-    if (tier.priceMonthly === 0 || tier.isEnterprise) {
+  const getMonthlyEquivalent = (tier: PricingTier): string | null => {
+    if (!isAnnual || tier.isEnterprise || tier.priceMonthly[currency] === 0) {
       return null;
     }
-    const monthlyCost = tier.priceMonthly * 12;
-    const savings = monthlyCost - tier.priceAnnual;
-    const percentage = Math.round((savings / monthlyCost) * 100);
-    return percentage > 0 ? `Save ${percentage}%` : null;
+    
+    const monthlyEquiv = Math.round(tier.priceAnnual[currency] / 12);
+    return formatPrice(monthlyEquiv, currency);
   };
 
   const handleGetStarted = async (tier: PricingTier) => {
@@ -164,6 +83,7 @@ const Pricing = () => {
         body: {
           tier: tier.tier,
           billingPeriod: isAnnual ? "annual" : "monthly",
+          currency: currency.toLowerCase(),
         },
       });
 
@@ -188,7 +108,7 @@ const Pricing = () => {
     }
   };
 
-  const isCurrentPlan = (tier: PricingTier) => {
+  const isCurrentPlan = (tier: PricingTier): boolean => {
     return currentTier === tier.tier;
   };
 
@@ -228,6 +148,10 @@ const Pricing = () => {
     return "outline";
   };
 
+  const getCurrencyLabel = (curr: Currency): string => {
+    return `${CURRENCIES[curr].symbol} ${curr}`;
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -239,6 +163,13 @@ const Pricing = () => {
           <p className="text-xl text-muted-foreground mb-8">
             Start free and scale as your team grows
           </p>
+
+          {/* Currency indicator */}
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <span className="text-sm text-muted-foreground">
+              Prices shown in {getCurrencyLabel(currency)}
+            </span>
+          </div>
 
           {/* Annual/Monthly Toggle */}
           <div className="flex items-center justify-center gap-4 mb-8">
@@ -263,73 +194,89 @@ const Pricing = () => {
 
         {/* Pricing Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 max-w-7xl mx-auto">
-          {tiers.map((tier) => (
-            <Card
-              key={tier.tier}
-              className={`relative flex flex-col ${
-                tier.popular ? "border-primary shadow-lg scale-105 z-10" : ""
-              }`}
-            >
-              {tier.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <Badge className="gap-1">
-                    <Crown className="w-3 h-3" />
-                    Recommended
-                  </Badge>
-                </div>
-              )}
+          {PRICING_TIERS.map((tier) => {
+            const savings = getAnnualSavings(tier);
+            const monthlyEquiv = getMonthlyEquivalent(tier);
+            
+            return (
+              <Card
+                key={tier.tier}
+                className={`relative flex flex-col ${
+                  tier.popular ? "border-primary shadow-lg scale-105 z-10" : ""
+                }`}
+              >
+                {tier.popular && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                    <Badge className="gap-1">
+                      <Crown className="w-3 h-3" />
+                      Recommended
+                    </Badge>
+                  </div>
+                )}
 
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl">{tier.name}</CardTitle>
-                <div className="mt-4">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold">{formatPrice(tier)}</span>
-                    {!tier.isEnterprise && tier.priceMonthly > 0 && (
-                      <span className="text-muted-foreground">/mo</span>
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-xl">{tier.name}</CardTitle>
+                  <div className="mt-4">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-4xl font-bold">{getDisplayPrice(tier)}</span>
+                      {!tier.isEnterprise && tier.priceMonthly[currency] > 0 && (
+                        <span className="text-muted-foreground">
+                          {isAnnual ? "/yr" : "/mo"}
+                        </span>
+                      )}
+                    </div>
+                    {isAnnual && monthlyEquiv && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {monthlyEquiv}/mo when billed annually
+                      </p>
+                    )}
+                    {isAnnual && savings && (
+                      <Badge variant="outline" className="mt-2 text-green-600 border-green-600">
+                        Save {savings}%
+                      </Badge>
                     )}
                   </div>
-                  {isAnnual && getSavings(tier) && (
-                    <Badge variant="outline" className="mt-2 text-green-600 border-green-600">
-                      {getSavings(tier)}
-                    </Badge>
-                  )}
-                  {isAnnual && !tier.isEnterprise && tier.priceMonthly > 0 && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Billed ${tier.priceAnnual}/year
-                    </p>
-                  )}
-                </div>
-                <CardDescription className="mt-2 min-h-[20px]">
-                  {tier.isEnterprise && "Tailored for large organizations"}
-                </CardDescription>
-              </CardHeader>
+                  <CardDescription className="mt-2 min-h-[20px]">
+                    {tier.isEnterprise && "Tailored for large organizations"}
+                  </CardDescription>
+                </CardHeader>
 
-              <CardContent className="flex-grow">
-                <ul className="space-y-3">
-                  {tier.features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                      <span className="text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
+                <CardContent className="flex-grow">
+                  <ul className="space-y-3">
+                    {tier.features.map((feature, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                        <span className="text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
 
-              <CardFooter>
-                <Button
-                  className="w-full"
-                  variant={getButtonVariant(tier)}
-                  disabled={loadingTier === tier.tier || isCurrentPlan(tier)}
-                  onClick={() => handleGetStarted(tier)}
-                >
-                  {getButtonText(tier)}
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
+                <CardFooter>
+                  <Button
+                    className="w-full"
+                    variant={getButtonVariant(tier)}
+                    disabled={loadingTier === tier.tier || isCurrentPlan(tier)}
+                    onClick={() => handleGetStarted(tier)}
+                  >
+                    {getButtonText(tier)}
+                  </Button>
+                </CardFooter>
+              </Card>
+            );
+          })}
         </div>
 
-        {/* FAQ or Additional Info */}
+        {/* VAT Notice */}
+        {isEU && (
+          <div className="mt-8 text-center">
+            <p className="text-sm text-muted-foreground">
+              Prices shown exclude VAT. VAT added where applicable (EU only).
+            </p>
+          </div>
+        )}
+
+        {/* Contact Section */}
         <div className="mt-16 text-center">
           <p className="text-muted-foreground">
             Questions about pricing?{" "}
