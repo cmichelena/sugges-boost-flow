@@ -34,90 +34,34 @@ export default function AcceptInvitation() {
       }
 
       try {
-        // Fetch invitation
-        const { data: invitation, error: invError } = await supabase
-          .from("organization_invitations")
-          .select("*, organizations(name)")
-          .eq("token", token)
-          .is("accepted_at", null)
-          .single();
+        // Use the secure RPC function to validate and accept the invitation
+        // This function hashes the token server-side and validates it securely
+        const { data, error } = await supabase.rpc('validate_invitation_token', {
+          p_token: token,
+          p_user_id: user.id,
+          p_user_email: user.email || ''
+        });
 
-        if (invError || !invitation) {
+        if (error) {
+          console.error("Error validating invitation:", error);
           setStatus("error");
-          setMessage("Invalid or expired invitation");
+          setMessage("Failed to validate invitation");
           setLoading(false);
           return;
         }
 
-        // Check if expired
-        if (new Date(invitation.expires_at) < new Date()) {
+        const result = data as { success: boolean; error?: string; organization_name?: string; role?: string };
+
+        if (!result.success) {
           setStatus("error");
-          setMessage("This invitation has expired");
+          setMessage(result.error || "Invalid or expired invitation");
           setLoading(false);
           return;
         }
 
-        // Check if email matches
-        if (invitation.email !== user.email) {
-          setStatus("error");
-          setMessage("This invitation was sent to a different email address");
-          setLoading(false);
-          return;
-        }
-
-        setOrganizationName(invitation.organizations.name);
-
-        // Check if already a member
-        const { data: existingMember } = await supabase
-          .from("organization_members")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("organization_id", invitation.organization_id)
-          .single();
-
-        if (existingMember) {
-          setStatus("error");
-          setMessage("You are already a member of this organization");
-          setLoading(false);
-          return;
-        }
-
-        // Add to organization_members
-        const { error: memberError } = await supabase
-          .from("organization_members")
-          .insert({
-            user_id: user.id,
-            organization_id: invitation.organization_id,
-            status: "active",
-            joined_at: new Date().toISOString(),
-            invited_by: invitation.invited_by,
-          });
-
-        if (memberError) {
-          throw memberError;
-        }
-
-        // Add user role
-        const { error: roleError } = await supabase
-          .from("user_roles")
-          .insert({
-            user_id: user.id,
-            organization_id: invitation.organization_id,
-            role: invitation.role,
-          });
-
-        if (roleError) {
-          throw roleError;
-        }
-
-        // Mark invitation as accepted
-        await supabase
-          .from("organization_invitations")
-          .update({ accepted_at: new Date().toISOString() })
-          .eq("id", invitation.id);
-
+        setOrganizationName(result.organization_name || "");
         setStatus("success");
-        setMessage(`You've successfully joined ${invitation.organizations.name}!`);
+        setMessage(`You've successfully joined ${result.organization_name}!`);
         
         toast.success("Invitation accepted!");
         

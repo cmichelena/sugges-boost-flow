@@ -89,6 +89,7 @@ export type Database = {
           organization_id: string
           role: Database["public"]["Enums"]["app_role"]
           token: string
+          token_hash: string | null
         }
         Insert: {
           accepted_at?: string | null
@@ -100,6 +101,7 @@ export type Database = {
           organization_id: string
           role?: Database["public"]["Enums"]["app_role"]
           token: string
+          token_hash?: string | null
         }
         Update: {
           accepted_at?: string | null
@@ -111,6 +113,7 @@ export type Database = {
           organization_id?: string
           role?: Database["public"]["Enums"]["app_role"]
           token?: string
+          token_hash?: string | null
         }
         Relationships: [
           {
@@ -787,6 +790,10 @@ export type Database = {
       is_org_member: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
+      }
+      validate_invitation_token: {
+        Args: { p_token: string; p_user_email: string; p_user_id: string }
+        Returns: Json
       }
     }
     Enums: {
