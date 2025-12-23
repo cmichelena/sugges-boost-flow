@@ -239,23 +239,31 @@ const Teams = () => {
   };
 
   const handleAddMember = async () => {
-    if (!selectedTeamForMember || !selectedUserId) return;
+    if (!selectedTeamForMember || !selectedUserId) {
+      toast.error("Please select a member to add");
+      return;
+    }
+
+    const teamId = selectedTeamForMember;
+    const userId = selectedUserId;
 
     const { error } = await supabase
       .from("team_members")
       .insert({
-        team_id: selectedTeamForMember,
-        user_id: selectedUserId,
+        team_id: teamId,
+        user_id: userId,
         role: "member",
       });
 
     if (error) {
-      toast.error("Failed to add member");
+      console.error("Error adding member:", error);
+      toast.error("Failed to add member: " + (error.message || "Unknown error"));
     } else {
       toast.success("Member added successfully");
-      loadTeamMembers(selectedTeamForMember);
-      setSelectedUserId("");
+      await loadTeamMembers(teamId);
     }
+    
+    setSelectedUserId("");
     setSelectedTeamForMember(null);
   };
 
@@ -415,19 +423,25 @@ const Teams = () => {
                             }}
                           >
                             <SelectTrigger className="flex-1">
-                              <SelectValue placeholder="Add team member..." />
+                              <SelectValue placeholder={availableMembers.length === 0 ? "No available members" : "Add team member..."} />
                             </SelectTrigger>
                             <SelectContent className="bg-background z-50">
-                              {availableMembers.map((member) => (
-                                <SelectItem key={member.user_id} value={member.user_id}>
-                                  {member.profiles?.display_name || 'Unknown User'}
-                                </SelectItem>
-                              ))}
+                              {availableMembers.length === 0 ? (
+                                <div className="py-2 px-3 text-sm text-muted-foreground">
+                                  All organization members are already in this team
+                                </div>
+                              ) : (
+                                availableMembers.map((member) => (
+                                  <SelectItem key={member.user_id} value={member.user_id}>
+                                    {member.profiles?.display_name || 'Unknown User'}
+                                  </SelectItem>
+                                ))
+                              )}
                             </SelectContent>
                           </Select>
                           <Button
                             onClick={handleAddMember}
-                            disabled={!selectedUserId || selectedTeamForMember !== team.id}
+                            disabled={!selectedUserId || selectedTeamForMember !== team.id || availableMembers.length === 0}
                             size="sm"
                           >
                             <UserPlus className="w-4 h-4" />
