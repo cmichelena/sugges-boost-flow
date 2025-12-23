@@ -20,6 +20,15 @@ const invitationSchema = z.object({
   }),
 });
 
+// Hash a token using SHA-256 and return hex string
+async function hashToken(token: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(token);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -101,19 +110,21 @@ serve(async (req) => {
       throw new Error("User is already a member of this organization");
     }
 
-    // Generate secure token
+    // Generate secure token and hash it
     const token_value = crypto.randomUUID();
+    const token_hash = await hashToken(token_value);
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiry
 
-    // Store invitation
+    // Store invitation with hashed token (plaintext token is NOT stored)
     const { error: insertError } = await supabase
       .from("organization_invitations")
       .insert({
         organization_id: organizationId,
         email,
         role,
-        token: token_value,
+        token: null, // Don't store plaintext token
+        token_hash: token_hash, // Store only the hash
         invited_by: user.id,
         expires_at: expiresAt.toISOString(),
       });
@@ -123,7 +134,7 @@ serve(async (req) => {
       throw new Error("Failed to create invitation");
     }
 
-    // Generate accept URL
+    // Generate accept URL with the plaintext token (only sent via email, never stored)
     const acceptUrl = `${req.headers.get("origin") || "https://suggistit.lovable.app"}/accept-invitation?token=${token_value}`;
     
     // Try to send email, but don't fail if it doesn't work (for testing with unverified domains)
@@ -157,7 +168,7 @@ serve(async (req) => {
       console.warn("Email sending error:", emailErr);
     }
 
-    console.log("Invitation created successfully", { emailSent, acceptUrl });
+    console.log("Invitation created successfully", { emailSent });
 
     return new Response(
       JSON.stringify({ 
