@@ -35,12 +35,33 @@ serve(async (req) => {
     }
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const { priceId, tier, billingPeriod } = await req.json();
-    logStep("Request data", { priceId, tier, billingPeriod });
+    const { tier, billingPeriod } = await req.json();
+    logStep("Request data", { tier, billingPeriod });
+
+    if (!tier) {
+      throw new Error("Tier is required");
+    }
+
+    // Fetch price ID from subscription_plans table
+    const { data: planData, error: planError } = await supabaseClient
+      .from("subscription_plans")
+      .select("stripe_price_id_monthly, stripe_price_id_annual")
+      .eq("tier", tier)
+      .single();
+
+    if (planError || !planData) {
+      throw new Error(`Failed to find plan for tier: ${tier}`);
+    }
+
+    const priceId = billingPeriod === "annual" 
+      ? planData.stripe_price_id_annual 
+      : planData.stripe_price_id_monthly;
 
     if (!priceId) {
-      throw new Error("Price ID is required");
+      throw new Error(`No Stripe price configured for tier: ${tier} (${billingPeriod})`);
     }
+
+    logStep("Found price ID", { priceId, tier, billingPeriod });
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",

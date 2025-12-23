@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 export interface SubscriptionStatus {
   subscribed: boolean;
-  tier: "free" | "pro" | "business" | "enterprise";
+  tier: "free" | "starter" | "pro" | "business" | "enterprise";
   subscriptionEnd: string | null;
   productId: string | null;
   loading: boolean;

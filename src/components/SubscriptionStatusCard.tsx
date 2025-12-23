@@ -14,25 +14,31 @@ const tierConfig = {
     name: "Free",
     color: "bg-muted text-muted-foreground",
     icon: null,
-    description: "Basic features for small teams",
+    description: "25 suggestions/month, 3 team members",
+  },
+  starter: {
+    name: "Starter",
+    color: "bg-green-500/10 text-green-600 border-green-500/20",
+    icon: Sparkles,
+    description: "250 suggestions/month, 10 team members",
   },
   pro: {
     name: "Pro",
     color: "bg-blue-500/10 text-blue-600 border-blue-500/20",
     icon: Sparkles,
-    description: "500 suggestions/month, 50 team members",
+    description: "1,500 suggestions/month, 25 team members",
   },
   business: {
     name: "Business",
     color: "bg-purple-500/10 text-purple-600 border-purple-500/20",
     icon: Crown,
-    description: "Unlimited suggestions, 200 team members",
+    description: "5,000+ suggestions/month, 100 team members",
   },
   enterprise: {
     name: "Enterprise",
     color: "bg-amber-500/10 text-amber-600 border-amber-500/20",
     icon: Crown,
-    description: "Custom enterprise features",
+    description: "Unlimited suggestions and team members",
   },
 };
 
