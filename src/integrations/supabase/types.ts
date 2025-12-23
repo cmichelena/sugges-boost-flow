@@ -799,7 +799,13 @@ export type Database = {
         | "canceled"
         | "trialing"
         | "incomplete"
-      subscription_tier: "free" | "pro" | "business" | "enterprise" | "forever"
+      subscription_tier:
+        | "free"
+        | "pro"
+        | "business"
+        | "enterprise"
+        | "forever"
+        | "starter"
       team_role: "lead" | "member"
     }
     CompositeTypes: {
@@ -938,7 +944,14 @@ export const Constants = {
         "trialing",
         "incomplete",
       ],
-      subscription_tier: ["free", "pro", "business", "enterprise", "forever"],
+      subscription_tier: [
+        "free",
+        "pro",
+        "business",
+        "enterprise",
+        "forever",
+        "starter",
+      ],
       team_role: ["lead", "member"],
     },
   },
