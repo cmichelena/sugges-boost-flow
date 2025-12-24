@@ -116,15 +116,15 @@ serve(async (req) => {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiry
 
-    // Store invitation with hashed token (plaintext token is NOT stored)
+    // Store invitation with hashed token
     const { error: insertError } = await supabase
       .from("organization_invitations")
       .insert({
         organization_id: organizationId,
         email,
         role,
-        token: null, // Don't store plaintext token
-        token_hash: token_hash, // Store only the hash
+        token: token_value, // Store token (needed for NOT NULL constraint)
+        token_hash: token_hash, // Also store hash for secure validation
         invited_by: user.id,
         expires_at: expiresAt.toISOString(),
       });
