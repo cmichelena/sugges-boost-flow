@@ -19,6 +19,8 @@ interface ReactionCounts {
   concerns: number;
 }
 
+type ReactionType = "champion" | "support" | "neutral" | "concerns";
+
 const Dashboard = () => {
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -138,19 +140,25 @@ const Dashboard = () => {
     // Fetch reactions for all suggestions
     const { data: reactionsData } = await supabase
       .from("reactions")
-      .select("suggestion_id, reaction_type")
+      .select("suggestion_id, reaction_type, user_id")
       .in("suggestion_id", suggestionIds);
 
-    // Aggregate reactions by suggestion
+    // Aggregate reactions by suggestion and track user's reactions
     const reactionsMap = new Map<string, ReactionCounts>();
+    const userReactionsMap = new Map<string, ReactionType | null>();
     suggestionIds.forEach(id => {
       reactionsMap.set(id, { champion: 0, support: 0, neutral: 0, concerns: 0 });
+      userReactionsMap.set(id, null);
     });
     
     (reactionsData || []).forEach(r => {
       const counts = reactionsMap.get(r.suggestion_id);
       if (counts && r.reaction_type in counts) {
         counts[r.reaction_type as keyof ReactionCounts]++;
+      }
+      // Track user's own reaction
+      if (r.user_id === session.user.id) {
+        userReactionsMap.set(r.suggestion_id, r.reaction_type as ReactionType);
       }
     });
 
@@ -180,9 +188,11 @@ const Dashboard = () => {
     // Map suggestions with profile data and reactions
     const suggestionsWithCounts = (data || []).map((suggestion: any) => {
       const reactions = reactionsMap.get(suggestion.id) || { champion: 0, support: 0, neutral: 0, concerns: 0 };
+      const userReaction = userReactionsMap.get(suggestion.id) || null;
       return {
         ...suggestion,
         reactions,
+        userReaction,
         comments: suggestion.comments?.[0]?.count || 0,
         profiles: suggestion.is_anonymous ? null : { 
           display_name: profilesMap.get(suggestion.user_id) || null 
@@ -405,6 +415,14 @@ const Dashboard = () => {
                   isAnonymous={suggestion.is_anonymous}
                   assignedToUserName={suggestion.assigned_user?.profiles?.display_name || null}
                   assignedToTeamName={suggestion.assigned_team?.name || null}
+                  userReaction={suggestion.userReaction}
+                  onReactionChange={(counts, userReaction) => {
+                    setSuggestions(prev => prev.map(s => 
+                      s.id === suggestion.id 
+                        ? { ...s, reactions: counts, userReaction } 
+                        : s
+                    ));
+                  }}
                   onClick={() => navigate(`/suggestion/${suggestion.id}`)}
                 />
               ))}
