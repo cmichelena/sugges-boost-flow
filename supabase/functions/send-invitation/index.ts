@@ -60,11 +60,18 @@ serve(async (req) => {
     }
 
     const token = authHeader.replace("Bearer ", "");
-    const { data } = await supabaseClient.auth.getUser(token);
-    const user = data.user;
+    logStep("Token extracted", { tokenLength: token.length, tokenPrefix: token.substring(0, 20) });
+    
+    const { data, error: authError } = await supabaseClient.auth.getUser(token);
+    
+    if (authError) {
+      logStep("Auth error from getUser", { error: authError.message, status: authError.status });
+    }
+    
+    const user = data?.user;
     
     if (!user) {
-      logStep("User not authenticated");
+      logStep("User not authenticated", { hasData: !!data, hasUser: !!user });
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
         {
