@@ -62,8 +62,8 @@ export const PRICING_TIERS: PricingTier[] = [
   {
     name: "Starter",
     tier: "starter",
-    priceMonthly: { EUR: 35, GBP: 30, USD: 39 },
-    priceAnnual: { EUR: 350, GBP: 300, USD: 390 },
+    priceMonthly: { EUR: 39, GBP: 34, USD: 45 },
+    priceAnnual: { EUR: 390, GBP: 340, USD: 450 },
     features: [
       "250 suggestions per month",
       "Up to 10 team members",
@@ -77,8 +77,8 @@ export const PRICING_TIERS: PricingTier[] = [
   {
     name: "Pro",
     tier: "pro",
-    priceMonthly: { EUR: 179, GBP: 155, USD: 199 },
-    priceAnnual: { EUR: 1790, GBP: 1550, USD: 1990 },
+    priceMonthly: { EUR: 199, GBP: 175, USD: 225 },
+    priceAnnual: { EUR: 1990, GBP: 1750, USD: 2250 },
     popular: true,
     features: [
       "1,500 suggestions per month",
@@ -93,8 +93,8 @@ export const PRICING_TIERS: PricingTier[] = [
   {
     name: "Business",
     tier: "business",
-    priceMonthly: { EUR: 749, GBP: 649, USD: 799 },
-    priceAnnual: { EUR: 7490, GBP: 6490, USD: 7990 },
+    priceMonthly: { EUR: 799, GBP: 699, USD: 899 },
+    priceAnnual: { EUR: 7990, GBP: 6990, USD: 8990 },
     features: [
       "5,000+ suggestions per month",
       "Up to 100 team members",
