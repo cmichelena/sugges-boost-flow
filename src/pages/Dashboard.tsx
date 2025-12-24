@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { SuggestionCard } from "@/components/SuggestionCard";
 import { Navbar } from "@/components/Navbar";
 import { Onboarding } from "@/components/Onboarding";
-import { SubscriptionStatusCard } from "@/components/SubscriptionStatusCard";
 import { toast } from "sonner";
 import { Loader2, User, ChevronDown } from "lucide-react";
 import { MomentumActivityDashboard } from "@/components/MomentumActivityDashboard";
@@ -287,11 +286,8 @@ const Dashboard = () => {
       
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          <div className="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="mb-8">
             <h1 className="font-bold">{t("common.dashboard")}</h1>
-            <div className="w-full sm:w-72">
-              <SubscriptionStatusCard />
-            </div>
           </div>
 
           <div className="mb-6 space-y-4">

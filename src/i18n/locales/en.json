@@ -26,7 +26,8 @@
     "submitSuggestion": "Submit Suggestion",
     "mySuggestions": "My Suggestions",
     "teams": "Teams",
-    "categories": "Categories"
+    "categories": "Categories",
+    "myPlan": "My Plan"
   },
   "landing": {
     "tagline": "If you see something, Suggistit",

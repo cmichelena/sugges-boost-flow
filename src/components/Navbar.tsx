@@ -1,20 +1,35 @@
 import { Link } from "react-router-dom";
-import { Plus, User, LogOut, Info, DollarSign } from "lucide-react";
+import { Plus, User, LogOut, Info, DollarSign, CreditCard, Sparkles, Crown } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
 import { useTranslation } from "react-i18next";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import logo from "@/assets/suggistit-logo.png";
 
+const tierConfig = {
+  free: { name: "Free", color: "bg-muted text-muted-foreground", icon: null },
+  starter: { name: "Starter", color: "bg-green-500/10 text-green-600", icon: Sparkles },
+  pro: { name: "Pro", color: "bg-blue-500/10 text-blue-600", icon: Sparkles },
+  business: { name: "Business", color: "bg-purple-500/10 text-purple-600", icon: Crown },
+  enterprise: { name: "Enterprise", color: "bg-amber-500/10 text-amber-600", icon: Crown },
+};
+
 export const Navbar = () => {
   const { user, signOut } = useAuth();
+  const { tier, subscribed } = useSubscription();
   const { t } = useTranslation();
+  
+  const config = tierConfig[tier] || tierConfig.free;
+  const TierIcon = config.icon;
 
   return (
     <nav className="sticky top-0 z-50 border-b bg-card">
@@ -55,7 +70,23 @@ export const Navbar = () => {
                     <User className="w-5 h-5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="w-56">
+                  {/* My Account Section */}
+                  <div className="px-2 py-2">
+                    <Link to="/pricing" className="block">
+                      <div className="flex items-center justify-between p-2 rounded-md hover:bg-accent transition-colors">
+                        <div className="flex items-center gap-2">
+                          <CreditCard className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm font-medium">{t("nav.myPlan")}</span>
+                        </div>
+                        <Badge variant="outline" className={`${config.color} text-xs`}>
+                          {TierIcon && <TierIcon className="w-3 h-3 mr-1" />}
+                          {config.name}
+                        </Badge>
+                      </div>
+                    </Link>
+                  </div>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link to="/my-suggestions">{t("nav.mySuggestions")}</Link>
                   </DropdownMenuItem>
@@ -65,6 +96,7 @@ export const Navbar = () => {
                   <DropdownMenuItem asChild>
                     <Link to="/settings">{t("common.settings")}</Link>
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={signOut}>
                     <LogOut className="w-4 h-4 mr-2" />
                     {t("common.signOut")}
