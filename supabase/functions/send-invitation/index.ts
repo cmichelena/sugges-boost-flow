@@ -42,11 +42,7 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    // Create clients - same pattern as create-checkout
-    const supabaseClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY") ?? "");
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
-    
-    // Get authenticated user - same pattern as create-checkout
+    // Get authorization header first
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       logStep("No authorization header provided");
@@ -59,19 +55,37 @@ serve(async (req) => {
       );
     }
 
-    const token = authHeader.replace("Bearer ", "");
-    logStep("Token extracted", { tokenLength: token.length, tokenPrefix: token.substring(0, 20) });
+    logStep("Auth header present");
+
+    // Create client with user's auth context - official Supabase pattern
+    const supabaseClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY") ?? "", {
+      global: {
+        headers: { Authorization: authHeader },
+      },
+      auth: {
+        persistSession: false,
+      },
+    });
     
-    const { data, error: authError } = await supabaseClient.auth.getUser(token);
+    // Create admin client for privileged operations
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+    
+    // Get the authenticated user
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
     
     if (authError) {
-      logStep("Auth error from getUser", { error: authError.message, status: authError.status });
+      logStep("Auth error from getUser", { error: authError.message });
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 401,
+        }
+      );
     }
     
-    const user = data?.user;
-    
     if (!user) {
-      logStep("User not authenticated", { hasData: !!data, hasUser: !!user });
+      logStep("User not authenticated");
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
         {
