@@ -1,11 +1,10 @@
 import { formatDistanceToNow } from "date-fns";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Eye, User, Users, EyeOff, Flame, ThumbsUp, Minus, AlertTriangle } from "lucide-react";
+import { MessageSquare, Eye, User, Users, EyeOff } from "lucide-react";
 import { MomentumDial } from "./MomentumDial";
 import { calculateMomentum, getMomentumLevel, calculateReactionScore } from "@/lib/momentum";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+import { ReactionButtons } from "./ReactionButtons";
 
 interface ReactionCounts {
   champion: number;
@@ -13,6 +12,8 @@ interface ReactionCounts {
   neutral: number;
   concerns: number;
 }
+
+type ReactionType = "champion" | "support" | "neutral" | "concerns";
 
 interface SuggestionCardProps {
   id: string;
@@ -28,10 +29,13 @@ interface SuggestionCardProps {
   isAnonymous?: boolean;
   assignedToUserName?: string | null;
   assignedToTeamName?: string | null;
+  userReaction?: ReactionType | null;
+  onReactionChange?: (counts: ReactionCounts, userReaction: ReactionType | null) => void;
   onClick: () => void;
 }
 
 export const SuggestionCard = ({
+  id,
   title,
   description,
   category,
@@ -44,6 +48,8 @@ export const SuggestionCard = ({
   isAnonymous,
   assignedToUserName,
   assignedToTeamName,
+  userReaction,
+  onReactionChange,
   onClick,
 }: SuggestionCardProps) => {
   const reactionScore = calculateReactionScore(
@@ -54,8 +60,6 @@ export const SuggestionCard = ({
   );
   const momentum = calculateMomentum(reactionScore, comments, views, new Date(createdAt));
   const momentumLevel = getMomentumLevel(momentum);
-
-  const totalReactions = reactions.champion + reactions.support + reactions.neutral + reactions.concerns;
 
   return (
     <Card
@@ -113,58 +117,13 @@ export const SuggestionCard = ({
           </div>
 
           <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
-            {/* Reactions summary */}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center gap-2">
-                    {reactions.champion > 0 && (
-                      <div className="flex items-center gap-0.5 text-orange-500">
-                        <Flame className="w-3.5 h-3.5" />
-                        <span className="text-xs">{reactions.champion}</span>
-                      </div>
-                    )}
-                    {reactions.support > 0 && (
-                      <div className="flex items-center gap-0.5 text-emerald-500">
-                        <ThumbsUp className="w-3.5 h-3.5" />
-                        <span className="text-xs">{reactions.support}</span>
-                      </div>
-                    )}
-                    {reactions.neutral > 0 && (
-                      <div className="flex items-center gap-0.5 text-blue-500">
-                        <Minus className="w-3.5 h-3.5" />
-                        <span className="text-xs">{reactions.neutral}</span>
-                      </div>
-                    )}
-                    {reactions.concerns > 0 && (
-                      <div className="flex items-center gap-0.5 text-amber-500">
-                        <AlertTriangle className="w-3.5 h-3.5" />
-                        <span className="text-xs">{reactions.concerns}</span>
-                      </div>
-                    )}
-                    {totalReactions === 0 && (
-                      <span className="text-xs text-muted-foreground">No reactions</span>
-                    )}
-                    {totalReactions > 0 && (
-                      <span className={cn(
-                        "text-xs font-medium ml-1",
-                        reactionScore > 0 ? "text-emerald-500" : reactionScore < 0 ? "text-amber-500" : "text-muted-foreground"
-                      )}>
-                        ({reactionScore > 0 ? `+${reactionScore}` : reactionScore})
-                      </span>
-                    )}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <div className="text-xs space-y-1">
-                    <div>Champion: {reactions.champion} (+2 each)</div>
-                    <div>Support: {reactions.support} (+1 each)</div>
-                    <div>Neutral: {reactions.neutral} (0 each)</div>
-                    <div>Concerns: {reactions.concerns} (-1 each)</div>
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <ReactionButtons
+              suggestionId={id}
+              initialCounts={reactions}
+              userReaction={userReaction}
+              compact
+              onReactionChange={onReactionChange}
+            />
             
             <div className="flex items-center gap-1">
               <MessageSquare className="w-4 h-4" />

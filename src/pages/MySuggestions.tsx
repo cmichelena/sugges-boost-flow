@@ -13,6 +13,8 @@ interface ReactionCounts {
   concerns: number;
 }
 
+type ReactionType = "champion" | "support" | "neutral" | "concerns";
+
 interface Suggestion {
   id: string;
   title: string;
@@ -26,6 +28,7 @@ interface Suggestion {
   } | null;
   reactions: ReactionCounts;
   comments_count: number;
+  userReaction: ReactionType | null;
 }
 
 const MySuggestions = () => {
@@ -60,19 +63,25 @@ const MySuggestions = () => {
       // Fetch reactions for all suggestions
       const { data: reactionsData } = await supabase
         .from("reactions")
-        .select("suggestion_id, reaction_type")
+        .select("suggestion_id, reaction_type, user_id")
         .in("suggestion_id", suggestionIds);
 
-      // Aggregate reactions by suggestion
+      // Aggregate reactions by suggestion and track user's reactions
       const reactionsMap = new Map<string, ReactionCounts>();
+      const userReactionsMap = new Map<string, ReactionType | null>();
       suggestionIds.forEach(id => {
         reactionsMap.set(id, { champion: 0, support: 0, neutral: 0, concerns: 0 });
+        userReactionsMap.set(id, null);
       });
       
       (reactionsData || []).forEach(r => {
         const counts = reactionsMap.get(r.suggestion_id);
         if (counts && r.reaction_type in counts) {
           counts[r.reaction_type as keyof ReactionCounts]++;
+        }
+        // Track user's own reaction
+        if (r.user_id === user.id) {
+          userReactionsMap.set(r.suggestion_id, r.reaction_type as ReactionType);
         }
       });
 
@@ -95,6 +104,7 @@ const MySuggestions = () => {
             ...suggestion,
             profiles: profile,
             reactions: reactionsMap.get(suggestion.id) || { champion: 0, support: 0, neutral: 0, concerns: 0 },
+            userReaction: userReactionsMap.get(suggestion.id) || null,
             comments_count: commentsCount || 0,
           };
         })
@@ -145,6 +155,14 @@ const MySuggestions = () => {
                 views={suggestion.views}
                 createdAt={suggestion.created_at}
                 authorName={suggestion.profiles?.display_name || "Anonymous"}
+                userReaction={suggestion.userReaction}
+                onReactionChange={(counts, userReaction) => {
+                  setSuggestions(prev => prev.map(s => 
+                    s.id === suggestion.id 
+                      ? { ...s, reactions: counts, userReaction } 
+                      : s
+                  ));
+                }}
                 onClick={() => navigate(`/suggestion/${suggestion.id}`)}
               />
             ))}
