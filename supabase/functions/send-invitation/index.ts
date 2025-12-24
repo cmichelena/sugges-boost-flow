@@ -51,10 +51,18 @@ serve(async (req) => {
       );
     }
 
-    const token = authHeader.replace("Bearer ", "");
+    // Create a client with the user's auth header to verify their identity
+    const supabaseUserClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
+      global: { headers: { Authorization: authHeader } },
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+        detectSessionInUrl: false
+      }
+    });
     
-    // Verify the user's JWT token using the admin client
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    // Get the authenticated user
+    const { data: { user }, error: authError } = await supabaseUserClient.auth.getUser();
     
     if (authError || !user) {
       console.error("Auth error:", authError);
