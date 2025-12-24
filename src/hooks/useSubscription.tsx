@@ -12,7 +12,7 @@ export interface SubscriptionStatus {
 }
 
 export const useSubscription = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [status, setStatus] = useState<SubscriptionStatus>({
     subscribed: false,
     tier: "free",
@@ -23,6 +23,11 @@ export const useSubscription = () => {
   });
 
   const checkSubscription = useCallback(async () => {
+    // Don't check subscription if auth is still loading or no user
+    if (authLoading) {
+      return;
+    }
+    
     if (!user) {
       setStatus({
         subscribed: false,
@@ -54,13 +59,17 @@ export const useSubscription = () => {
       });
     } catch (err) {
       console.error("Error checking subscription:", err);
-      setStatus((prev) => ({
-        ...prev,
+      // Don't show error for auth issues - just default to free tier
+      setStatus({
+        subscribed: false,
+        tier: "free",
+        subscriptionEnd: null,
+        productId: null,
         loading: false,
-        error: err instanceof Error ? err.message : "Failed to check subscription",
-      }));
+        error: null,
+      });
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   const openCustomerPortal = async () => {
     try {
@@ -83,11 +92,13 @@ export const useSubscription = () => {
     checkSubscription();
   }, [checkSubscription]);
 
-  // Auto-refresh every 60 seconds
+  // Auto-refresh every 60 seconds (only when user is authenticated)
   useEffect(() => {
+    if (!user) return;
+    
     const interval = setInterval(checkSubscription, 60000);
     return () => clearInterval(interval);
-  }, [checkSubscription]);
+  }, [checkSubscription, user]);
 
   return {
     ...status,

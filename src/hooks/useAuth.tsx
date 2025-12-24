@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 interface AuthContextType {
   user: User | null;
   session: Session | null;
+  loading: boolean;
   signOut: () => Promise<void>;
 }
 
@@ -14,6 +15,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,12 +23,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        setLoading(false);
       }
     );
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -38,7 +42,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, signOut }}>
       {children}
     </AuthContext.Provider>
   );
