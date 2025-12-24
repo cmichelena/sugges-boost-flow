@@ -43,8 +43,21 @@ const tierConfig: Record<string, { name: string; color: string; icon: typeof Cro
     icon: Users,
     limits: {
       maxSuggestions: 25,
-      maxMembers: 5,
+      maxMembers: 3,
       aiEnabled: false,
+      analyticsEnabled: false,
+      brandingEnabled: false,
+      prioritySupport: false,
+    },
+  },
+  starter: {
+    name: "Starter",
+    color: "bg-green-500/10 text-green-600 border-green-500/20",
+    icon: Sparkles,
+    limits: {
+      maxSuggestions: 250,
+      maxMembers: 10,
+      aiEnabled: true,
       analyticsEnabled: false,
       brandingEnabled: false,
       prioritySupport: false,
@@ -55,8 +68,8 @@ const tierConfig: Record<string, { name: string; color: string; icon: typeof Cro
     color: "bg-blue-500/10 text-blue-600 border-blue-500/20",
     icon: Sparkles,
     limits: {
-      maxSuggestions: 500,
-      maxMembers: 50,
+      maxSuggestions: 1500,
+      maxMembers: 25,
       aiEnabled: true,
       analyticsEnabled: true,
       brandingEnabled: false,
@@ -68,8 +81,8 @@ const tierConfig: Record<string, { name: string; color: string; icon: typeof Cro
     color: "bg-purple-500/10 text-purple-600 border-purple-500/20",
     icon: Crown,
     limits: {
-      maxSuggestions: null, // unlimited
-      maxMembers: 200,
+      maxSuggestions: 5000,
+      maxMembers: 100,
       aiEnabled: true,
       analyticsEnabled: true,
       brandingEnabled: true,
