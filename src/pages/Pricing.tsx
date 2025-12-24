@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, Crown, Loader2, Mail } from "lucide-react";
+import { Check, Crown, Loader2, Mail, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useGeoLocation } from "@/hooks/useGeoLocation";
+import { Navbar } from "@/components/Navbar";
 import { 
   PRICING_TIERS, 
   CURRENCIES,
@@ -154,8 +155,21 @@ const Pricing = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Navbar />
+      
       {/* Hero Section */}
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 py-8">
+        {/* Back Button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate(-1)}
+          className="mb-6"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+
         <div className="text-center mb-12">
           <h1 className="font-bold mb-4">
             Simple, Transparent Pricing

@@ -17,6 +17,7 @@ import Teams from "./pages/Teams";
 import AcceptInvitation from "./pages/AcceptInvitation";
 import Pricing from "./pages/Pricing";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Organization from "./pages/Organization";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const App = () => (
           <Route path="/teams" element={<Teams />} />
           <Route path="/accept-invitation" element={<AcceptInvitation />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/organization" element={<Organization />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
