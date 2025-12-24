@@ -35,19 +35,40 @@ serve(async (req) => {
   }
 
   try {
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Create service role client for admin operations
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
     
     // Get authenticated user
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      throw new Error("No authorization header");
+      console.error("No authorization header provided");
+      return new Response(
+        JSON.stringify({ error: "No authorization header" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 401,
+        }
+      );
     }
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    // Create a client with the user's token to verify auth
+    const supabaseUser = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
+      global: { headers: { Authorization: `Bearer ${token}` } }
+    });
+    
+    const { data: { user }, error: authError } = await supabaseUser.auth.getUser();
     
     if (authError || !user) {
-      throw new Error("Unauthorized");
+      console.error("Auth error:", authError);
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 401,
+        }
+      );
     }
 
     // Validate request body
@@ -76,7 +97,7 @@ serve(async (req) => {
     console.log("Processing invitation request", { organizationId });
 
     // Verify user has admin or owner role
-    const { data: userRole } = await supabase
+    const { data: userRole } = await supabaseAdmin
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id)
@@ -88,7 +109,7 @@ serve(async (req) => {
     }
 
     // Get organization details
-    const { data: org } = await supabase
+    const { data: org } = await supabaseAdmin
       .from("organizations")
       .select("name")
       .eq("id", organizationId)
@@ -98,16 +119,21 @@ serve(async (req) => {
       throw new Error("Organization not found");
     }
 
-    // Check if user already exists
-    const { data: existingMember } = await supabase
-      .from("organization_members")
-      .select("id")
-      .eq("organization_id", organizationId)
-      .eq("user_id", (await supabase.auth.admin.listUsers()).data.users.find(u => u.email === email)?.id || "")
-      .single();
+    // Check if user with this email already exists and is a member
+    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
+    const existingUser = existingUsers?.users?.find((u: { email?: string }) => u.email === email);
+    
+    if (existingUser) {
+      const { data: existingMember } = await supabaseAdmin
+        .from("organization_members")
+        .select("id")
+        .eq("organization_id", organizationId)
+        .eq("user_id", existingUser.id)
+        .single();
 
-    if (existingMember) {
-      throw new Error("User is already a member of this organization");
+      if (existingMember) {
+        throw new Error("User is already a member of this organization");
+      }
     }
 
     // Generate secure token and hash it
@@ -117,7 +143,7 @@ serve(async (req) => {
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiry
 
     // Store invitation with hashed token
-    const { error: insertError } = await supabase
+    const { error: insertError } = await supabaseAdmin
       .from("organization_invitations")
       .insert({
         organization_id: organizationId,
