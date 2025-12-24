@@ -229,7 +229,46 @@ const Settings = () => {
       await loadOrganizationData();
     } catch (error: any) {
       console.error("Error inviting member:", error);
-      toast.error(error.message || "Failed to send invitation");
+      
+      // Parse the error response for user-friendly messages
+      let errorMessage = "Failed to send invitation. Please try again.";
+      
+      try {
+        // Check if error has context with a message from the edge function
+        if (error.context?.body) {
+          const parsed = JSON.parse(error.context.body);
+          if (parsed.message) {
+            errorMessage = parsed.message;
+          } else if (parsed.error) {
+            errorMessage = parsed.error;
+          }
+        } else if (error.message) {
+          // Try to parse the error message if it's JSON
+          try {
+            const parsed = JSON.parse(error.message);
+            if (parsed.message) {
+              errorMessage = parsed.message;
+            }
+          } catch {
+            // Check for common error patterns
+            if (error.message.includes("session") || error.message.includes("expired")) {
+              errorMessage = "Your session may have expired. Please sign out and sign back in, then try again.";
+            } else if (error.message.includes("401") || error.message.includes("Unauthorized")) {
+              errorMessage = "Authentication failed. Please sign out and sign back in, then try again.";
+            } else if (error.message.includes("403") || error.message.includes("permission")) {
+              errorMessage = "You don't have permission to invite members.";
+            } else if (error.message.includes("already") && error.message.includes("member")) {
+              errorMessage = "This person is already a member of your organization.";
+            } else if (error.message !== "[object Object]") {
+              errorMessage = error.message;
+            }
+          }
+        }
+      } catch {
+        // Use default message if parsing fails
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setInviting(false);
     }

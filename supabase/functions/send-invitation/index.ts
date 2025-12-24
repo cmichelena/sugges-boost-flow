@@ -76,7 +76,11 @@ serve(async (req) => {
     if (authError) {
       logStep("Auth error from getUser", { error: authError.message });
       return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
+        JSON.stringify({ 
+          error: "Authentication failed", 
+          code: "AUTH_ERROR",
+          message: "Your session may have expired. Please sign out and sign back in, then try again."
+        }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 401,
@@ -87,7 +91,11 @@ serve(async (req) => {
     if (!user) {
       logStep("User not authenticated");
       return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
+        JSON.stringify({ 
+          error: "Not authenticated", 
+          code: "NO_USER",
+          message: "You must be logged in to send invitations."
+        }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 401,
@@ -132,7 +140,17 @@ serve(async (req) => {
 
     if (!userRole || !["admin", "owner"].includes(userRole.role)) {
       logStep("Insufficient permissions", { userRole });
-      throw new Error("Insufficient permissions");
+      return new Response(
+        JSON.stringify({ 
+          error: "Insufficient permissions", 
+          code: "FORBIDDEN",
+          message: "Only organization admins and owners can invite new members."
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 403,
+        }
+      );
     }
 
     logStep("User has permission", { role: userRole.role });
@@ -145,7 +163,17 @@ serve(async (req) => {
       .single();
 
     if (!org) {
-      throw new Error("Organization not found");
+      return new Response(
+        JSON.stringify({ 
+          error: "Organization not found", 
+          code: "NOT_FOUND",
+          message: "The organization could not be found. Please refresh the page and try again."
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 404,
+        }
+      );
     }
 
     logStep("Organization found", { name: org.name });
@@ -163,7 +191,17 @@ serve(async (req) => {
         .single();
 
       if (existingMember) {
-        throw new Error("User is already a member of this organization");
+        return new Response(
+          JSON.stringify({ 
+            error: "Already a member", 
+            code: "ALREADY_MEMBER",
+            message: "This person is already a member of your organization."
+          }),
+          {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 409,
+          }
+        );
       }
     }
 
@@ -190,7 +228,17 @@ serve(async (req) => {
 
     if (insertError) {
       logStep("Error inserting invitation", insertError);
-      throw new Error("Failed to create invitation");
+      return new Response(
+        JSON.stringify({ 
+          error: "Failed to create invitation", 
+          code: "DB_ERROR",
+          message: "We couldn't create the invitation. Please try again in a moment."
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 500,
+        }
+      );
     }
 
     // Generate accept URL with the plaintext token
