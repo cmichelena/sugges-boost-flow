@@ -168,13 +168,13 @@ const Teams = () => {
   };
 
   const handleCreateTeam = async () => {
-    if (!newTeamName.trim() || !organizationId) return;
+    if (!newTeamName.trim() || !activeOrganization) return;
 
     setCreatingTeam(true);
     const { error } = await supabase
       .from("teams")
       .insert({
-        organization_id: organizationId,
+        organization_id: activeOrganization.id,
         name: newTeamName.trim(),
       });
 
@@ -183,7 +183,7 @@ const Teams = () => {
     } else {
       toast.success("Team created successfully");
       setNewTeamName("");
-      loadTeams(organizationId);
+      loadTeams(activeOrganization.id);
     }
     setCreatingTeam(false);
   };
@@ -198,7 +198,7 @@ const Teams = () => {
       toast.error("Failed to update team");
     } else {
       toast.success(isActive ? "Team deactivated" : "Team activated");
-      if (organizationId) loadTeams(organizationId);
+      if (activeOrganization) loadTeams(activeOrganization.id);
     }
   };
 
@@ -212,7 +212,7 @@ const Teams = () => {
       toast.error("Failed to delete team");
     } else {
       toast.success("Team deleted");
-      if (organizationId) loadTeams(organizationId);
+      if (activeOrganization) loadTeams(activeOrganization.id);
     }
     setDeleteConfirm(null);
   };

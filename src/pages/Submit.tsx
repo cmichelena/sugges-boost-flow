@@ -76,9 +76,6 @@ const Submit = () => {
     setCategories(categoriesData || []);
   };
 
-    fetchData();
-  }, [navigate]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
