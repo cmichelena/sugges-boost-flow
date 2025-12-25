@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Loader2, Users, Crown, Calendar, Mail, CheckCircle, Clock, Trash2, AlertTriangle, Building2 } from "lucide-react";
+import { Loader2, Users, Crown, Calendar, Mail, CheckCircle, Clock, Trash2, AlertTriangle, Building2, User, Globe, X } from "lucide-react";
 import { z } from "zod";
 import { PlanUsageCard } from "@/components/PlanUsageCard";
 import {
@@ -24,6 +24,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 
@@ -43,7 +50,7 @@ interface Member {
 
 const OrganizationPage = () => {
   const { user } = useAuth();
-  const { activeOrganization, userRole, loading: orgLoading } = useOrganization();
+  const { activeOrganization, userRole, loading: orgLoading, refreshOrganizations } = useOrganization();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [inviting, setInviting] = useState(false);
@@ -52,6 +59,8 @@ const OrganizationPage = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState<Member | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [newDomain, setNewDomain] = useState("");
+  const [savingSettings, setSavingSettings] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -250,6 +259,81 @@ const OrganizationPage = () => {
     setDeleteDialogOpen(true);
   };
 
+  const handleUpdateOrganizationType = async (type: "personal" | "company") => {
+    if (!activeOrganization || userRole !== "owner") return;
+
+    setSavingSettings(true);
+    try {
+      const { error } = await supabase
+        .from("organizations")
+        .update({ organization_type: type })
+        .eq("id", activeOrganization.id);
+
+      if (error) throw error;
+      toast.success(`Organization type updated to ${type}`);
+      await refreshOrganizations();
+    } catch (error) {
+      console.error("Error updating organization type:", error);
+      toast.error("Failed to update organization type");
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
+  const handleAddDomain = async () => {
+    if (!activeOrganization || !newDomain.trim() || userRole !== "owner") return;
+
+    const domain = newDomain.trim().toLowerCase();
+    const currentDomains = activeOrganization.allowed_email_domains || [];
+    
+    if (currentDomains.includes(domain)) {
+      toast.error("Domain already added");
+      return;
+    }
+
+    setSavingSettings(true);
+    try {
+      const { error } = await supabase
+        .from("organizations")
+        .update({ allowed_email_domains: [...currentDomains, domain] })
+        .eq("id", activeOrganization.id);
+
+      if (error) throw error;
+      toast.success("Domain added");
+      setNewDomain("");
+      await refreshOrganizations();
+    } catch (error) {
+      console.error("Error adding domain:", error);
+      toast.error("Failed to add domain");
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
+  const handleRemoveDomain = async (domain: string) => {
+    if (!activeOrganization || userRole !== "owner") return;
+
+    const currentDomains = activeOrganization.allowed_email_domains || [];
+    const newDomains = currentDomains.filter(d => d !== domain);
+
+    setSavingSettings(true);
+    try {
+      const { error } = await supabase
+        .from("organizations")
+        .update({ allowed_email_domains: newDomains.length > 0 ? newDomains : null })
+        .eq("id", activeOrganization.id);
+
+      if (error) throw error;
+      toast.success("Domain removed");
+      await refreshOrganizations();
+    } catch (error) {
+      console.error("Error removing domain:", error);
+      toast.error("Failed to remove domain");
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
   if (loading || orgLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -274,10 +358,14 @@ const OrganizationPage = () => {
         {/* Organization Info */}
         <Card className="p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <Users className="w-5 h-5" />
+            {activeOrganization?.organization_type === "company" ? (
+              <Building2 className="w-5 h-5" />
+            ) : (
+              <User className="w-5 h-5" />
+            )}
             Organization Details
           </h2>
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div>
               <Label className="text-muted-foreground">Organization Name</Label>
               <p className="text-lg font-medium">{activeOrganization?.name}</p>
@@ -289,6 +377,106 @@ const OrganizationPage = () => {
                 {activeOrganization?.created_at ? new Date(activeOrganization.created_at).toLocaleDateString() : "N/A"}
               </p>
             </div>
+            
+            {/* Organization Type */}
+            <div>
+              <Label className="text-muted-foreground">Organization Type</Label>
+              {userRole === "owner" ? (
+                <Select
+                  value={activeOrganization?.organization_type || "personal"}
+                  onValueChange={(value) => handleUpdateOrganizationType(value as "personal" | "company")}
+                  disabled={savingSettings}
+                >
+                  <SelectTrigger className="w-[200px] mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="personal">
+                      <div className="flex items-center gap-2">
+                        <User className="w-4 h-4" />
+                        Personal
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="company">
+                      <div className="flex items-center gap-2">
+                        <Building2 className="w-4 h-4" />
+                        Company
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <p className="flex items-center gap-2 mt-1">
+                  {activeOrganization?.organization_type === "company" ? (
+                    <>
+                      <Building2 className="w-4 h-4" />
+                      Company
+                    </>
+                  ) : (
+                    <>
+                      <User className="w-4 h-4" />
+                      Personal
+                    </>
+                  )}
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">
+                {activeOrganization?.organization_type === "company" 
+                  ? "Company orgs can restrict signups by email domain"
+                  : "Personal workspaces are auto-created for each user"}
+              </p>
+            </div>
+
+            {/* Allowed Email Domains (only for company orgs) */}
+            {activeOrganization?.organization_type === "company" && userRole === "owner" && (
+              <div>
+                <Label className="text-muted-foreground flex items-center gap-2">
+                  <Globe className="w-4 h-4" />
+                  Allowed Email Domains
+                </Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Only users with these email domains can join via invitation. Leave empty to allow any email.
+                </p>
+                
+                {/* Current domains */}
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {(activeOrganization.allowed_email_domains || []).map((domain) => (
+                    <Badge key={domain} variant="secondary" className="flex items-center gap-1">
+                      @{domain}
+                      <button
+                        onClick={() => handleRemoveDomain(domain)}
+                        disabled={savingSettings}
+                        className="ml-1 hover:text-destructive"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                  {(!activeOrganization.allowed_email_domains || activeOrganization.allowed_email_domains.length === 0) && (
+                    <span className="text-sm text-muted-foreground italic">No restrictions - any email allowed</span>
+                  )}
+                </div>
+                
+                {/* Add domain form */}
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="example.com"
+                    value={newDomain}
+                    onChange={(e) => setNewDomain(e.target.value)}
+                    disabled={savingSettings}
+                    className="w-48"
+                  />
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleAddDomain}
+                    disabled={savingSettings || !newDomain.trim()}
+                  >
+                    Add Domain
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </Card>
 

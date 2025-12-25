@@ -185,9 +185,11 @@ export type Database = {
       }
       organizations: {
         Row: {
+          allowed_email_domains: string[] | null
           created_at: string
           id: string
           name: string
+          organization_type: Database["public"]["Enums"]["organization_type"]
           owner_id: string
           slug: string
           stripe_customer_id: string | null
@@ -198,9 +200,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          allowed_email_domains?: string[] | null
           created_at?: string
           id?: string
           name: string
+          organization_type?: Database["public"]["Enums"]["organization_type"]
           owner_id: string
           slug: string
           stripe_customer_id?: string | null
@@ -211,9 +215,11 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          allowed_email_domains?: string[] | null
           created_at?: string
           id?: string
           name?: string
+          organization_type?: Database["public"]["Enums"]["organization_type"]
           owner_id?: string
           slug?: string
           stripe_customer_id?: string | null
@@ -782,9 +788,11 @@ export type Database = {
       get_user_organizations: {
         Args: { _user_id: string }
         Returns: {
+          allowed_email_domains: string[] | null
           created_at: string
           id: string
           name: string
+          organization_type: Database["public"]["Enums"]["organization_type"]
           owner_id: string
           slug: string
           stripe_customer_id: string | null
@@ -825,6 +833,7 @@ export type Database = {
     Enums: {
       app_role: "owner" | "admin" | "member" | "viewer"
       member_status: "pending" | "active" | "removed"
+      organization_type: "personal" | "company"
       reaction_type: "champion" | "support" | "neutral" | "concerns"
       subscription_status:
         | "active"
@@ -969,6 +978,7 @@ export const Constants = {
     Enums: {
       app_role: ["owner", "admin", "member", "viewer"],
       member_status: ["pending", "active", "removed"],
+      organization_type: ["personal", "company"],
       reaction_type: ["champion", "support", "neutral", "concerns"],
       subscription_status: [
         "active",

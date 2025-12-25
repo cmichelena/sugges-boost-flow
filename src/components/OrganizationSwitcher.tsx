@@ -1,4 +1,4 @@
-import { Building2, ChevronDown, Check, Plus } from "lucide-react";
+import { Building2, ChevronDown, Check, User } from "lucide-react";
 import { useOrganization } from "@/hooks/useOrganization";
 import {
   DropdownMenu,
@@ -11,6 +11,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+
+const OrgIcon = ({ type }: { type: "personal" | "company" }) => {
+  if (type === "personal") {
+    return <User className="w-4 h-4 shrink-0" />;
+  }
+  return <Building2 className="w-4 h-4 shrink-0" />;
+};
 
 export const OrganizationSwitcher = () => {
   const { activeOrganization, organizations, loading, switchOrganization } = useOrganization();
@@ -40,7 +48,7 @@ export const OrganizationSwitcher = () => {
   if (organizations.length === 1) {
     return (
       <div className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground">
-        <Building2 className="w-4 h-4" />
+        <OrgIcon type={activeOrganization.organization_type} />
         <span className="max-w-[150px] truncate">{activeOrganization.name}</span>
       </div>
     );
@@ -50,7 +58,7 @@ export const OrganizationSwitcher = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="gap-2 max-w-[200px]">
-          <Building2 className="w-4 h-4 shrink-0" />
+          <OrgIcon type={activeOrganization.organization_type} />
           <span className="truncate">{activeOrganization.name}</span>
           <ChevronDown className="w-3 h-3 shrink-0 opacity-50" />
         </Button>
@@ -67,8 +75,13 @@ export const OrganizationSwitcher = () => {
             className="flex items-center justify-between gap-2"
           >
             <div className="flex items-center gap-2 min-w-0">
-              <Building2 className="w-4 h-4 shrink-0" />
+              <OrgIcon type={org.organization_type} />
               <span className="truncate">{org.name}</span>
+              {org.organization_type === "company" && (
+                <Badge variant="secondary" className="text-xs px-1 py-0">
+                  Company
+                </Badge>
+              )}
             </div>
             {org.id === activeOrganization.id && (
               <Check className="w-4 h-4 text-primary shrink-0" />
