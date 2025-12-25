@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { OrganizationSwitcher } from "./OrganizationSwitcher";
 import logo from "@/assets/suggistit-logo.png";
 
 const tierConfig = {
@@ -37,9 +38,12 @@ export const Navbar = () => {
     return (
       <nav className="sticky top-0 z-50 border-b bg-card">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/dashboard" className="flex items-center flex-shrink-0">
-            <img src={logo} alt="Suggistit" className="h-12 md:h-16" />
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link to="/dashboard" className="flex items-center flex-shrink-0">
+              <img src={logo} alt="Suggistit" className="h-12 md:h-16" />
+            </Link>
+            <OrganizationSwitcher />
+          </div>
 
           <div className="flex items-center gap-2">
             <Button variant="default" size="sm" asChild>

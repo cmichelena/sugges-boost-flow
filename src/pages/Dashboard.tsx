@@ -11,6 +11,8 @@ import { SuggestionJourneyChart } from "@/components/SuggestionJourneyChart";
 import { calculateMomentum, getMomentumLevel, calculateReactionScore, type MomentumLevel } from "@/lib/momentum";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTranslation } from "react-i18next";
+import { useOrganization } from "@/hooks/useOrganization";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ReactionCounts {
   champion: number;
@@ -28,7 +30,6 @@ const Dashboard = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [showMyAssignments, setShowMyAssignments] = useState(false);
   const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [selectedMomentum, setSelectedMomentum] = useState<MomentumLevel | null>(null);
   const [isNewUser, setIsNewUser] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -37,6 +38,8 @@ const Dashboard = () => {
   const [searchParams] = useSearchParams();
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
+  const { activeOrganization, loading: orgLoading } = useOrganization();
+  const { user } = useAuth();
 
   // Check for subscription success message
   useEffect(() => {
@@ -47,7 +50,6 @@ const Dashboard = () => {
       toast.success(`Welcome to ${tier.charAt(0).toUpperCase() + tier.slice(1)}! 🎉`, {
         description: "Your subscription is now active.",
       });
-      // Clear the URL params
       window.history.replaceState({}, "", "/dashboard");
     }
   }, [searchParams]);
@@ -58,57 +60,43 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    loadSuggestions();
-  }, [navigate]);
-
-  const loadSuggestions = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
+    if (!user) {
       navigate("/auth");
       return;
     }
+    if (!orgLoading && activeOrganization) {
+      loadSuggestions();
+    }
+  }, [navigate, user, orgLoading, activeOrganization]);
 
-    setCurrentUserId(session.user.id);
+  const loadSuggestions = async () => {
+    if (!user || !activeOrganization) return;
+
+    setLoading(true);
 
     // Check if user is new and needs onboarding
     const { data: profile } = await supabase
       .from("profiles")
       .select("created_at, onboarding_completed")
-      .eq("id", session.user.id)
+      .eq("id", user.id)
       .single();
 
     if (profile) {
       const createdAt = new Date(profile.created_at);
       const now = new Date();
       const hoursSinceCreation = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60);
-      
-      // User is "new" if account created within last 24 hours
       setIsNewUser(hoursSinceCreation < 24);
       
-      // Show onboarding if not completed
       if (!profile.onboarding_completed) {
         setShowOnboarding(true);
       }
-    }
-
-    const { data: orgMember, error: orgError } = await supabase
-      .from("organization_members")
-      .select("organization_id")
-      .eq("user_id", session.user.id)
-      .eq("status", "active")
-      .single();
-
-    if (orgError || !orgMember) {
-      toast.error("Failed to load organization");
-      setLoading(false);
-      return;
     }
 
     // Load categories
     const { data: categoriesData } = await supabase
       .from("suggestion_categories")
       .select("id, name")
-      .eq("organization_id", orgMember.organization_id)
+      .eq("organization_id", activeOrganization.id)
       .eq("is_hidden", false)
       .order("display_order");
 
@@ -124,7 +112,7 @@ const Dashboard = () => {
           name
         )
       `)
-      .eq("organization_id", orgMember.organization_id)
+      .eq("organization_id", activeOrganization.id)
       .eq("archived", false)
       .order("created_at", { ascending: false });
 
@@ -156,8 +144,7 @@ const Dashboard = () => {
       if (counts && r.reaction_type in counts) {
         counts[r.reaction_type as keyof ReactionCounts]++;
       }
-      // Track user's own reaction
-      if (r.user_id === session.user.id) {
+      if (r.user_id === user.id) {
         userReactionsMap.set(r.suggestion_id, r.reaction_type as ReactionType);
       }
     });
@@ -180,8 +167,8 @@ const Dashboard = () => {
         .select("id, display_name")
         .in("id", userIds);
         
-      profilesData?.forEach(profile => {
-        profilesMap.set(profile.id, profile.display_name);
+      profilesData?.forEach(p => {
+        profilesMap.set(p.id, p.display_name);
       });
     }
 
@@ -286,8 +273,8 @@ const Dashboard = () => {
   if (statusFilter !== "all") {
     filteredSuggestions = filteredSuggestions.filter(s => s.status === statusFilter);
   }
-  if (showMyAssignments && currentUserId) {
-    filteredSuggestions = filteredSuggestions.filter(s => s.assigned_to_user_id === currentUserId);
+  if (showMyAssignments && user) {
+    filteredSuggestions = filteredSuggestions.filter(s => s.assigned_to_user_id === user.id);
   }
 
   return (
@@ -311,7 +298,6 @@ const Dashboard = () => {
             />
             <SuggestionJourneyChart suggestions={suggestions} />
             
-            {/* Browse Suggestions Button - Mobile Only */}
             {showBrowseButton && (
               <button
                 onClick={scrollToSuggestions}
@@ -328,7 +314,6 @@ const Dashboard = () => {
             onComplete={() => setShowOnboarding(false)} 
           />
 
-          {/* Welcome message above suggestions */}
           <div className="mb-4">
             <h2 className="text-2xl font-semibold mb-1">
               {isNewUser ? t("dashboard.welcomeNew") : t("dashboard.welcomeBack")}
@@ -341,7 +326,6 @@ const Dashboard = () => {
             </p>
           </div>
 
-          {/* Filters */}
           <div ref={suggestionsRef} className="mb-6 scroll-mt-4 flex flex-wrap items-center gap-3">
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-[160px] bg-background">
@@ -372,7 +356,6 @@ const Dashboard = () => {
               </SelectContent>
             </Select>
 
-            {/* My Assignments */}
             <button
               onClick={() => setShowMyAssignments(!showMyAssignments)}
               className={`
