@@ -227,6 +227,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          active_organization_id: string | null
           avatar_url: string | null
           created_at: string
           display_name: string | null
@@ -235,6 +236,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          active_organization_id?: string | null
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
@@ -243,6 +245,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          active_organization_id?: string | null
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
@@ -250,7 +253,22 @@ export type Database = {
           onboarding_completed?: boolean
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_active_organization_id_fkey"
+            columns: ["active_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_active_organization_id_fkey"
+            columns: ["active_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_member_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reactions: {
         Row: {
@@ -757,6 +775,10 @@ export type Database = {
         }[]
       }
       get_reaction_score: { Args: { p_suggestion_id: string }; Returns: number }
+      get_user_default_organization: {
+        Args: { _user_id: string }
+        Returns: string
+      }
       get_user_organizations: {
         Args: { _user_id: string }
         Returns: {
@@ -788,6 +810,10 @@ export type Database = {
         Returns: boolean
       }
       is_org_member: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
+      set_active_organization: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }

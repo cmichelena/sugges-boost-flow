@@ -11,6 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useOrganization } from "@/hooks/useOrganization";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Category {
   id: string;
@@ -32,42 +34,28 @@ interface Team {
 const Categories = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [creatingCategory, setCreatingCategory] = useState(false);
   const navigate = useNavigate();
+  const { activeOrganization, loading: orgLoading } = useOrganization();
+  const { user } = useAuth();
 
   useEffect(() => {
-    fetchData();
-  }, [navigate]);
-
-  const fetchData = async () => {
-    setLoading(true);
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
+    if (!user) {
       navigate("/auth");
       return;
     }
-
-    const { data: orgMember, error: orgError } = await supabase
-      .from("organization_members")
-      .select("organization_id")
-      .eq("user_id", session.user.id)
-      .eq("status", "active")
-      .single();
-
-    if (orgError || !orgMember) {
-      toast.error("Failed to load organization");
-      setLoading(false);
-      return;
+    if (!orgLoading && activeOrganization) {
+      fetchData();
     }
+  }, [navigate, user, orgLoading, activeOrganization]);
 
-    setOrganizationId(orgMember.organization_id);
+  const fetchData = async () => {
+    if (!activeOrganization) return;
 
-    // Load categories and teams
-    await loadCategories(orgMember.organization_id);
-    await loadTeams(orgMember.organization_id);
+    await loadCategories(activeOrganization.id);
+    await loadTeams(activeOrganization.id);
 
     setLoading(false);
   };
@@ -104,7 +92,7 @@ const Categories = () => {
   };
 
   const handleCreateCategory = async () => {
-    if (!newCategoryName.trim() || !organizationId) return;
+    if (!newCategoryName.trim() || !activeOrganization) return;
 
     setCreatingCategory(true);
     const maxOrder = Math.max(...categories.map(c => c.display_order), 0);
@@ -112,7 +100,7 @@ const Categories = () => {
     const { error } = await supabase
       .from("suggestion_categories")
       .insert({
-        organization_id: organizationId,
+        organization_id: activeOrganization.id,
         name: newCategoryName.trim(),
         display_order: maxOrder + 1,
       });
@@ -122,7 +110,7 @@ const Categories = () => {
     } else {
       toast.success("Category created successfully");
       setNewCategoryName("");
-      loadCategories(organizationId);
+      loadCategories(activeOrganization.id);
     }
     setCreatingCategory(false);
   };
@@ -137,7 +125,7 @@ const Categories = () => {
       toast.error("Failed to update category");
     } else {
       toast.success(isHidden ? "Category shown" : "Category hidden");
-      if (organizationId) loadCategories(organizationId);
+      if (activeOrganization) loadCategories(activeOrganization.id);
     }
   };
 
@@ -151,7 +139,7 @@ const Categories = () => {
       toast.error("Failed to assign team");
     } else {
       toast.success("Team assigned successfully");
-      if (organizationId) loadCategories(organizationId);
+      if (activeOrganization) loadCategories(activeOrganization.id);
     }
   };
 
@@ -165,7 +153,7 @@ const Categories = () => {
       toast.error("Failed to update category");
     } else {
       toast.success(canBeAnonymous ? "Anonymous submissions enabled" : "Anonymous submissions disabled");
-      if (organizationId) loadCategories(organizationId);
+      if (activeOrganization) loadCategories(activeOrganization.id);
     }
   };
 
@@ -179,11 +167,11 @@ const Categories = () => {
       toast.error("Failed to delete category");
     } else {
       toast.success("Category deleted");
-      if (organizationId) loadCategories(organizationId);
+      if (activeOrganization) loadCategories(activeOrganization.id);
     }
   };
 
-  if (loading) {
+  if (loading || orgLoading) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />

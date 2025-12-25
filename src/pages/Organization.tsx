@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { Navbar } from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,15 +27,6 @@ import {
 
 const emailSchema = z.string().email("Please enter a valid email address");
 
-interface Organization {
-  id: string;
-  name: string;
-  subscription_tier: string;
-  subscription_status: string;
-  trial_ends_at: string;
-  created_at: string;
-}
-
 interface Member {
   id: string;
   user_id: string;
@@ -51,13 +43,12 @@ interface Member {
 
 const OrganizationPage = () => {
   const { user } = useAuth();
+  const { activeOrganization, userRole, loading: orgLoading } = useOrganization();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [inviting, setInviting] = useState(false);
-  const [organization, setOrganization] = useState<Organization | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [inviteEmail, setInviteEmail] = useState("");
-  const [userRole, setUserRole] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState<Member | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -67,43 +58,19 @@ const OrganizationPage = () => {
       navigate("/auth");
       return;
     }
-    loadOrganizationData();
-  }, [user, navigate]);
+    if (!orgLoading && activeOrganization) {
+      loadOrganizationData();
+    }
+  }, [user, navigate, orgLoading, activeOrganization]);
 
   const loadOrganizationData = async () => {
+    if (!activeOrganization) return;
+
     try {
-      const { data: orgMember, error: orgError } = await supabase
-        .from("organization_members")
-        .select("organization_id")
-        .eq("user_id", user!.id)
-        .eq("status", "active")
-        .single();
-
-      if (orgError) throw orgError;
-
-      const { data: org, error: orgDetailsError } = await supabase
-        .from("organizations")
-        .select("*")
-        .eq("id", orgMember.organization_id)
-        .single();
-
-      if (orgDetailsError) throw orgDetailsError;
-      setOrganization(org);
-
-      const { data: roleData, error: roleError } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user!.id)
-        .eq("organization_id", orgMember.organization_id)
-        .single();
-
-      if (roleError) throw roleError;
-      setUserRole(roleData.role);
-
       const { data: membersData, error: membersError } = await supabase
         .from("organization_members")
         .select("*")
-        .eq("organization_id", orgMember.organization_id)
+        .eq("organization_id", activeOrganization.id)
         .order("joined_at", { ascending: false });
 
       if (membersError) throw membersError;
@@ -120,7 +87,7 @@ const OrganizationPage = () => {
               .from("user_roles")
               .select("role")
               .eq("user_id", member.user_id)
-              .eq("organization_id", orgMember.organization_id)
+              .eq("organization_id", activeOrganization.id)
           ]);
 
           return {
@@ -158,7 +125,7 @@ const OrganizationPage = () => {
         return;
       }
 
-      if (!organization?.id) {
+      if (!activeOrganization?.id) {
         toast.error("Organization not found");
         setInviting(false);
         return;
@@ -167,7 +134,7 @@ const OrganizationPage = () => {
       const { data, error } = await supabase.functions.invoke("send-invitation", {
         body: {
           email: inviteEmail,
-          organizationId: organization.id,
+          organizationId: activeOrganization.id,
           role: "member",
         },
       });
@@ -252,14 +219,14 @@ const OrganizationPage = () => {
   };
 
   const handleDeleteMember = async () => {
-    if (!memberToDelete || !organization) return;
+    if (!memberToDelete || !activeOrganization) return;
     
     setDeleting(true);
     try {
       const { error } = await supabase.functions.invoke("delete-user-account", {
         body: {
           targetUserId: memberToDelete.user_id,
-          organizationId: organization.id,
+          organizationId: activeOrganization.id,
         },
       });
 
@@ -283,7 +250,7 @@ const OrganizationPage = () => {
     setDeleteDialogOpen(true);
   };
 
-  if (loading) {
+  if (loading || orgLoading) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
@@ -313,26 +280,26 @@ const OrganizationPage = () => {
           <div className="space-y-3">
             <div>
               <Label className="text-muted-foreground">Organization Name</Label>
-              <p className="text-lg font-medium">{organization?.name}</p>
+              <p className="text-lg font-medium">{activeOrganization?.name}</p>
             </div>
             <div>
               <Label className="text-muted-foreground">Created</Label>
               <p className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
-                {organization?.created_at ? new Date(organization.created_at).toLocaleDateString() : "N/A"}
+                {activeOrganization?.created_at ? new Date(activeOrganization.created_at).toLocaleDateString() : "N/A"}
               </p>
             </div>
           </div>
         </Card>
 
         {/* Subscription & Usage */}
-        {organization && (
+        {activeOrganization && (
           <div className="mb-6">
             <PlanUsageCard
-              organizationId={organization.id}
-              dbSubscriptionTier={organization.subscription_tier}
-              dbSubscriptionStatus={organization.subscription_status}
-              trialEndsAt={organization.trial_ends_at}
+              organizationId={activeOrganization.id}
+              dbSubscriptionTier={activeOrganization.subscription_tier}
+              dbSubscriptionStatus={activeOrganization.subscription_status}
+              trialEndsAt={activeOrganization.trial_ends_at}
             />
           </div>
         )}

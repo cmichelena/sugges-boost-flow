@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { OrganizationProvider } from "@/hooks/useOrganization";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
@@ -29,24 +30,26 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/submit" element={<Submit />} />
-            <Route path="/suggestion/:id" element={<SuggestionDetail />} />
-            <Route path="/my-suggestions" element={<MySuggestions />} />
-          <Route path="/how-it-works" element={<HowItWorks />} />
-          <Route path="/pricing" element={<Pricing />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/categories" element={<Categories />} />
-          <Route path="/teams" element={<Teams />} />
-          <Route path="/accept-invitation" element={<AcceptInvitation />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/organization" element={<Organization />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <OrganizationProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/submit" element={<Submit />} />
+              <Route path="/suggestion/:id" element={<SuggestionDetail />} />
+              <Route path="/my-suggestions" element={<MySuggestions />} />
+            <Route path="/how-it-works" element={<HowItWorks />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/categories" element={<Categories />} />
+            <Route path="/teams" element={<Teams />} />
+            <Route path="/accept-invitation" element={<AcceptInvitation />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/organization" element={<Organization />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </OrganizationProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

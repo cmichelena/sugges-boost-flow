@@ -11,6 +11,8 @@ import { Loader2, Plus, Users, Trash2, UserPlus, Crown, User, ChevronDown, Chevr
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { useOrganization } from "@/hooks/useOrganization";
+import { useAuth } from "@/hooks/useAuth";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,70 +53,47 @@ const Teams = () => {
   const [expandedTeams, setExpandedTeams] = useState<Set<string>>(new Set());
   const [teamMembers, setTeamMembers] = useState<Record<string, TeamMember[]>>({});
   const [orgMembers, setOrgMembers] = useState<OrgMember[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [newTeamName, setNewTeamName] = useState("");
   const [creatingTeam, setCreatingTeam] = useState(false);
   const [selectedTeamForMember, setSelectedTeamForMember] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'team' | 'member', id: string, teamId?: string } | null>(null);
   const navigate = useNavigate();
+  const { activeOrganization, userRole, loading: orgLoading } = useOrganization();
+  const { user } = useAuth();
 
   useEffect(() => {
-    fetchData();
-  }, [navigate]);
-
-  const fetchData = async () => {
-    setLoading(true);
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
+    if (!user) {
       navigate("/auth");
       return;
     }
-
-    // Get organization
-    const { data: orgMember, error: orgError } = await supabase
-      .from("organization_members")
-      .select("organization_id")
-      .eq("user_id", session.user.id)
-      .eq("status", "active")
-      .single();
-
-    if (orgError || !orgMember) {
-      toast.error("Failed to load organization");
-      setLoading(false);
-      return;
+    if (!orgLoading && activeOrganization) {
+      fetchData();
     }
+  }, [navigate, user, orgLoading, activeOrganization]);
 
-    setOrganizationId(orgMember.organization_id);
+  const fetchData = async () => {
+    if (!activeOrganization || !user) return;
 
     // Check if user is admin/owner
-    const { data: role } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", session.user.id)
-      .eq("organization_id", orgMember.organization_id)
-      .in("role", ["admin", "owner"])
-      .single();
-
-    if (!role) {
+    if (userRole !== "admin" && userRole !== "owner") {
       toast.error("You don't have permission to manage teams");
       navigate("/");
       return;
     }
 
     // Load teams
-    await loadTeams(orgMember.organization_id);
+    await loadTeams(activeOrganization.id);
 
     // Load organization members
     const { data: members } = await supabase
       .from("organization_members")
       .select("user_id")
-      .eq("organization_id", orgMember.organization_id)
+      .eq("organization_id", activeOrganization.id)
       .eq("status", "active");
 
     if (members) {
-      // Fetch profiles separately
       const { data: profiles } = await supabase
         .from("profiles")
         .select("id, display_name")

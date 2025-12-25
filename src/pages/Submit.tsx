@@ -16,6 +16,8 @@ import { SuggestionDisclaimer } from "@/components/SuggestionDisclaimer";
 import { FileUpload } from "@/components/FileUpload";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { UpgradePrompt } from "@/components/UpgradePrompt";
+import { useOrganization } from "@/hooks/useOrganization";
+import { useAuth } from "@/hooks/useAuth";
 
 const suggestionSchema = z.object({
   title: z.string().trim().min(5, 'Title must be at least 5 characters').max(100, 'Title must be less than 100 characters'),
@@ -35,55 +37,44 @@ const Submit = () => {
   const [categoryId, setCategoryId] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
-  const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const navigate = useNavigate();
-  const { hasAccess, loading: featureLoading, tier } = useFeatureAccess();
+  const { hasAccess, loading: featureLoading } = useFeatureAccess();
+  const { activeOrganization, loading: orgLoading } = useOrganization();
+  const { user } = useAuth();
 
   const hasAIAccess = hasAccess("ai_improvements");
 
-  // Fetch user's organization and categories on mount
   useEffect(() => {
-    const fetchData = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/auth");
-        return;
-      }
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    if (!orgLoading && activeOrganization) {
+      loadCategories();
+    }
+  }, [navigate, user, orgLoading, activeOrganization]);
 
-      const { data, error } = await supabase
-        .from("organization_members")
-        .select("organization_id")
-        .eq("user_id", session.user.id)
-        .eq("status", "active")
-        .single();
+  const loadCategories = async () => {
+    if (!activeOrganization) return;
 
-      if (error) {
-        console.error("Error fetching organization:", error);
-        toast.error("Failed to load organization");
-        return;
-      }
+    const { data: categoriesData, error: categoriesError } = await supabase
+      .from("suggestion_categories")
+      .select("id, name, can_be_anonymous")
+      .eq("organization_id", activeOrganization.id)
+      .eq("is_hidden", false)
+      .order("display_order");
 
-      setOrganizationId(data.organization_id);
+    if (categoriesError) {
+      console.error("Error fetching categories:", categoriesError);
+      toast.error("Failed to load categories");
+      return;
+    }
 
-      // Load categories for this organization
-      const { data: categoriesData, error: categoriesError } = await supabase
-        .from("suggestion_categories")
-        .select("id, name, can_be_anonymous")
-        .eq("organization_id", data.organization_id)
-        .eq("is_hidden", false)
-        .order("display_order");
-
-      if (categoriesError) {
-        console.error("Error fetching categories:", categoriesError);
-        toast.error("Failed to load categories");
-        return;
-      }
-
-      setCategories(categoriesData || []);
-    };
+    setCategories(categoriesData || []);
+  };
 
     fetchData();
   }, [navigate]);
@@ -93,7 +84,6 @@ const Submit = () => {
     setLoading(true);
 
     try {
-      // Validate form inputs
       const validation = suggestionSchema.safeParse({ title, description, categoryId });
       if (!validation.success) {
         toast.error(validation.error.errors[0].message);
@@ -103,9 +93,8 @@ const Submit = () => {
 
       const selectedCategory = categories.find(c => c.id === categoryId);
 
-      // Get the current session to ensure we have a valid token
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError || !session) {
+      if (sessionError || !session || !activeOrganization) {
         toast.error("Please sign in to submit a suggestion");
         navigate("/auth");
         return;
@@ -137,10 +126,9 @@ const Submit = () => {
       const { data: assignmentData } = await supabase
         .rpc('auto_assign_suggestion_to_team', { _category_id: categoryId });
 
-      // Insert the suggestion with category_id and assignment
       const { data: suggestionData, error } = await supabase.from("suggestions").insert({
         user_id: isAnonymous ? null : session.user.id,
-        organization_id: organizationId,
+        organization_id: activeOrganization.id,
         title: improved?.improved_title || title,
         description: improved?.improved_description || description,
         original_title: title,
