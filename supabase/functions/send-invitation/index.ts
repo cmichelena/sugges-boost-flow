@@ -240,8 +240,8 @@ serve(async (req) => {
       );
     }
 
-    // Generate accept URL with the plaintext token
-    const acceptUrl = `${req.headers.get("origin") || "https://suggistit.lovable.app"}/accept-invitation?token=${token_value}`;
+    // Generate accept URL with the plaintext token - always use production domain
+    const acceptUrl = `https://www.suggistit.com/accept-invitation?token=${token_value}`;
     
     // Try to send email
     let emailSent = false;
