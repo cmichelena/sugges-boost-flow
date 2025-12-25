@@ -248,7 +248,7 @@ serve(async (req) => {
     let emailSent = false;
     try {
       const { error: emailError } = await resend.emails.send({
-        from: "Suggistit <noreply@suggistit.com>",
+        from: "Suggistit <noreply@hello.suggistit.com>",
         to: [email],
         subject: `You've been invited to join ${org.name} on Suggistit`,
         html: `
