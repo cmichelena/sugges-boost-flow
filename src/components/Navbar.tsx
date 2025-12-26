@@ -15,7 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { OrganizationSwitcher } from "./OrganizationSwitcher";
-import logo from "@/assets/suggistit-logo.png";
+import logo from "@/assets/suggistit-logo-hw.png";
 
 const tierConfig = {
   free: { name: "Free", color: "bg-muted text-muted-foreground", icon: null },
