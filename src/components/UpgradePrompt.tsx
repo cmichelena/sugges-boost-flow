@@ -72,6 +72,14 @@ export const UpgradePrompt = ({
               Unlock with {minTier}
             </h4>
             <ul className="text-sm text-muted-foreground space-y-1">
+              {minTier === "Starter" && (
+                <>
+                  <li>• Create company organizations</li>
+                  <li>• Up to 250 suggestions/month</li>
+                  <li>• Up to 10 team members</li>
+                  <li>• Domain-restricted invitations</li>
+                </>
+              )}
               {minTier === "Pro" && (
                 <>
                   <li>• AI-powered suggestion improvements</li>
