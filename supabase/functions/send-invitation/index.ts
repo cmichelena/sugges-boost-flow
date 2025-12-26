@@ -213,13 +213,15 @@ serve(async (req) => {
 
     logStep("Storing invitation");
 
-    // Store invitation with hashed token only (plaintext token NOT stored for security)
+    // Store invitation with both token and token_hash for validation
+    // token_hash is used for secure lookup, token is cleared after acceptance
     const { error: insertError } = await supabaseAdmin
       .from("organization_invitations")
       .insert({
         organization_id: organizationId,
         email,
         role,
+        token: token_value,
         token_hash: token_hash,
         invited_by: user.id,
         expires_at: expiresAt.toISOString(),
