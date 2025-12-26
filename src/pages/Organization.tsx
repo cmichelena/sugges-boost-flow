@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Loader2, Users, Crown, Calendar, Mail, CheckCircle, Clock, Trash2, AlertTriangle, Building2, User, Globe, X } from "lucide-react";
+import { Loader2, Users, Crown, Calendar, Mail, CheckCircle, Clock, Trash2, AlertTriangle, Building2, User, Globe, X, ChevronRight } from "lucide-react";
 import { z } from "zod";
 import { PlanUsageCard } from "@/components/PlanUsageCard";
 import {
@@ -50,7 +50,7 @@ interface Member {
 
 const OrganizationPage = () => {
   const { user } = useAuth();
-  const { activeOrganization, userRole, loading: orgLoading, refreshOrganizations } = useOrganization();
+  const { activeOrganization, organizations, userRole, loading: orgLoading, refreshOrganizations, switchOrganization } = useOrganization();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [inviting, setInviting] = useState(false);
@@ -480,7 +480,66 @@ const OrganizationPage = () => {
           </div>
         </Card>
 
-        {/* Subscription & Usage */}
+        {/* My Organizations - show all orgs the user has joined */}
+        {organizations.length > 1 && (
+          <Card className="p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              My Organizations ({organizations.length})
+            </h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              All organizations you're a member of. Click to switch.
+            </p>
+            <div className="space-y-2">
+              {organizations.map((org) => {
+                const isActive = org.id === activeOrganization?.id;
+                return (
+                  <button
+                    key={org.id}
+                    onClick={async () => {
+                      if (!isActive) {
+                        const success = await switchOrganization(org.id);
+                        if (success) {
+                          toast.success(`Switched to ${org.name}`);
+                          window.location.reload();
+                        } else {
+                          toast.error("Failed to switch organization");
+                        }
+                      }
+                    }}
+                    className={`w-full flex items-center justify-between p-3 border rounded-lg transition-colors ${
+                      isActive 
+                        ? "border-primary bg-primary/5" 
+                        : "hover:bg-muted/50"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      {org.organization_type === "company" ? (
+                        <Building2 className="w-5 h-5 text-muted-foreground" />
+                      ) : (
+                        <User className="w-5 h-5 text-muted-foreground" />
+                      )}
+                      <div className="text-left">
+                        <p className="font-medium">{org.name}</p>
+                        <p className="text-xs text-muted-foreground capitalize">
+                          {org.organization_type} • {org.subscription_tier}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {isActive ? (
+                        <Badge variant="default" className="text-xs">Active</Badge>
+                      ) : (
+                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </Card>
+        )}
+
         {activeOrganization && (
           <div className="mb-6">
             <PlanUsageCard

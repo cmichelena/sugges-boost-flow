@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
@@ -11,6 +12,7 @@ export default function AcceptInvitation() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { refreshOrganizations } = useOrganization();
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<"validating" | "success" | "error">("validating");
   const [message, setMessage] = useState("");
@@ -65,9 +67,12 @@ export default function AcceptInvitation() {
         
         toast.success("Invitation accepted!");
         
-        // Redirect to home after 2 seconds
+        // Refresh organizations to include the new one
+        await refreshOrganizations();
+        
+        // Redirect to dashboard after 2 seconds
         setTimeout(() => {
-          navigate("/");
+          navigate("/dashboard");
         }, 2000);
       } catch (error: any) {
         console.error("Error accepting invitation:", error);
@@ -79,7 +84,7 @@ export default function AcceptInvitation() {
     };
 
     acceptInvitation();
-  }, [searchParams, user, navigate]);
+  }, [searchParams, user, navigate, refreshOrganizations]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
