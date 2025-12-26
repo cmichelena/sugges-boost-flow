@@ -44,7 +44,54 @@ serve(async (req) => {
       );
     }
 
-    console.log("Request authenticated");
+    console.log("Request authenticated for user:", user.id);
+
+    // Get user's active organization and check subscription tier
+    const { data: profile } = await supabaseClient
+      .from('profiles')
+      .select('active_organization_id')
+      .eq('id', user.id)
+      .single();
+
+    if (!profile?.active_organization_id) {
+      console.error("No active organization found for user");
+      return new Response(
+        JSON.stringify({ error: 'No active organization' }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Check if organization has AI improvements enabled via subscription tier
+    const { data: orgData, error: orgError } = await supabaseClient
+      .from('organizations')
+      .select('id, subscription_tier')
+      .eq('id', profile.active_organization_id)
+      .single();
+
+    if (orgError || !orgData) {
+      console.error("Failed to fetch organization:", orgError);
+      return new Response(
+        JSON.stringify({ error: 'Organization not found' }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Check subscription plan for AI improvements feature
+    const { data: planData } = await supabaseClient
+      .from('subscription_plans')
+      .select('ai_improvements_enabled')
+      .eq('tier', orgData.subscription_tier)
+      .single();
+
+    if (!planData?.ai_improvements_enabled) {
+      console.log("AI improvements not enabled for tier:", orgData.subscription_tier);
+      return new Response(
+        JSON.stringify({ error: 'AI improvements feature not available on your plan. Please upgrade to access this feature.' }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log("AI feature access verified for tier:", orgData.subscription_tier);
 
     const { title, description, category } = await req.json();
     
