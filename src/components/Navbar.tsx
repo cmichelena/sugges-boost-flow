@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { OrganizationSwitcher } from "./OrganizationSwitcher";
 import logo from "@/assets/suggistit-logo-hw.png";
+import logoIcon from "@/assets/suggistit-icon.png";
 
 const tierConfig = {
   free: { name: "Free", color: "bg-muted text-muted-foreground", icon: null },
@@ -38,18 +39,22 @@ export const Navbar = () => {
     return (
       <nav className="sticky top-0 z-50 border-b bg-card">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
             <Link to="/dashboard" className="flex items-center flex-shrink-0">
-              <img src={logo} alt="Suggistit" className="h-12 md:h-16" />
+              {/* Icon on mobile, full logo on desktop */}
+              <img src={logoIcon} alt="Suggistit" className="h-10 md:hidden" />
+              <img src={logo} alt="Suggistit" className="hidden md:block h-16" />
             </Link>
-            <OrganizationSwitcher />
+            <div className="min-w-0 flex-1">
+              <OrganizationSwitcher />
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button variant="default" size="sm" asChild>
+          <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
+            <Button variant="default" size="sm" asChild className="px-2 md:px-4">
               <Link to="/submit">
-                <Plus className="w-4 h-4 mr-2" />
-                {t("common.submit")}
+                <Plus className="w-4 h-4 md:mr-2" />
+                <span className="hidden md:inline">{t("common.submit")}</span>
               </Link>
             </Button>
 
