@@ -2,13 +2,14 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
-export type Feature = "ai_improvements" | "advanced_analytics" | "custom_branding" | "priority_support";
+export type Feature = "ai_improvements" | "advanced_analytics" | "custom_branding" | "priority_support" | "create_company_org";
 
 interface FeatureConfig {
   ai_improvements: boolean;
   advanced_analytics: boolean;
   custom_branding: boolean;
   priority_support: boolean;
+  create_company_org: boolean;
   max_suggestions: number | null;
   max_members: number | null;
 }
@@ -19,14 +20,25 @@ const tierFeatures: Record<string, FeatureConfig> = {
     advanced_analytics: false,
     custom_branding: false,
     priority_support: false,
+    create_company_org: false,
     max_suggestions: 25,
     max_members: 5,
+  },
+  starter: {
+    ai_improvements: false,
+    advanced_analytics: false,
+    custom_branding: false,
+    priority_support: false,
+    create_company_org: true,
+    max_suggestions: 250,
+    max_members: 10,
   },
   pro: {
     ai_improvements: true,
     advanced_analytics: true,
     custom_branding: false,
     priority_support: false,
+    create_company_org: true,
     max_suggestions: 500,
     max_members: 50,
   },
@@ -35,7 +47,8 @@ const tierFeatures: Record<string, FeatureConfig> = {
     advanced_analytics: true,
     custom_branding: true,
     priority_support: true,
-    max_suggestions: null, // unlimited
+    create_company_org: true,
+    max_suggestions: null,
     max_members: 200,
   },
   enterprise: {
@@ -43,6 +56,7 @@ const tierFeatures: Record<string, FeatureConfig> = {
     advanced_analytics: true,
     custom_branding: true,
     priority_support: true,
+    create_company_org: true,
     max_suggestions: null,
     max_members: null,
   },
@@ -51,6 +65,7 @@ const tierFeatures: Record<string, FeatureConfig> = {
     advanced_analytics: false,
     custom_branding: false,
     priority_support: false,
+    create_company_org: true,
     max_suggestions: 200,
     max_members: 10,
   },
@@ -61,6 +76,7 @@ const featureNames: Record<Feature, string> = {
   advanced_analytics: "Advanced Analytics",
   custom_branding: "Custom Branding",
   priority_support: "Priority Support",
+  create_company_org: "Create Company Organization",
 };
 
 const featureDescriptions: Record<Feature, string> = {
@@ -68,6 +84,7 @@ const featureDescriptions: Record<Feature, string> = {
   advanced_analytics: "Access detailed insights and reports about your organization's suggestions.",
   custom_branding: "Customize your workspace with your organization's branding.",
   priority_support: "Get faster response times from our support team.",
+  create_company_org: "Create company organizations with domain restrictions and team management.",
 };
 
 const featureMinTier: Record<Feature, string> = {
@@ -75,6 +92,7 @@ const featureMinTier: Record<Feature, string> = {
   advanced_analytics: "Pro",
   custom_branding: "Business",
   priority_support: "Business",
+  create_company_org: "Starter",
 };
 
 export interface FeatureAccessState {
