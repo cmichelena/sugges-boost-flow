@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { AvatarUpload } from "@/components/AvatarUpload";
 
 const languages = [
   { code: "en", name: "English", flag: "🇬🇧" },
@@ -124,6 +125,16 @@ const Settings = () => {
             {t("settings.profile")}
           </h2>
           
+          <div className="mb-6">
+            <Label className="mb-2 block">Profile Photo</Label>
+            <AvatarUpload
+              userId={user!.id}
+              currentAvatarUrl={profile?.avatar_url || null}
+              displayName={displayName}
+              onAvatarChange={(newUrl) => setProfile(prev => prev ? { ...prev, avatar_url: newUrl } : null)}
+            />
+          </div>
+
           <form onSubmit={handleSaveProfile} className="space-y-4">
             <div>
               <Label htmlFor="email">Email</Label>
