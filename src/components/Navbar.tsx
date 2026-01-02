@@ -44,7 +44,8 @@ export const Navbar = () => {
             <Link to="/dashboard" className="flex items-center flex-shrink-0">
               {/* Icon on mobile, full logo on desktop */}
               <img src={logoIcon} alt="Suggistit" className="h-10 md:hidden" />
-              <img src={logoDark} alt="Suggistit" className="hidden md:block h-16" />
+              <img src={logoLight} alt="Suggistit" className="hidden md:block h-16 dark:hidden" />
+              <img src={logoDark} alt="Suggistit" className="hidden md:dark:block h-16" />
             </Link>
             <div className="min-w-0 flex-1">
               <OrganizationSwitcher />
