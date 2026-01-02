@@ -106,8 +106,8 @@ All colors MUST be HSL.
     --destructive: 22 19.1% 70.4%;
     --destructive-foreground: 248 0.3% 98.4%;
 
-    --border: 0 0% 100% / 10%;
-    --input: 0 0% 100% / 15%;
+    --border: 0 0% 40%;
+    --input: 0 0% 45%;
     --ring: 264 2.7% 55.1%;
 
     /* Momentum levels */
@@ -132,7 +132,7 @@ All colors MUST be HSL.
     --sidebar-primary-foreground: 248 0.3% 98.4%;
     --sidebar-accent: 260 4.1% 27.9%;
     --sidebar-accent-foreground: 248 0.3% 98.4%;
-    --sidebar-border: 0 0% 100% / 10%;
+    --sidebar-border: 0 0% 40%;
     --sidebar-ring: 264 2.7% 55.1%;
   }
 }

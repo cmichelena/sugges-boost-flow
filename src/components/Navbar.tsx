@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { OrganizationSwitcher } from "./OrganizationSwitcher";
 import logoLight from "@/assets/suggistit-logo-black.png";
-import logoDark from "@/assets/suggistit-logo-hw.png";
+import logoDark from "@/assets/suggistit-logo-white.png";
 import logoIcon from "@/assets/suggistit-icon.png";
 
 const tierConfig = {

@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2, User, Globe, Settings as SettingsIcon, Building2 } from "lucide-react";
+import { Loader2, User, Globe, Settings as SettingsIcon, Building2, Sun, Moon, Monitor } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useTheme } from "next-themes";
 import {
   Select,
   SelectContent,
@@ -35,6 +36,7 @@ const Settings = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  const { theme, setTheme } = useTheme();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -208,7 +210,52 @@ const Settings = () => {
           </div>
         </Card>
 
-        {/* Organization Link */}
+        {/* Appearance Settings */}
+        <Card className="p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <Sun className="w-5 h-5" />
+            {t("settings.appearance")}
+          </h2>
+          
+          <div className="space-y-4">
+            <div>
+              <Label>Theme</Label>
+              <div className="flex gap-2 mt-2">
+                <Button
+                  variant={theme === "light" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setTheme("light")}
+                  className="flex items-center gap-2"
+                >
+                  <Sun className="w-4 h-4" />
+                  Light
+                </Button>
+                <Button
+                  variant={theme === "dark" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setTheme("dark")}
+                  className="flex items-center gap-2"
+                >
+                  <Moon className="w-4 h-4" />
+                  Dark
+                </Button>
+                <Button
+                  variant={theme === "system" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setTheme("system")}
+                  className="flex items-center gap-2"
+                >
+                  <Monitor className="w-4 h-4" />
+                  System
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                System follows your device preference
+              </p>
+            </div>
+          </div>
+        </Card>
+
         <Card className="p-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
             <Building2 className="w-5 h-5" />
