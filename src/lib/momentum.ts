@@ -13,9 +13,10 @@ export const calculateMomentum = (
   reactionScore: number,
   comments: number,
   views: number,
-  createdAt: Date
+  createdAt: Date,
+  referenceDate?: Date
 ): number => {
-  const now = new Date();
+  const now = referenceDate ?? new Date();
   const ageInDays = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
   const weeksOld = Math.floor(ageInDays / 7);
 
