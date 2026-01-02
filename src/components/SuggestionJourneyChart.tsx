@@ -87,11 +87,13 @@ export const SuggestionJourneyChart = ({ suggestions }: SuggestionJourneyChartPr
             s.reactions?.neutral ?? 0,
             s.reactions?.concerns ?? 0
           );
+          // Pass the current chart day as reference date to show progression over time
           const momentum = calculateMomentum(
             reactionScore,
             s.comments ?? 0,
             s.views ?? 0,
-            createdAt
+            createdAt,
+            day
           );
           dayData[s.id] = Math.round(momentum);
         }
