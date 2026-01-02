@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -101,14 +101,27 @@ const Auth = () => {
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Get safe redirect URL from query params
+  const getSafeRedirectUrl = () => {
+    const redirectTo = searchParams.get('redirect');
+    if (!redirectTo) return '/';
+    // Only allow relative URLs starting with / to prevent open redirect attacks
+    const decoded = decodeURIComponent(redirectTo);
+    if (decoded.startsWith('/') && !decoded.startsWith('//')) {
+      return decoded;
+    }
+    return '/';
+  };
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate("/");
+        navigate(getSafeRedirectUrl());
       }
     });
-  }, [navigate]);
+  }, [navigate, searchParams]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,7 +147,7 @@ const Auth = () => {
           email: validation.data.email,
           password: validation.data.password,
           options: {
-            emailRedirectTo: `${window.location.origin}/`,
+            emailRedirectTo: `${window.location.origin}${getSafeRedirectUrl()}`,
             data: {
               display_name: validation.data.displayName,
             },
@@ -163,7 +176,7 @@ const Auth = () => {
         });
         if (error) throw error;
         toast.success("Signed in successfully!");
-        navigate("/");
+        navigate(getSafeRedirectUrl());
       }
     } catch (error: any) {
       toast.error(error.message);
