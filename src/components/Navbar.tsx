@@ -15,7 +15,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { OrganizationSwitcher } from "./OrganizationSwitcher";
-import logo from "@/assets/suggistit-logo-hw.png";
+import logoLight from "@/assets/suggistit-logo-black.png";
+import logoDark from "@/assets/suggistit-logo-hw.png";
 import logoIcon from "@/assets/suggistit-icon.png";
 
 const tierConfig = {
@@ -43,7 +44,7 @@ export const Navbar = () => {
             <Link to="/dashboard" className="flex items-center flex-shrink-0">
               {/* Icon on mobile, full logo on desktop */}
               <img src={logoIcon} alt="Suggistit" className="h-10 md:hidden" />
-              <img src={logo} alt="Suggistit" className="hidden md:block h-16" />
+              <img src={logoDark} alt="Suggistit" className="hidden md:block h-16" />
             </Link>
             <div className="min-w-0 flex-1">
               <OrganizationSwitcher />
@@ -153,7 +154,8 @@ export const Navbar = () => {
     <nav className="sticky top-0 z-50 border-b bg-card">
       <div className="container mx-auto px-4 py-2 md:py-0 md:h-16 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-0">
         <Link to="/" className="flex items-center flex-shrink-0">
-          <img src={logo} alt="Suggistit" className="h-12 md:h-16" />
+          <img src={logoLight} alt="Suggistit" className="h-12 md:h-16 dark:hidden" />
+          <img src={logoDark} alt="Suggistit" className="h-12 md:h-16 hidden dark:block" />
         </Link>
 
         <div className="flex items-center gap-2">
