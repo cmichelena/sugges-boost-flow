@@ -17,6 +17,7 @@ export const calculateMomentum = (
 ): number => {
   const now = new Date();
   const ageInDays = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
+  const weeksOld = Math.floor(ageInDays / 7);
 
   // Points from engagement - reaction score can be negative
   // Scale reaction score more significantly since it represents weighted reactions
@@ -24,12 +25,13 @@ export const calculateMomentum = (
   const commentPoints = comments * 15;
   const viewPoints = views * 2;
 
-  // Waiting time multiplier (increases over time)
-  const waitingMultiplier = Math.min(1 + ageInDays * 0.1, 3);
+  // Progressive time bonus: +2 after week 1, +4 after week 2, +6 after week 3, etc.
+  // Sum of arithmetic sequence: 2 + 4 + 6 + ... + 2n = 2 * (1 + 2 + ... + n) = n * (n + 1)
+  const timeBonus = weeksOld > 0 ? weeksOld * (weeksOld + 1) : 0;
 
-  // Base engagement (ensure minimum of 0)
+  // Base engagement (ensure minimum of 0 before adding time bonus)
   const baseScore = Math.max(0, reactionPoints + commentPoints + viewPoints);
-  const totalScore = baseScore * waitingMultiplier;
+  const totalScore = baseScore + timeBonus;
 
   return Math.round(totalScore);
 };
