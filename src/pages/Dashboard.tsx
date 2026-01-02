@@ -69,6 +69,30 @@ const Dashboard = () => {
     }
   }, [navigate, user, orgLoading, activeOrganization]);
 
+  // Show loading state while organization is loading
+  if (orgLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="flex justify-center items-center py-24">
+          <Loader2 className="w-8 h-8 animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
+  // If no active organization, show message
+  if (!activeOrganization) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8 text-center">
+          <p className="text-muted-foreground">No organization found. Please create or join an organization.</p>
+        </div>
+      </div>
+    );
+  }
+
   const loadSuggestions = async () => {
     if (!user || !activeOrganization) return;
 
