@@ -39,7 +39,7 @@ const Dashboard = () => {
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
   const { activeOrganization, loading: orgLoading } = useOrganization();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   // Check for subscription success message
   useEffect(() => {
@@ -69,8 +69,8 @@ const Dashboard = () => {
     }
   }, [navigate, user, orgLoading, activeOrganization]);
 
-  // Show loading state while organization is loading
-  if (orgLoading) {
+  // Show loading state while auth or organization is loading
+  if (authLoading || orgLoading) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
@@ -81,7 +81,7 @@ const Dashboard = () => {
     );
   }
 
-  // If no active organization, show message
+  // If no active organization (and loading is complete), show message
   if (!activeOrganization) {
     return (
       <div className="min-h-screen bg-background">
