@@ -59,40 +59,7 @@ const Dashboard = () => {
     suggestionsRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  useEffect(() => {
-    if (!user) {
-      navigate("/auth");
-      return;
-    }
-    if (!orgLoading && activeOrganization) {
-      loadSuggestions();
-    }
-  }, [navigate, user, orgLoading, activeOrganization]);
-
-  // Show loading state while auth or organization is loading
-  if (authLoading || orgLoading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="flex justify-center items-center py-24">
-          <Loader2 className="w-8 h-8 animate-spin" />
-        </div>
-      </div>
-    );
-  }
-
-  // If no active organization (and loading is complete), show message
-  if (!activeOrganization) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="container mx-auto px-4 py-8 text-center">
-          <p className="text-muted-foreground">No organization found. Please create or join an organization.</p>
-        </div>
-      </div>
-    );
-  }
-
+  // Load suggestions function - defined before useEffect that uses it
   const loadSuggestions = async () => {
     if (!user || !activeOrganization) return;
 
@@ -220,6 +187,16 @@ const Dashboard = () => {
     setLoading(false);
   };
 
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/auth");
+      return;
+    }
+    if (!orgLoading && activeOrganization) {
+      loadSuggestions();
+    }
+  }, [navigate, user, authLoading, orgLoading, activeOrganization]);
+
   const momentumStats = useMemo(() => {
     const result = { fresh: 0, warming: 0, heating: 0, fire: 0 };
     
@@ -270,6 +247,31 @@ const Dashboard = () => {
 
     return { total, open, inProgress, completed, declined, totalLikes: totalReactionScore, totalComments };
   }, [suggestions]);
+
+  // Show loading state while auth or organization is loading
+  if (authLoading || orgLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="flex justify-center items-center py-24">
+          <Loader2 className="w-8 h-8 animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
+  // If no active organization (and loading is complete), show message
+  if (!activeOrganization) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8 text-center">
+          <p className="text-muted-foreground">No organization found. Please create or join an organization.</p>
+        </div>
+      </div>
+    );
+  }
+
 
   let filteredSuggestions = suggestions;
 
