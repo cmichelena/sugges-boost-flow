@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Navbar } from "@/components/Navbar";
+import { AppLayout } from "@/components/AppLayout";
 import { toast } from "sonner";
 import { Loader2, Plus, GripVertical, Trash2, Eye, EyeOff, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -173,19 +173,16 @@ const Categories = () => {
 
   if (loading || orgLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
+      <AppLayout>
         <div className="container mx-auto px-4 py-8 flex justify-center">
           <Loader2 className="w-8 h-8 animate-spin" />
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      
+    <AppLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-6">
@@ -293,7 +290,7 @@ const Categories = () => {
           </div>
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

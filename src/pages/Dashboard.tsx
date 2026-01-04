@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { SuggestionCard } from "@/components/SuggestionCard";
-import { Navbar } from "@/components/Navbar";
+import { AppLayout } from "@/components/AppLayout";
 import { Onboarding } from "@/components/Onboarding";
 import { DashboardSkeleton } from "@/components/DashboardSkeleton";
 import { toast } from "sonner";
@@ -252,22 +252,19 @@ const Dashboard = () => {
   // Show loading state while auth or organization is loading
   if (authLoading || orgLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
+      <AppLayout>
         <DashboardSkeleton />
-      </div>
+      </AppLayout>
     );
   }
 
-  // If no active organization (and loading is complete), show message
   if (!activeOrganization) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
+      <AppLayout>
         <div className="container mx-auto px-4 py-8 text-center">
           <p className="text-muted-foreground">No organization found. Please create or join an organization.</p>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
@@ -303,9 +300,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      
+    <AppLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
@@ -438,7 +433,7 @@ const Dashboard = () => {
           )}
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

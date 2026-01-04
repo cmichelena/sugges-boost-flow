@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Navbar } from "@/components/Navbar";
+import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -311,15 +311,14 @@ const SuggestionDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
+      <AppLayout>
         <div className="container mx-auto px-4 py-8">
           <div className="animate-pulse space-y-4">
             <div className="h-8 bg-muted rounded w-1/3" />
             <div className="h-32 bg-muted rounded" />
           </div>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
@@ -340,9 +339,7 @@ const SuggestionDetail = () => {
   const momentumLevel = getMomentumLevel(momentumScore);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-
+    <AppLayout>
       <div className="container mx-auto px-4 py-8">
         <Button variant="ghost" onClick={() => navigate("/")} className="mb-4">
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -553,7 +550,7 @@ const SuggestionDetail = () => {
           )}
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

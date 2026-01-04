@@ -53,10 +53,11 @@ export const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
-            <Button variant="default" size="sm" asChild className="px-2 md:px-4">
+            {/* Hide submit button on mobile - it's in the bottom nav */}
+            <Button variant="default" size="sm" asChild className="hidden md:flex px-4">
               <Link to="/submit">
-                <Plus className="w-4 h-4 md:mr-2" />
-                <span className="hidden md:inline">{t("common.submit")}</span>
+                <Plus className="w-4 h-4 mr-2" />
+                {t("common.submit")}
               </Link>
             </Button>
 
