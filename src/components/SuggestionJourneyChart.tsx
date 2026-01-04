@@ -136,6 +136,20 @@ export const SuggestionJourneyChart = ({ suggestions }: SuggestionJourneyChartPr
     return groups;
   }, [filteredSuggestions]);
 
+  // For gradient mode: compute colors for each suggestion's current (latest) momentum
+  // Must be called before any early returns to maintain hook order
+  const suggestionColors = useMemo(() => {
+    const colors: Record<string, string> = {};
+    if (chartStyle === "gradient" && data.length > 0) {
+      const latestData = data[data.length - 1];
+      filteredSuggestions.forEach(s => {
+        const momentum = latestData[s.id] ?? 0;
+        colors[s.id] = getMomentumColor(momentum);
+      });
+    }
+    return colors;
+  }, [chartStyle, data, filteredSuggestions]);
+
   if (filteredSuggestions.length === 0) {
     return (
       <Card className="border-border/40 bg-card/50 backdrop-blur-sm">
@@ -172,19 +186,6 @@ export const SuggestionJourneyChart = ({ suggestions }: SuggestionJourneyChartPr
       </Card>
     );
   }
-
-  // For gradient mode: compute colors for each suggestion's current (latest) momentum
-  const suggestionColors = useMemo(() => {
-    const colors: Record<string, string> = {};
-    if (chartStyle === "gradient" && data.length > 0) {
-      const latestData = data[data.length - 1];
-      filteredSuggestions.forEach(s => {
-        const momentum = latestData[s.id] ?? 0;
-        colors[s.id] = getMomentumColor(momentum);
-      });
-    }
-    return colors;
-  }, [chartStyle, data, filteredSuggestions]);
 
   // Custom dot component for gradient mode
   const GradientDot = (props: any) => {
