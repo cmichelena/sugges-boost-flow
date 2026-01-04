@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Navbar } from "@/components/Navbar";
+import { AppLayout } from "@/components/AppLayout";
 import { SuggestionCard } from "@/components/SuggestionCard";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -119,9 +119,7 @@ const MySuggestions = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-
+    <AppLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="font-bold mb-2">My Suggestions</h1>
@@ -169,7 +167,7 @@ const MySuggestions = () => {
           </div>
         )}
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

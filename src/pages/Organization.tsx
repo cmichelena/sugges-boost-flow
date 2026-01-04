@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
-import { Navbar } from "@/components/Navbar";
+import { AppLayout } from "@/components/AppLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -336,19 +336,16 @@ const OrganizationPage = () => {
 
   if (loading || orgLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
+      <AppLayout>
         <div className="container mx-auto px-4 py-8 flex items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin" />
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      
+    <AppLayout>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <h1 className="font-bold mb-6 flex items-center gap-3">
           <Building2 className="w-8 h-8" />
@@ -686,7 +683,7 @@ const OrganizationPage = () => {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

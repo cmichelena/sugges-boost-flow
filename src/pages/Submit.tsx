@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Navbar } from "@/components/Navbar";
+import { AppLayout } from "@/components/AppLayout";
 import { toast } from "sonner";
 import { Loader2, ScrollText, Sparkles, Lock } from "lucide-react";
 import { z } from "zod";
@@ -183,9 +183,7 @@ const Submit = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      
+    <AppLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           <Card className="p-8">
@@ -387,7 +385,7 @@ const Submit = () => {
         open={showUpgradePrompt}
         onClose={() => setShowUpgradePrompt(false)}
       />
-    </div>
+    </AppLayout>
   );
 };
 
