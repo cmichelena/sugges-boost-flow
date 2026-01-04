@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { SuggestionCard } from "@/components/SuggestionCard";
 import { Navbar } from "@/components/Navbar";
 import { Onboarding } from "@/components/Onboarding";
+import { DashboardSkeleton } from "@/components/DashboardSkeleton";
 import { toast } from "sonner";
-import { Loader2, User, ChevronDown } from "lucide-react";
+import { User, ChevronDown, Loader2 } from "lucide-react";
 import { MomentumActivityDashboard } from "@/components/MomentumActivityDashboard";
 import { SuggestionJourneyChart } from "@/components/SuggestionJourneyChart";
 import { calculateMomentum, getMomentumLevel, calculateReactionScore, type MomentumLevel } from "@/lib/momentum";
@@ -253,9 +254,7 @@ const Dashboard = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="flex justify-center items-center py-24">
-          <Loader2 className="w-8 h-8 animate-spin" />
-        </div>
+        <DashboardSkeleton />
       </div>
     );
   }
