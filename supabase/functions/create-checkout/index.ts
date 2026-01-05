@@ -7,6 +7,21 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Whitelist of allowed origins for Stripe redirect URLs
+const ALLOWED_ORIGINS = [
+  'https://www.suggistit.com',
+  'https://suggistit.com',
+  'https://cxuuuibgsnxynoaomebn.lovableproject.com',
+  'http://localhost:5173', // Development
+  'http://localhost:8080', // Development alternative
+];
+
+const getValidatedOrigin = (requestOrigin: string | null): string => {
+  const defaultOrigin = 'https://cxuuuibgsnxynoaomebn.lovableproject.com';
+  if (!requestOrigin) return defaultOrigin;
+  return ALLOWED_ORIGINS.includes(requestOrigin) ? requestOrigin : defaultOrigin;
+};
+
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[CREATE-CHECKOUT] ${step}${detailsStr}`);
@@ -75,7 +90,8 @@ serve(async (req) => {
       logStep("Found existing customer", { customerId });
     }
 
-    const origin = req.headers.get("origin") || "https://cxuuuibgsnxynoaomebn.lovableproject.com";
+    const origin = getValidatedOrigin(req.headers.get("origin"));
+    logStep("Using validated origin", { origin });
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
