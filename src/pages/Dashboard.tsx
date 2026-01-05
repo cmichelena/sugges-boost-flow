@@ -107,6 +107,7 @@ const Dashboard = () => {
 
     setCategories(categoriesData || []);
 
+    // Fetch ALL suggestions (including archived) for overall stats
     const { data, error } = await supabase
       .from("suggestions")
       .select(`
@@ -118,7 +119,6 @@ const Dashboard = () => {
         )
       `)
       .eq("organization_id", activeOrganization.id)
-      .eq("archived", false)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -288,7 +288,8 @@ const Dashboard = () => {
   }
 
 
-  let filteredSuggestions = suggestions;
+  // Filter to non-archived suggestions for the list display
+  let filteredSuggestions = suggestions.filter(s => !s.archived);
 
   if (selectedMomentum) {
     filteredSuggestions = filteredSuggestions.filter((s) => {
