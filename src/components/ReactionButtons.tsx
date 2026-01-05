@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
-import { Flame, ThumbsUp, Minus, AlertTriangle, Loader2 } from "lucide-react";
+import { ChevronUp, ChevronDown, ChevronsUp, ChevronsDown, Loader2, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type ReactionType = "champion" | "support" | "neutral" | "concerns";
@@ -23,40 +23,47 @@ interface ReactionButtonsProps {
   onReactionChange?: (counts: ReactionCounts, userReaction: ReactionType | null) => void;
 }
 
+// Mapping database enum to new semantic labels
+// champion = Strong Support (+2), support = Support (+1), neutral = Oppose (-1), concerns = Strong Oppose (-2)
 const reactionConfig: Record<ReactionType, { 
-  icon: typeof Flame; 
+  icon: typeof ChevronUp; 
   label: string; 
-  weight: string;
+  weight: number;
+  weightLabel: string;
   color: string;
   activeColor: string;
 }> = {
   champion: { 
-    icon: Flame, 
-    label: "Champion", 
-    weight: "+2",
-    color: "text-muted-foreground hover:text-orange-500",
-    activeColor: "text-orange-500 bg-orange-500/10"
+    icon: ChevronsUp, 
+    label: "Strong Support", 
+    weight: 2,
+    weightLabel: "+2",
+    color: "text-muted-foreground hover:text-emerald-500",
+    activeColor: "text-emerald-500 bg-emerald-500/20"
   },
   support: { 
-    icon: ThumbsUp, 
+    icon: ChevronUp, 
     label: "Support", 
-    weight: "+1",
-    color: "text-muted-foreground hover:text-emerald-500",
-    activeColor: "text-emerald-500 bg-emerald-500/10"
+    weight: 1,
+    weightLabel: "+1",
+    color: "text-muted-foreground hover:text-emerald-400",
+    activeColor: "text-emerald-400 bg-emerald-400/20"
   },
   neutral: { 
-    icon: Minus, 
-    label: "Neutral", 
-    weight: "0",
-    color: "text-muted-foreground hover:text-blue-500",
-    activeColor: "text-blue-500 bg-blue-500/10"
+    icon: ChevronDown, 
+    label: "Oppose", 
+    weight: -1,
+    weightLabel: "-1",
+    color: "text-muted-foreground hover:text-orange-400",
+    activeColor: "text-orange-400 bg-orange-400/20"
   },
   concerns: { 
-    icon: AlertTriangle, 
-    label: "Concerns", 
-    weight: "-1",
-    color: "text-muted-foreground hover:text-amber-500",
-    activeColor: "text-amber-500 bg-amber-500/10"
+    icon: ChevronsDown, 
+    label: "Strong Oppose", 
+    weight: -2,
+    weightLabel: "-2",
+    color: "text-muted-foreground hover:text-red-500",
+    activeColor: "text-red-500 bg-red-500/20"
   },
 };
 
@@ -153,8 +160,8 @@ export const ReactionButtons = ({
   const totalScore = 
     counts.champion * 2 + 
     counts.support * 1 + 
-    counts.neutral * 0 + 
-    counts.concerns * -1;
+    counts.neutral * -1 + 
+    counts.concerns * -2;
 
   if (compact) {
     return (
@@ -187,7 +194,7 @@ export const ReactionButtons = ({
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{config.label} ({config.weight})</p>
+                  <p>{config.label} ({config.weightLabel} momentum)</p>
                 </TooltipContent>
               </Tooltip>
             );
@@ -239,7 +246,7 @@ export const ReactionButtons = ({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{config.label} ({config.weight} momentum)</p>
+                  <p>{config.label} ({config.weightLabel} momentum)</p>
                 </TooltipContent>
               </Tooltip>
             );

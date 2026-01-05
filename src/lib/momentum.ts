@@ -46,6 +46,7 @@ export const getMomentumLevel = (score: number): MomentumLevel => {
 
 /**
  * Calculate weighted reaction score from individual reaction counts
+ * Strong Support = +2, Support = +1, Oppose = -1, Strong Oppose = -2
  */
 export const calculateReactionScore = (
   champion: number,
@@ -53,5 +54,5 @@ export const calculateReactionScore = (
   neutral: number,
   concerns: number
 ): number => {
-  return (champion * 2) + (support * 1) + (neutral * 0) + (concerns * -1);
+  return (champion * 2) + (support * 1) + (neutral * -1) + (concerns * -2);
 };
