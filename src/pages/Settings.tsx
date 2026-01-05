@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AvatarUpload } from "@/components/AvatarUpload";
+import { NotificationSettings } from "@/components/NotificationSettings";
 
 const languages = [
   { code: "en", name: "English", flag: "🇬🇧" },
@@ -252,6 +253,11 @@ const Settings = () => {
             </div>
           </div>
         </Card>
+
+        {/* Notification Settings */}
+        <div className="mb-6">
+          <NotificationSettings />
+        </div>
 
         <Card className="p-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">

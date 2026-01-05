@@ -44,28 +44,43 @@ const handler = async (req: Request): Promise<Response> => {
       assigned_team_id 
     });
 
-    const emailsToSend: { email: string; name: string; type: 'user' | 'team' }[] = [];
+    const emailsToSend: { email: string; name: string; type: 'user' | 'team'; userId: string }[] = [];
 
     // If assigned to a specific user, get their email
     if (assigned_user_id) {
-      const { data: userData, error: userError } = await supabase.auth.admin.getUserById(assigned_user_id);
-      
-      if (userError) {
-        console.error("Error fetching assigned user:", userError);
-      } else if (userData?.user?.email) {
-        // Get display name from profiles
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("display_name")
-          .eq("id", assigned_user_id)
-          .single();
+      // Check user's notification preferences
+      const { data: prefs } = await supabase
+        .from("notification_preferences")
+        .select("email_enabled")
+        .eq("user_id", assigned_user_id)
+        .maybeSingle();
+
+      // Default to email enabled if no preferences exist
+      const emailEnabled = prefs?.email_enabled ?? true;
+
+      if (emailEnabled) {
+        const { data: userData, error: userError } = await supabase.auth.admin.getUserById(assigned_user_id);
         
-        emailsToSend.push({
-          email: userData.user.email,
-          name: profile?.display_name || userData.user.email.split('@')[0],
-          type: 'user'
-        });
-        console.log("Added assigned user to notification list:", userData.user.email);
+        if (userError) {
+          console.error("Error fetching assigned user:", userError);
+        } else if (userData?.user?.email) {
+          // Get display name from profiles
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("display_name")
+            .eq("id", assigned_user_id)
+            .single();
+          
+          emailsToSend.push({
+            email: userData.user.email,
+            name: profile?.display_name || userData.user.email.split('@')[0],
+            type: 'user',
+            userId: assigned_user_id
+          });
+          console.log("Added assigned user to notification list:", userData.user.email);
+        }
+      } else {
+        console.log("User has email notifications disabled:", assigned_user_id);
       }
     }
 
@@ -92,6 +107,21 @@ const handler = async (req: Request): Promise<Response> => {
           // Skip if this user was already added as the direct assignee
           if (member.user_id === assigned_user_id) continue;
 
+          // Check user's notification preferences
+          const { data: prefs } = await supabase
+            .from("notification_preferences")
+            .select("email_enabled")
+            .eq("user_id", member.user_id)
+            .maybeSingle();
+
+          // Default to email enabled if no preferences exist
+          const emailEnabled = prefs?.email_enabled ?? true;
+
+          if (!emailEnabled) {
+            console.log("Team member has email notifications disabled:", member.user_id);
+            continue;
+          }
+
           const { data: memberData, error: memberError } = await supabase.auth.admin.getUserById(member.user_id);
           
           if (memberError) {
@@ -109,7 +139,8 @@ const handler = async (req: Request): Promise<Response> => {
             emailsToSend.push({
               email: memberData.user.email,
               name: profile?.display_name || memberData.user.email.split('@')[0],
-              type: 'team'
+              type: 'team',
+              userId: member.user_id
             });
             console.log("Added team member to notification list:", memberData.user.email);
           }
