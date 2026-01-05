@@ -143,6 +143,28 @@ const Submit = () => {
 
       if (error) throw error;
 
+      // Send assignment notification if suggestion was assigned
+      const assignedTeamId = assignmentData?.[0]?.team_id;
+      const assignedUserId = assignmentData?.[0]?.assigned_user_id;
+      
+      if (suggestionData && (assignedTeamId || assignedUserId)) {
+        supabase.functions.invoke("send-assignment-notification", {
+          body: {
+            suggestion_id: suggestionData.id,
+            suggestion_title: improved?.improved_title || title,
+            assigned_user_id: assignedUserId || undefined,
+            assigned_team_id: assignedTeamId || undefined,
+            organization_name: activeOrganization.name,
+          },
+        }).then(({ error: notifError }) => {
+          if (notifError) {
+            console.error("Failed to send assignment notification:", notifError);
+          } else {
+            console.log("Assignment notification sent successfully");
+          }
+        });
+      }
+
       // Upload attachments if any
       if (attachments.length > 0 && suggestionData) {
         for (const file of attachments) {
