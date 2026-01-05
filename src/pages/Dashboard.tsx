@@ -6,7 +6,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { Onboarding } from "@/components/Onboarding";
 import { DashboardSkeleton } from "@/components/DashboardSkeleton";
 import { toast } from "sonner";
-import { Users, ChevronDown, Loader2, ArrowUpCircle } from "lucide-react";
+import { Users, ChevronDown, Loader2, ArrowUpCircle, Archive, LayoutList } from "lucide-react";
 import { MomentumActivityDashboard } from "@/components/MomentumActivityDashboard";
 import { SuggestionJourneyChart } from "@/components/SuggestionJourneyChart";
 import { calculateMomentum, getMomentumLevel, calculateReactionScore, type MomentumLevel } from "@/lib/momentum";
@@ -32,6 +32,7 @@ const Dashboard = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [showMyEscalations, setShowMyEscalations] = useState(false);
   const [showTeamAssignments, setShowTeamAssignments] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
   const [userTeamIds, setUserTeamIds] = useState<string[]>([]);
   const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
   const [selectedMomentum, setSelectedMomentum] = useState<MomentumLevel | null>(null);
@@ -217,10 +218,15 @@ const Dashboard = () => {
     }
   }, [navigate, user, authLoading, orgLoading, activeOrganization]);
 
+  // Filter suggestions based on archived toggle for momentum stats
+  const displaySuggestions = useMemo(() => {
+    return suggestions.filter(s => showArchived ? s.archived : !s.archived);
+  }, [suggestions, showArchived]);
+
   const momentumStats = useMemo(() => {
     const result = { fresh: 0, warming: 0, heating: 0, fire: 0 };
     
-    for (const s of suggestions) {
+    for (const s of displaySuggestions) {
       const reactionScore = calculateReactionScore(
         s.reactions?.champion ?? 0,
         s.reactions?.support ?? 0,
@@ -237,7 +243,7 @@ const Dashboard = () => {
       result[level] += 1;
     }
     return result;
-  }, [suggestions]);
+  }, [displaySuggestions]);
 
   const activityStats = useMemo(() => {
     let total = suggestions.length;
@@ -288,8 +294,8 @@ const Dashboard = () => {
   }
 
 
-  // Filter to non-archived suggestions for the list display
-  let filteredSuggestions = suggestions.filter(s => !s.archived);
+  // Use displaySuggestions (already filtered by archived state) for the list
+  let filteredSuggestions = [...displaySuggestions];
 
   if (selectedMomentum) {
     filteredSuggestions = filteredSuggestions.filter((s) => {
@@ -440,6 +446,30 @@ const Dashboard = () => {
                 {t("dashboard.myEscalations", "My Escalations")}
               </button>
             )}
+
+            <button
+              onClick={() => setShowArchived(!showArchived)}
+              className={`
+                px-3 py-2 rounded-md text-sm font-medium transition-all duration-200
+                border flex items-center gap-1.5
+                ${showArchived
+                  ? "bg-primary border-primary text-primary-foreground"
+                  : "bg-background border-input text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                }
+              `}
+            >
+              {showArchived ? (
+                <>
+                  <LayoutList className="w-4 h-4" />
+                  {t("dashboard.showActive", "Active")}
+                </>
+              ) : (
+                <>
+                  <Archive className="w-4 h-4" />
+                  {t("dashboard.showArchived", "Archived")}
+                </>
+              )}
+            </button>
           </div>
 
           {loading ? (
