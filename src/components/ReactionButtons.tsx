@@ -166,47 +166,43 @@ export const ReactionButtons = ({
   if (compact) {
     return (
       <TooltipProvider>
-        <div className="flex items-center gap-1">
-          {(Object.keys(reactionConfig) as ReactionType[]).map((type) => {
-            const config = reactionConfig[type];
-            const Icon = config.icon;
-            const isActive = userReaction === type;
-            const count = counts[type];
+        <div className="flex items-center gap-1.5">
+          {/* All reaction buttons always visible */}
+          <div className="flex items-center border border-border rounded-md overflow-hidden">
+            {(Object.keys(reactionConfig) as ReactionType[]).map((type, index) => {
+              const config = reactionConfig[type];
+              const Icon = config.icon;
+              const isActive = userReaction === type;
+              const count = counts[type];
 
-            if (count === 0 && !isActive) return null;
-
-            return (
-              <Tooltip key={type}>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleReaction(type);
-                    }}
-                    disabled={loading}
-                    className={cn(
-                      "flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs transition-colors",
-                      isActive ? config.activeColor : "text-muted-foreground hover:bg-muted"
-                    )}
-                  >
-                    <Icon className="w-3 h-3" />
-                    <span>{count}</span>
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{config.label} ({config.weightLabel} momentum)</p>
-                </TooltipContent>
-              </Tooltip>
-            );
-          })}
-          {totalScore !== 0 && (
-            <span className={cn(
-              "text-xs font-medium ml-1",
-              totalScore > 0 ? "text-emerald-500" : "text-amber-500"
-            )}>
-              {totalScore > 0 ? `+${totalScore}` : totalScore}
-            </span>
-          )}
+              return (
+                <Tooltip key={type}>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleReaction(type);
+                      }}
+                      disabled={loading}
+                      className={cn(
+                        "flex items-center gap-0.5 px-2 py-1 text-xs transition-all border-r border-border last:border-r-0",
+                        isActive 
+                          ? config.activeColor + " font-medium" 
+                          : "text-muted-foreground hover:bg-muted/50"
+                      )}
+                    >
+                      <Icon className={cn("w-3.5 h-3.5", isActive && "scale-110")} />
+                      {count > 0 && <span className="min-w-[12px] text-center">{count}</span>}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs">
+                    <p className="font-medium">{config.label}</p>
+                    <p className="text-muted-foreground">{config.weightLabel} momentum</p>
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
+          </div>
         </div>
       </TooltipProvider>
     );
