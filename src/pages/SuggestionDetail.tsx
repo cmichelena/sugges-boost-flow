@@ -13,6 +13,7 @@ import { MessageCircle, Eye, ArrowLeft, Send, Trash2, CheckCircle, XCircle } fro
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
+import { useCanManageSuggestion } from "@/hooks/useCanManageSuggestion";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { z } from "zod";
 import { AttachmentList } from "@/components/AttachmentList";
@@ -69,8 +70,9 @@ const SuggestionDetail = () => {
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(true);
   const [submittingComment, setSubmittingComment] = useState(false);
-  const [isOwner, setIsOwner] = useState(false);
   const [statusAction, setStatusAction] = useState<"accept" | "reject" | null>(null);
+  
+  const { canManage, isOwner } = useCanManageSuggestion(suggestion);
 
   useEffect(() => {
     if (id) {
@@ -159,7 +161,6 @@ const SuggestionDetail = () => {
       setUserReaction(currentUserReaction);
       setComments(commentsWithProfiles);
       setAttachments(attachmentsData || []);
-      setIsOwner(user?.id === suggestionData.user_id);
     } catch (error) {
       console.error("Error loading suggestion:", error);
       toast.error("Failed to load suggestion");
@@ -364,7 +365,7 @@ const SuggestionDetail = () => {
                 </div>
               </div>
 
-              {isOwner && !suggestion.archived && (
+              {canManage && !suggestion.archived && (
                 <div className="mb-4 pb-4 border-b">
                   <label className="text-sm font-medium mb-2 block">Change Status</label>
                   <Select value={suggestion.status} onValueChange={handleStatusChange}>
@@ -445,7 +446,7 @@ const SuggestionDetail = () => {
 
               {user ? (
                 <div className="space-y-3">
-                  {isOwner && !suggestion.archived && (
+                  {canManage && !suggestion.archived && (
                     <div className="flex gap-2 p-3 bg-muted/50 rounded-lg border">
                       <Button
                         variant={statusAction === "accept" ? "default" : "outline"}
