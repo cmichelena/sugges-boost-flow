@@ -251,8 +251,8 @@ const Dashboard = () => {
     for (const s of suggestions) {
       const status = s.status || "";
       if (status === "Open" || status === "") open++;
-      if (status === "In Progress" || status === "Under Review" || status === "Planned") inProgress++;
-      if (status === "Completed") completed++;
+      if (status === "In Progress" || status === "Under Review" || status === "Planned" || status === "Acknowledged") inProgress++;
+      if (status === "Completed" || status === "Accepted") completed++;
       if (status === "Declined") declined++;
 
       const reactionScore = calculateReactionScore(
