@@ -4,11 +4,10 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Check, X } from "lucide-react";
-import logoBlack from "@/assets/suggistit-logo-black.png";
+import { Check, X, Loader2 } from "lucide-react";
+import boxLogo from "@/assets/suggistit-box-logo.png";
 
 // Common weak passwords to reject
 const WEAK_PASSWORDS = [
@@ -68,23 +67,23 @@ const PasswordStrengthIndicator = ({ password }: { password: string }) => {
 
   const metCount = requirements.filter(r => r.met).length;
   const strength = metCount <= 2 ? 'weak' : metCount <= 4 ? 'fair' : 'strong';
-  const strengthColor = strength === 'weak' ? 'bg-destructive' : strength === 'fair' ? 'bg-yellow-500' : 'bg-green-500';
+  const strengthColor = strength === 'weak' ? 'bg-red-500' : strength === 'fair' ? 'bg-yellow-500' : 'bg-green-500';
 
   return (
-    <div className="mt-2 space-y-2">
+    <div className="mt-3 space-y-3">
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5, 6].map((i) => (
           <div
             key={i}
-            className={`h-1 flex-1 rounded-full transition-colors ${
-              i <= metCount ? strengthColor : 'bg-muted'
+            className={`h-1.5 flex-1 rounded-full transition-colors ${
+              i <= metCount ? strengthColor : 'bg-zinc-700'
             }`}
           />
         ))}
       </div>
-      <div className="grid grid-cols-2 gap-1 text-xs">
+      <div className="grid grid-cols-2 gap-2 text-xs">
         {requirements.map((req, i) => (
-          <div key={i} className={`flex items-center gap-1 ${req.met ? 'text-green-600' : 'text-muted-foreground'}`}>
+          <div key={i} className={`flex items-center gap-1.5 ${req.met ? 'text-green-400' : 'text-zinc-500'}`}>
             {req.met ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
             <span>{req.label}</span>
           </div>
@@ -186,75 +185,116 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-background p-4">
-      <Card className="w-full max-w-md p-8">
-        <div className="flex items-center justify-center mb-6">
-          <img src={logoBlack} alt="Suggistit" className="h-12" />
+    <div className="min-h-screen flex items-center justify-center bg-zinc-950 p-4">
+      {/* Background gradient effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-orange-500/20 rounded-full blur-[100px]" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-orange-600/10 rounded-full blur-[100px]" />
+      </div>
+
+      <div className="relative w-full max-w-md">
+        {/* Logo and branding */}
+        <div className="flex flex-col items-center mb-8">
+          <img src={boxLogo} alt="Suggistit" className="h-24 mb-4" />
+          <h1 className="text-3xl font-bold text-white tracking-tight">
+            Suggistit
+          </h1>
+          <p className="text-zinc-400 text-sm mt-1">
+            If you see something, Suggistit
+          </p>
         </div>
 
-        <h2 className="text-2xl font-bold text-center mb-6">
-          {isSignUp ? "Create Account" : "Welcome Back"}
-        </h2>
+        {/* Auth card */}
+        <div className="bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 rounded-2xl p-8 shadow-2xl">
+          <h2 className="text-xl font-semibold text-white text-center mb-6">
+            {isSignUp ? "Create your account" : "Welcome back"}
+          </h2>
 
-        <form onSubmit={handleAuth} className="space-y-4">
-          {isSignUp && (
-            <div>
-              <Label htmlFor="displayName">Display Name</Label>
+          <form onSubmit={handleAuth} className="space-y-5">
+            {isSignUp && (
+              <div className="space-y-2">
+                <Label htmlFor="displayName" className="text-zinc-300 text-sm font-medium">
+                  Display Name
+                </Label>
+                <Input
+                  id="displayName"
+                  type="text"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  required
+                  placeholder="Your name"
+                  className="bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-orange-500 focus:ring-orange-500/20 h-11"
+                />
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-zinc-300 text-sm font-medium">
+                Email
+              </Label>
               <Input
-                id="displayName"
-                type="text"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="Your name"
+                placeholder="you@example.com"
+                className="bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-orange-500 focus:ring-orange-500/20 h-11"
               />
             </div>
-          )}
 
-          <div>
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="you@example.com"
-            />
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-zinc-300 text-sm font-medium">
+                Password
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="••••••••"
+                minLength={8}
+                className="bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-orange-500 focus:ring-orange-500/20 h-11"
+              />
+              {isSignUp && password && (
+                <PasswordStrengthIndicator password={password} />
+              )}
+            </div>
+
+            <Button 
+              type="submit" 
+              className="w-full h-11 bg-orange-500 hover:bg-orange-600 text-white font-medium transition-colors" 
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {isSignUp ? "Creating account..." : "Signing in..."}
+                </>
+              ) : (
+                isSignUp ? "Create Account" : "Sign In"
+              )}
+            </Button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <button
+              onClick={() => setIsSignUp(!isSignUp)}
+              className="text-sm text-zinc-400 hover:text-orange-400 transition-colors"
+            >
+              {isSignUp
+                ? "Already have an account? Sign in"
+                : "Don't have an account? Sign up"}
+            </button>
           </div>
-
-          <div>
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="••••••••"
-              minLength={8}
-            />
-            {isSignUp && password && (
-              <PasswordStrengthIndicator password={password} />
-            )}
-          </div>
-
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Loading..." : isSignUp ? "Sign Up" : "Sign In"}
-          </Button>
-        </form>
-
-        <div className="mt-4 text-center">
-          <button
-            onClick={() => setIsSignUp(!isSignUp)}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {isSignUp
-              ? "Already have an account? Sign in"
-              : "Don't have an account? Sign up"}
-          </button>
         </div>
-      </Card>
+
+        {/* Footer */}
+        <p className="text-center text-zinc-600 text-xs mt-6">
+          By continuing, you agree to our Terms of Service and Privacy Policy
+        </p>
+      </div>
     </div>
   );
 };
