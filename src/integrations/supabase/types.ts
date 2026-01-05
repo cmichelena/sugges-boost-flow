@@ -519,6 +519,8 @@ export type Database = {
           closure_comment_id: string | null
           created_at: string
           description: string
+          escalated_at: string | null
+          escalated_to_user_id: string | null
           id: string
           is_anonymous: boolean
           organization_id: string | null
@@ -542,6 +544,8 @@ export type Database = {
           closure_comment_id?: string | null
           created_at?: string
           description: string
+          escalated_at?: string | null
+          escalated_to_user_id?: string | null
           id?: string
           is_anonymous?: boolean
           organization_id?: string | null
@@ -565,6 +569,8 @@ export type Database = {
           closure_comment_id?: string | null
           created_at?: string
           description?: string
+          escalated_at?: string | null
+          escalated_to_user_id?: string | null
           id?: string
           is_anonymous?: boolean
           organization_id?: string | null
@@ -810,6 +816,13 @@ export type Database = {
           team_id: string
         }[]
       }
+      get_leadership_members: {
+        Args: { _org_id: string }
+        Returns: {
+          display_name: string
+          user_id: string
+        }[]
+      }
       get_reaction_score: { Args: { p_suggestion_id: string }; Returns: number }
       get_user_default_organization: {
         Args: { _user_id: string }
@@ -845,6 +858,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_leadership_member: {
+        Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
       is_org_member: {

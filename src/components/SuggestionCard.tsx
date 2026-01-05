@@ -1,7 +1,7 @@
 import { formatDistanceToNow } from "date-fns";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Eye, User, Users, EyeOff } from "lucide-react";
+import { MessageSquare, Eye, User, Users, EyeOff, ArrowUpCircle } from "lucide-react";
 import { MomentumDial } from "./MomentumDial";
 import { calculateMomentum, getMomentumLevel, calculateReactionScore } from "@/lib/momentum";
 import { ReactionButtons } from "./ReactionButtons";
@@ -29,6 +29,7 @@ interface SuggestionCardProps {
   isAnonymous?: boolean;
   assignedToUserName?: string | null;
   assignedToTeamName?: string | null;
+  escalatedToUserName?: string | null;
   userReaction?: ReactionType | null;
   onReactionChange?: (counts: ReactionCounts, userReaction: ReactionType | null) => void;
   onClick: () => void;
@@ -48,6 +49,7 @@ export const SuggestionCard = ({
   isAnonymous,
   assignedToUserName,
   assignedToTeamName,
+  escalatedToUserName,
   userReaction,
   onReactionChange,
   onClick,
@@ -105,6 +107,15 @@ export const SuggestionCard = ({
                 <Badge variant="outline" className="text-xs">
                   <Users className="w-3 h-3 mr-1" />
                   Assigned to {assignedToTeamName}
+                </Badge>
+              </>
+            )}
+            {escalatedToUserName && (
+              <>
+                <span>•</span>
+                <Badge variant="default" className="text-xs bg-primary/90">
+                  <ArrowUpCircle className="w-3 h-3 mr-1" />
+                  Escalated to {escalatedToUserName}
                 </Badge>
               </>
             )}
