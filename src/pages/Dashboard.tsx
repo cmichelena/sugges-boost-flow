@@ -6,7 +6,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { Onboarding } from "@/components/Onboarding";
 import { DashboardSkeleton } from "@/components/DashboardSkeleton";
 import { toast } from "sonner";
-import { User, Users, ChevronDown, Loader2 } from "lucide-react";
+import { Users, ChevronDown, Loader2, ArrowUpCircle } from "lucide-react";
 import { MomentumActivityDashboard } from "@/components/MomentumActivityDashboard";
 import { SuggestionJourneyChart } from "@/components/SuggestionJourneyChart";
 import { calculateMomentum, getMomentumLevel, calculateReactionScore, type MomentumLevel } from "@/lib/momentum";
@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useTranslation } from "react-i18next";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsLeadershipMember } from "@/hooks/useIsLeadershipMember";
 
 interface ReactionCounts {
   champion: number;
@@ -29,7 +30,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [showMyAssignments, setShowMyAssignments] = useState(false);
+  const [showMyEscalations, setShowMyEscalations] = useState(false);
   const [showTeamAssignments, setShowTeamAssignments] = useState(false);
   const [userTeamIds, setUserTeamIds] = useState<string[]>([]);
   const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
@@ -43,6 +44,7 @@ const Dashboard = () => {
   const { t } = useTranslation();
   const { activeOrganization, loading: orgLoading } = useOrganization();
   const { user, loading: authLoading } = useAuth();
+  const { isLeadershipMember } = useIsLeadershipMember();
 
   // Check for subscription success message
   useEffect(() => {
@@ -152,12 +154,13 @@ const Dashboard = () => {
       }
     });
 
-    // Get unique user IDs for profile lookup (including assigned users)
+    // Get unique user IDs for profile lookup (including assigned users and escalated users)
     const userIds = [...new Set(
       (data || [])
         .flatMap(s => [
           !s.is_anonymous && s.user_id ? s.user_id : null,
-          s.assigned_to_user_id ? s.assigned_to_user_id : null
+          s.assigned_to_user_id ? s.assigned_to_user_id : null,
+          s.escalated_to_user_id ? s.escalated_to_user_id : null
         ])
         .filter(Boolean)
     )];
@@ -190,6 +193,11 @@ const Dashboard = () => {
         assigned_user: suggestion.assigned_to_user_id ? {
           profiles: {
             display_name: profilesMap.get(suggestion.assigned_to_user_id) || null
+          }
+        } : null,
+        escalated_user: suggestion.escalated_to_user_id ? {
+          profiles: {
+            display_name: profilesMap.get(suggestion.escalated_to_user_id) || null
           }
         } : null
       };
@@ -306,8 +314,8 @@ const Dashboard = () => {
   if (statusFilter !== "all") {
     filteredSuggestions = filteredSuggestions.filter(s => s.status === statusFilter);
   }
-  if (showMyAssignments && user) {
-    filteredSuggestions = filteredSuggestions.filter(s => s.assigned_to_user_id === user.id);
+  if (showMyEscalations && user) {
+    filteredSuggestions = filteredSuggestions.filter(s => s.escalated_to_user_id === user.id);
   }
   if (showTeamAssignments && userTeamIds.length > 0) {
     filteredSuggestions = filteredSuggestions.filter(s => 
@@ -392,29 +400,11 @@ const Dashboard = () => {
               </SelectContent>
             </Select>
 
-            <button
-              onClick={() => {
-                setShowMyAssignments(!showMyAssignments);
-                if (!showMyAssignments) setShowTeamAssignments(false);
-              }}
-              className={`
-                px-3 py-2 rounded-md text-sm font-medium transition-all duration-200
-                border flex items-center gap-1.5
-                ${showMyAssignments
-                  ? "bg-primary border-primary text-primary-foreground"
-                  : "bg-background border-input text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                }
-              `}
-            >
-              <User className="w-4 h-4" />
-              {t("dashboard.myAssignments")}
-            </button>
-
             {userTeamIds.length > 0 && (
               <button
                 onClick={() => {
                   setShowTeamAssignments(!showTeamAssignments);
-                  if (!showTeamAssignments) setShowMyAssignments(false);
+                  if (!showTeamAssignments) setShowMyEscalations(false);
                 }}
                 className={`
                   px-3 py-2 rounded-md text-sm font-medium transition-all duration-200
@@ -427,6 +417,26 @@ const Dashboard = () => {
               >
                 <Users className="w-4 h-4" />
                 {t("dashboard.teamAssignments")}
+              </button>
+            )}
+
+            {isLeadershipMember && (
+              <button
+                onClick={() => {
+                  setShowMyEscalations(!showMyEscalations);
+                  if (!showMyEscalations) setShowTeamAssignments(false);
+                }}
+                className={`
+                  px-3 py-2 rounded-md text-sm font-medium transition-all duration-200
+                  border flex items-center gap-1.5
+                  ${showMyEscalations
+                    ? "bg-primary border-primary text-primary-foreground"
+                    : "bg-background border-input text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  }
+                `}
+              >
+                <ArrowUpCircle className="w-4 h-4" />
+                {t("dashboard.myEscalations", "My Escalations")}
               </button>
             )}
           </div>
@@ -457,6 +467,7 @@ const Dashboard = () => {
                   isAnonymous={suggestion.is_anonymous}
                   assignedToUserName={suggestion.assigned_user?.profiles?.display_name || null}
                   assignedToTeamName={suggestion.assigned_team?.name || null}
+                  escalatedToUserName={suggestion.escalated_user?.profiles?.display_name || null}
                   userReaction={suggestion.userReaction}
                   onReactionChange={(counts, userReaction) => {
                     setSuggestions(prev => prev.map(s => 

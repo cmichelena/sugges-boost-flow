@@ -8,12 +8,14 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { MomentumDial } from "@/components/MomentumDial";
 import { ReactionButtons } from "@/components/ReactionButtons";
+import { ElevateToLeadershipDialog } from "@/components/ElevateToLeadershipDialog";
 import { calculateMomentum, getMomentumLevel, calculateReactionScore } from "@/lib/momentum";
-import { MessageCircle, Eye, ArrowLeft, Send, Trash2, CheckCircle, XCircle } from "lucide-react";
+import { MessageCircle, Eye, ArrowLeft, Send, Trash2, CheckCircle, XCircle, ArrowUpCircle } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { useCanManageSuggestion } from "@/hooks/useCanManageSuggestion";
+import { useCanEscalate } from "@/hooks/useCanEscalate";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { z } from "zod";
 import { AttachmentList } from "@/components/AttachmentList";
@@ -71,8 +73,11 @@ const SuggestionDetail = () => {
   const [loading, setLoading] = useState(true);
   const [submittingComment, setSubmittingComment] = useState(false);
   const [statusAction, setStatusAction] = useState<"accept" | "reject" | null>(null);
+  const [showEscalateDialog, setShowEscalateDialog] = useState(false);
+  const [escalatedToProfile, setEscalatedToProfile] = useState<{ display_name: string } | null>(null);
   
   const { canManage, isOwner } = useCanManageSuggestion(suggestion);
+  const { canEscalate } = useCanEscalate(suggestion);
 
   useEffect(() => {
     if (id) {
@@ -145,6 +150,17 @@ const SuggestionDetail = () => {
             .order("created_at", { ascending: true }),
         ]);
 
+      // Fetch escalated user profile if exists
+      let escalatedProfile = null;
+      if (suggestionData.escalated_to_user_id) {
+        const { data: escProfile } = await supabase
+          .from("profiles")
+          .select("display_name")
+          .eq("id", suggestionData.escalated_to_user_id)
+          .single();
+        escalatedProfile = escProfile;
+      }
+
       const commentsWithProfiles = await Promise.all(
         (commentsData || []).map(async (comment) => {
           const { data: commentProfile } = await supabase
@@ -161,6 +177,7 @@ const SuggestionDetail = () => {
       setUserReaction(currentUserReaction);
       setComments(commentsWithProfiles);
       setAttachments(attachmentsData || []);
+      setEscalatedToProfile(escalatedProfile);
     } catch (error) {
       console.error("Error loading suggestion:", error);
       toast.error("Failed to load suggestion");
@@ -351,9 +368,15 @@ const SuggestionDetail = () => {
           <div className="lg:col-span-2 space-y-6">
             <Card className="p-6">
               <div className="space-y-4 mb-4">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <Badge>{suggestion.category}</Badge>
                   <Badge variant="outline">{suggestion.status}</Badge>
+                  {suggestion.escalated_to_user_id && (
+                    <Badge variant="default" className="bg-primary/90">
+                      <ArrowUpCircle className="w-3 h-3 mr-1" />
+                      Escalated to {escalatedToProfile?.display_name || "Leadership"}
+                    </Badge>
+                  )}
                 </div>
                 <h1 className="font-bold">{suggestion.title}</h1>
                 <p className="text-muted-foreground">
@@ -364,6 +387,20 @@ const SuggestionDetail = () => {
                   <MomentumDial level={momentumLevel} score={momentumScore} size="lg" />
                 </div>
               </div>
+
+              {/* Escalate to Leadership button */}
+              {canEscalate && !suggestion.archived && (
+                <div className="mb-4 pb-4 border-b">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowEscalateDialog(true)}
+                    className="w-full sm:w-auto gap-2"
+                  >
+                    <ArrowUpCircle className="w-4 h-4" />
+                    Elevate to Leadership
+                  </Button>
+                </div>
+              )}
 
               {canManage && !suggestion.archived && (
                 <div className="mb-4 pb-4 border-b">
@@ -551,6 +588,30 @@ const SuggestionDetail = () => {
           )}
         </div>
       </div>
+
+      <ElevateToLeadershipDialog
+        open={showEscalateDialog}
+        onOpenChange={setShowEscalateDialog}
+        suggestionId={id!}
+        onEscalated={(escalatedToUserId, escalatedAt) => {
+          setSuggestion({
+            ...suggestion,
+            escalated_to_user_id: escalatedToUserId,
+            escalated_at: escalatedAt,
+          });
+          // Fetch the profile of the escalated user
+          supabase
+            .from("profiles")
+            .select("display_name")
+            .eq("id", escalatedToUserId)
+            .single()
+            .then(({ data }) => {
+              if (data) setEscalatedToProfile(data);
+            });
+          // Reload comments to show the escalation comment
+          loadSuggestion();
+        }}
+      />
     </AppLayout>
   );
 };
