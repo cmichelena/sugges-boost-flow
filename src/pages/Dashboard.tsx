@@ -6,7 +6,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { Onboarding } from "@/components/Onboarding";
 import { DashboardSkeleton } from "@/components/DashboardSkeleton";
 import { toast } from "sonner";
-import { User, ChevronDown, Loader2 } from "lucide-react";
+import { User, Users, ChevronDown, Loader2 } from "lucide-react";
 import { MomentumActivityDashboard } from "@/components/MomentumActivityDashboard";
 import { SuggestionJourneyChart } from "@/components/SuggestionJourneyChart";
 import { calculateMomentum, getMomentumLevel, calculateReactionScore, type MomentumLevel } from "@/lib/momentum";
@@ -30,6 +30,8 @@ const Dashboard = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [showMyAssignments, setShowMyAssignments] = useState(false);
+  const [showTeamAssignments, setShowTeamAssignments] = useState(false);
+  const [userTeamIds, setUserTeamIds] = useState<string[]>([]);
   const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
   const [selectedMomentum, setSelectedMomentum] = useState<MomentumLevel | null>(null);
   const [isNewUser, setIsNewUser] = useState(false);
@@ -65,6 +67,15 @@ const Dashboard = () => {
     if (!user || !activeOrganization) return;
 
     setLoading(true);
+
+    // Fetch user's team memberships
+    const { data: teamMemberships } = await supabase
+      .from("team_members")
+      .select("team_id")
+      .eq("user_id", user.id);
+    
+    const teamIds = (teamMemberships || []).map(tm => tm.team_id);
+    setUserTeamIds(teamIds);
 
     // Check if user is new and needs onboarding
     const { data: profile } = await supabase
@@ -298,6 +309,11 @@ const Dashboard = () => {
   if (showMyAssignments && user) {
     filteredSuggestions = filteredSuggestions.filter(s => s.assigned_to_user_id === user.id);
   }
+  if (showTeamAssignments && userTeamIds.length > 0) {
+    filteredSuggestions = filteredSuggestions.filter(s => 
+      s.assigned_team_id && userTeamIds.includes(s.assigned_team_id)
+    );
+  }
 
   return (
     <AppLayout>
@@ -377,7 +393,10 @@ const Dashboard = () => {
             </Select>
 
             <button
-              onClick={() => setShowMyAssignments(!showMyAssignments)}
+              onClick={() => {
+                setShowMyAssignments(!showMyAssignments);
+                if (!showMyAssignments) setShowTeamAssignments(false);
+              }}
               className={`
                 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200
                 border flex items-center gap-1.5
@@ -390,6 +409,26 @@ const Dashboard = () => {
               <User className="w-4 h-4" />
               {t("dashboard.myAssignments")}
             </button>
+
+            {userTeamIds.length > 0 && (
+              <button
+                onClick={() => {
+                  setShowTeamAssignments(!showTeamAssignments);
+                  if (!showTeamAssignments) setShowMyAssignments(false);
+                }}
+                className={`
+                  px-3 py-2 rounded-md text-sm font-medium transition-all duration-200
+                  border flex items-center gap-1.5
+                  ${showTeamAssignments
+                    ? "bg-primary border-primary text-primary-foreground"
+                    : "bg-background border-input text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  }
+                `}
+              >
+                <Users className="w-4 h-4" />
+                {t("dashboard.teamAssignments")}
+              </button>
+            )}
           </div>
 
           {loading ? (
