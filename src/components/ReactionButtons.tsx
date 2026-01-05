@@ -164,12 +164,14 @@ export const ReactionButtons = ({
     counts.concerns * -2;
 
   if (compact) {
+    const hasVoted = userReaction !== null;
+    
     return (
       <TooltipProvider>
         <div className="flex items-center gap-1.5">
-          {/* All reaction buttons always visible */}
-          <div className="flex items-center border border-border rounded-md overflow-hidden">
-            {(Object.keys(reactionConfig) as ReactionType[]).map((type, index) => {
+          {/* Single-choice reaction selector */}
+          <div className="flex items-center border border-border rounded-md overflow-hidden bg-muted/30">
+            {(Object.keys(reactionConfig) as ReactionType[]).map((type) => {
               const config = reactionConfig[type];
               const Icon = config.icon;
               const isActive = userReaction === type;
@@ -185,19 +187,32 @@ export const ReactionButtons = ({
                       }}
                       disabled={loading}
                       className={cn(
-                        "flex items-center gap-0.5 px-2 py-1 text-xs transition-all border-r border-border last:border-r-0",
+                        "flex items-center gap-0.5 px-2 py-1.5 text-xs transition-all border-r border-border/50 last:border-r-0 relative",
                         isActive 
-                          ? config.activeColor + " font-medium" 
-                          : "text-muted-foreground hover:bg-muted/50"
+                          ? cn(config.activeColor, "font-semibold shadow-sm z-10")
+                          : hasVoted
+                            ? "text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/50"
+                            : "text-muted-foreground hover:bg-muted/50"
                       )}
                     >
-                      <Icon className={cn("w-3.5 h-3.5", isActive && "scale-110")} />
-                      {count > 0 && <span className="min-w-[12px] text-center">{count}</span>}
+                      <Icon className={cn(
+                        "w-3.5 h-3.5 transition-transform",
+                        isActive && "scale-125"
+                      )} />
+                      {count > 0 && (
+                        <span className={cn(
+                          "min-w-[14px] text-center",
+                          isActive ? "font-bold" : "opacity-70"
+                        )}>
+                          {count}
+                        </span>
+                      )}
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="text-xs">
                     <p className="font-medium">{config.label}</p>
                     <p className="text-muted-foreground">{config.weightLabel} momentum</p>
+                    {isActive && <p className="text-primary text-[10px] mt-0.5">Your vote • click to remove</p>}
                   </TooltipContent>
                 </Tooltip>
               );
