@@ -7,7 +7,9 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Check, X, Loader2 } from "lucide-react";
-import boxLogo from "@/assets/suggistit-box-logo.png";
+import { useTheme } from "next-themes";
+import boxLogoDark from "@/assets/suggistit-box-logo.png";
+import boxLogoLight from "@/assets/suggistit-logo-light.png";
 
 // Common weak passwords to reject
 const WEAK_PASSWORDS = [
@@ -101,6 +103,9 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { resolvedTheme } = useTheme();
+  
+  const isDark = resolvedTheme === "dark";
 
   // Get safe redirect URL from query params
   const getSafeRedirectUrl = () => {
@@ -185,35 +190,54 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-950 p-4">
+    <div className={`min-h-screen flex items-center justify-center p-4 ${isDark ? 'bg-zinc-950' : 'bg-gradient-to-br from-orange-50 via-white to-orange-50'}`}>
       {/* Background gradient effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-orange-500/20 rounded-full blur-[100px]" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-orange-600/10 rounded-full blur-[100px]" />
+        {isDark ? (
+          <>
+            <div className="absolute -top-40 -right-40 w-80 h-80 bg-orange-500/20 rounded-full blur-[100px]" />
+            <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-orange-600/10 rounded-full blur-[100px]" />
+          </>
+        ) : (
+          <>
+            <div className="absolute -top-40 -right-40 w-96 h-96 bg-orange-200/40 rounded-full blur-[120px]" />
+            <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-orange-100/50 rounded-full blur-[120px]" />
+          </>
+        )}
       </div>
 
       <div className="relative w-full max-w-md">
         {/* Logo and branding */}
         <div className="flex flex-col items-center mb-8">
-          <img src={boxLogo} alt="Suggistit" className="h-24 mb-4" />
-          <h1 className="text-3xl font-bold text-white tracking-tight">
-            Suggistit
-          </h1>
-          <p className="text-zinc-400 text-sm mt-1">
+          {isDark ? (
+            <>
+              <img src={boxLogoDark} alt="Suggistit" className="h-24 mb-4" />
+              <h1 className="text-3xl font-bold text-white tracking-tight">
+                Suggistit
+              </h1>
+            </>
+          ) : (
+            <img src={boxLogoLight} alt="Suggistit" className="h-36" />
+          )}
+          <p className={`text-sm mt-2 ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
             If you see something, Suggistit
           </p>
         </div>
 
         {/* Auth card */}
-        <div className="bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 rounded-2xl p-8 shadow-2xl">
-          <h2 className="text-xl font-semibold text-white text-center mb-6">
+        <div className={`backdrop-blur-sm rounded-2xl p-8 shadow-2xl ${
+          isDark 
+            ? 'bg-zinc-900/80 border border-zinc-800' 
+            : 'bg-white/80 border border-orange-100'
+        }`}>
+          <h2 className={`text-xl font-semibold text-center mb-6 ${isDark ? 'text-white' : 'text-zinc-900'}`}>
             {isSignUp ? "Create your account" : "Welcome back"}
           </h2>
 
           <form onSubmit={handleAuth} className="space-y-5">
             {isSignUp && (
               <div className="space-y-2">
-                <Label htmlFor="displayName" className="text-zinc-300 text-sm font-medium">
+                <Label htmlFor="displayName" className={`text-sm font-medium ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>
                   Display Name
                 </Label>
                 <Input
@@ -223,13 +247,17 @@ const Auth = () => {
                   onChange={(e) => setDisplayName(e.target.value)}
                   required
                   placeholder="Your name"
-                  className="bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-orange-500 focus:ring-orange-500/20 h-11"
+                  className={`h-11 ${
+                    isDark 
+                      ? 'bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500' 
+                      : 'bg-white border-zinc-200 text-zinc-900 placeholder:text-zinc-400'
+                  } focus:border-orange-500 focus:ring-orange-500/20`}
                 />
               </div>
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-zinc-300 text-sm font-medium">
+              <Label htmlFor="email" className={`text-sm font-medium ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>
                 Email
               </Label>
               <Input
@@ -239,12 +267,16 @@ const Auth = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="you@example.com"
-                className="bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-orange-500 focus:ring-orange-500/20 h-11"
+                className={`h-11 ${
+                  isDark 
+                    ? 'bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500' 
+                    : 'bg-white border-zinc-200 text-zinc-900 placeholder:text-zinc-400'
+                } focus:border-orange-500 focus:ring-orange-500/20`}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-zinc-300 text-sm font-medium">
+              <Label htmlFor="password" className={`text-sm font-medium ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>
                 Password
               </Label>
               <Input
@@ -255,7 +287,11 @@ const Auth = () => {
                 required
                 placeholder="••••••••"
                 minLength={8}
-                className="bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-orange-500 focus:ring-orange-500/20 h-11"
+                className={`h-11 ${
+                  isDark 
+                    ? 'bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500' 
+                    : 'bg-white border-zinc-200 text-zinc-900 placeholder:text-zinc-400'
+                } focus:border-orange-500 focus:ring-orange-500/20`}
               />
               {isSignUp && password && (
                 <PasswordStrengthIndicator password={password} />
@@ -281,7 +317,7 @@ const Auth = () => {
           <div className="mt-6 text-center">
             <button
               onClick={() => setIsSignUp(!isSignUp)}
-              className="text-sm text-zinc-400 hover:text-orange-400 transition-colors"
+              className={`text-sm transition-colors ${isDark ? 'text-zinc-400 hover:text-orange-400' : 'text-zinc-500 hover:text-orange-600'}`}
             >
               {isSignUp
                 ? "Already have an account? Sign in"
@@ -291,7 +327,7 @@ const Auth = () => {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-zinc-600 text-xs mt-6">
+        <p className={`text-center text-xs mt-6 ${isDark ? 'text-zinc-600' : 'text-zinc-400'}`}>
           By continuing, you agree to our Terms of Service and Privacy Policy
         </p>
       </div>
