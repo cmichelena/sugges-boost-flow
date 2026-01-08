@@ -41,7 +41,7 @@ export const BottomNavbar = () => {
         const Icon = item.icon;
         if (item.primary) {
           return <Link key={item.path} to={item.path} className="flex flex-col items-center justify-center -mt-4">
-                <div className="flex items-center justify-center w-14 h-14 rounded-full text-primary-foreground shadow-lg bg-[#f9971f]">
+                <div className="flex items-center justify-center w-14 h-14 rounded-full text-primary-foreground shadow-lg bg-[#f07000]">
                   <Icon className="w-6 h-6" />
                 </div>
               </Link>;
