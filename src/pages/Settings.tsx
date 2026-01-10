@@ -54,6 +54,7 @@ const Settings = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [displayName, setDisplayName] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -102,6 +103,23 @@ const Settings = () => {
       toast.error("Failed to update profile");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleResetData = async () => {
+    setResetting(true);
+    try {
+      const { error } = await supabase.functions.invoke('reset-user-data');
+      if (error) throw error;
+      
+      toast.success("Your data has been reset. Your account remains active.");
+      setDisplayName("");
+      loadProfile();
+    } catch (error: any) {
+      console.error("Error resetting account data:", error);
+      toast.error("Failed to reset account data. Please try again.");
+    } finally {
+      setResetting(false);
     }
   };
 
@@ -331,6 +349,46 @@ const Settings = () => {
                   <ExternalLink className="w-4 h-4" />
                 </a>
               </Button>
+            </div>
+
+            <div className="border-t pt-4">
+              <h3 className="font-medium mb-2 text-orange-600 dark:text-orange-400">Reset Account Data</h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                Delete all your suggestions, comments, reactions, and profile data while keeping your account active. This is like starting fresh.
+              </p>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="border-orange-500 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950">
+                    Reset My Data
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Reset all your data?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete all your suggestions, comments, reactions, and profile information.
+                      Your account will remain active and you can continue using the platform with a fresh start.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleResetData}
+                      disabled={resetting}
+                      className="bg-orange-600 text-white hover:bg-orange-700"
+                    >
+                      {resetting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Resetting...
+                        </>
+                      ) : (
+                        "Yes, reset my data"
+                      )}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
 
             <div className="border-t pt-4">
