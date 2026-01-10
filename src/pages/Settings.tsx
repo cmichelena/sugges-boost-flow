@@ -351,6 +351,28 @@ const Settings = () => {
               </Button>
             </div>
 
+            <div>
+              <h3 className="font-medium mb-2">Contact Us</h3>
+              <p className="text-sm text-muted-foreground mb-2">
+                Have questions or need support? Get in touch with our team.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                asChild
+              >
+                <a
+                  href="https://www.vector56.com/contact"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2"
+                >
+                  Contact
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </Button>
+            </div>
+
             <div className="border-t pt-4">
               <h3 className="font-medium mb-2 text-orange-600 dark:text-orange-400">Reset Account Data</h3>
               <p className="text-sm text-muted-foreground mb-3">
