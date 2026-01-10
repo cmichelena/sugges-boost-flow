@@ -375,12 +375,12 @@ const Settings = () => {
 
             <div className="border-t pt-4">
               <h3 className="font-medium mb-2 text-orange-600 dark:text-orange-400">Reset Account Data</h3>
-              <p className="text-sm text-orange-600/80 dark:text-orange-400/80 mb-3">
+              <p className="text-sm text-muted-foreground mb-3">
                 Delete all your suggestions, comments, reactions, and profile data while keeping your account active. This is like starting fresh.
               </p>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="border-orange-500 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950">
+                  <Button size="sm" className="bg-orange-600 text-white hover:bg-orange-700">
                     Reset My Data
                   </Button>
                 </AlertDialogTrigger>
@@ -415,7 +415,7 @@ const Settings = () => {
 
             <div className="border-t pt-4">
               <h3 className="font-medium mb-2 text-destructive">Delete Account</h3>
-              <p className="text-sm text-destructive/80 mb-3">
+              <p className="text-sm text-muted-foreground mb-3">
                 Permanently delete your account and all associated data. This action cannot be undone.
               </p>
               <AlertDialog>
