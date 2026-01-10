@@ -171,6 +171,9 @@ const Landing = () => {
               <Link to="/privacy-policy" className="text-sm text-muted-foreground/70 hover:text-foreground transition-colors">
                 Privacy Policy
               </Link>
+              <a href="https://www.vector56.com/contact" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground/70 hover:text-foreground transition-colors">
+                Contact
+              </a>
             </div>
           </div>
         </div>
