@@ -280,10 +280,28 @@ const OrganizationPage = () => {
     }
   };
 
+  const validateDomain = (domain: string): boolean => {
+    const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
+    return domainRegex.test(domain) || /^[a-zA-Z0-9]+\.[a-zA-Z]{2,}$/.test(domain);
+  };
+
   const handleAddDomain = async () => {
     if (!activeOrganization || !newDomain.trim() || userRole !== "owner") return;
 
     const domain = newDomain.trim().toLowerCase();
+
+    // Validate domain format
+    if (!validateDomain(domain)) {
+      toast.error("Invalid domain format (e.g., company.com)");
+      return;
+    }
+
+    // Check length per RFC 1035
+    if (domain.length > 253) {
+      toast.error("Domain name too long (max 253 characters)");
+      return;
+    }
+
     const currentDomains = activeOrganization.allowed_email_domains || [];
     
     if (currentDomains.includes(domain)) {
