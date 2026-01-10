@@ -8,7 +8,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2, User, Globe, Settings as SettingsIcon, Building2, Sun, Moon, Monitor } from "lucide-react";
+import { Loader2, User, Globe, Settings as SettingsIcon, Building2, Sun, Moon, Monitor, UserX, ExternalLink } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
 import {
@@ -42,6 +53,7 @@ const Settings = () => {
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [displayName, setDisplayName] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -90,6 +102,23 @@ const Settings = () => {
       toast.error("Failed to update profile");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      const { error } = await supabase.functions.invoke('delete-user-account');
+      if (error) throw error;
+      
+      await supabase.auth.signOut();
+      toast.success("Account deletion request submitted. Your data will be removed.");
+      navigate("/");
+    } catch (error: any) {
+      console.error("Error requesting account deletion:", error);
+      toast.error("Failed to request account deletion. Please try again.");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -259,7 +288,7 @@ const Settings = () => {
           <NotificationSettings />
         </div>
 
-        <Card className="p-6">
+        <Card className="p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
             <Building2 className="w-5 h-5" />
             {t("settings.organization")}
@@ -272,6 +301,79 @@ const Settings = () => {
           <Button variant="outline" onClick={() => navigate("/organization")}>
             Go to Organization Settings
           </Button>
+        </Card>
+
+        {/* Account Settings */}
+        <Card className="p-6">
+          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <UserX className="w-5 h-5" />
+            Account
+          </h2>
+          
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-medium mb-2">Privacy Policy</h3>
+              <p className="text-sm text-muted-foreground mb-2">
+                Learn how we handle your data and protect your privacy.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                asChild
+              >
+                <a
+                  href="https://www.vector56.com/privacy-policy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2"
+                >
+                  View Privacy Policy
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </Button>
+            </div>
+
+            <div className="border-t pt-4">
+              <h3 className="font-medium mb-2 text-destructive">Delete Account</h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                Permanently delete your account and all associated data. This action cannot be undone.
+              </p>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm">
+                    Request Account Deletion
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete your account
+                      and remove all your data from our servers, including your suggestions,
+                      comments, and profile information.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDeleteAccount}
+                      disabled={deleting}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {deleting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Deleting...
+                        </>
+                      ) : (
+                        "Yes, delete my account"
+                      )}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </div>
         </Card>
       </div>
     </AppLayout>
