@@ -17,6 +17,7 @@ export default defineConfig(({ mode }) => ({
       registerType: "autoUpdate",
       includeAssets: ["favicon.png", "robots.txt"],
       manifest: {
+        id: "com.suggistit.app",
         name: "Suggistit - Community Suggestion Platform",
         short_name: "Suggistit",
         description: "If you see something, Suggistit. Share and discover ideas from the community.",
