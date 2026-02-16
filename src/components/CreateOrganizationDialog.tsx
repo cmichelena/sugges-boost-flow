@@ -111,52 +111,17 @@ export const CreateOrganizationDialog = ({
     try {
       const slug = generateSlug(trimmedName);
 
-      // Create the organization with workspace_type
-      const { data: newOrg, error: orgError } = await supabase
-        .from("organizations")
-        .insert({
-          name: trimmedName,
-          slug,
-          owner_id: user.id,
-          organization_type: "company",
-          subscription_tier: "free",
-          subscription_status: "trialing",
-          trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-          allowed_email_domains: emailDomains.length > 0 ? emailDomains : null,
-          workspace_type: workspaceType,
-        })
-        .select("id")
-        .single();
-
-      if (orgError) throw orgError;
-
-      // Add user as organization member
-      const { error: memberError } = await supabase
-        .from("organization_members")
-        .insert({
-          user_id: user.id,
-          organization_id: newOrg.id,
-          status: "active",
-          joined_at: new Date().toISOString(),
-          invited_by: user.id,
-        });
-
-      if (memberError) throw memberError;
-
-      // Add owner role
-      const { error: roleError } = await supabase.from("user_roles").insert({
-        user_id: user.id,
-        organization_id: newOrg.id,
-        role: "owner",
+      // Use server-side function to create org + member + role atomically
+      const { data: newOrgId, error } = await supabase.rpc("create_organization_with_owner", {
+        _name: trimmedName,
+        _slug: slug,
+        _owner_id: user.id,
+        _organization_type: "company",
+        _workspace_type: workspaceType,
+        _allowed_email_domains: emailDomains.length > 0 ? emailDomains : null,
       });
 
-      if (roleError) throw roleError;
-
-      // Switch to the new organization
-      await supabase.rpc("set_active_organization", {
-        _user_id: user.id,
-        _org_id: newOrg.id,
-      });
+      if (error) throw error;
 
       toast.success("Organization created successfully!");
       onOpenChange(false);
