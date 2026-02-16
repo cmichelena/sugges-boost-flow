@@ -14,6 +14,68 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_members: {
+        Row: {
+          account_id: string
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_members_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      accounts: {
+        Row: {
+          billing_email: string | null
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+          stripe_customer_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          billing_email?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          owner_id: string
+          stripe_customer_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          billing_email?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          stripe_customer_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           content: string
@@ -215,6 +277,7 @@ export type Database = {
       }
       organizations: {
         Row: {
+          account_id: string | null
           allowed_email_domains: string[] | null
           created_at: string
           id: string
@@ -232,6 +295,7 @@ export type Database = {
           workspace_type: string
         }
         Insert: {
+          account_id?: string | null
           allowed_email_domains?: string[] | null
           created_at?: string
           id?: string
@@ -249,6 +313,7 @@ export type Database = {
           workspace_type?: string
         }
         Update: {
+          account_id?: string | null
           allowed_email_domains?: string[] | null
           created_at?: string
           id?: string
@@ -265,7 +330,15 @@ export type Database = {
           updated_at?: string
           workspace_type?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "organizations_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -852,6 +925,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_portfolio_summary: { Args: { _account_id: string }; Returns: Json }
       get_reaction_score: { Args: { p_suggestion_id: string }; Returns: number }
       get_user_default_organization: {
         Args: { _user_id: string }
@@ -860,6 +934,7 @@ export type Database = {
       get_user_organizations: {
         Args: { _user_id: string }
         Returns: {
+          account_id: string | null
           allowed_email_domains: string[] | null
           created_at: string
           id: string
@@ -883,12 +958,20 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      has_account_role: {
+        Args: { _account_id: string; _role: string; _user_id: string }
+        Returns: boolean
+      }
       has_org_role: {
         Args: {
           _org_id: string
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_account_member: {
+        Args: { _account_id: string; _user_id: string }
         Returns: boolean
       }
       is_leadership_member: {
