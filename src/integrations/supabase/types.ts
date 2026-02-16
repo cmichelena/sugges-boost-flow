@@ -907,17 +907,30 @@ export type Database = {
           team_id: string
         }[]
       }
-      create_organization_with_owner: {
-        Args: {
-          _allowed_email_domains?: string[]
-          _name: string
-          _organization_type: Database["public"]["Enums"]["organization_type"]
-          _owner_id: string
-          _slug: string
-          _workspace_type: string
-        }
-        Returns: string
-      }
+      create_organization_with_owner:
+        | {
+            Args: {
+              _allowed_email_domains?: string[]
+              _name: string
+              _organization_type: Database["public"]["Enums"]["organization_type"]
+              _owner_id: string
+              _slug: string
+              _workspace_type: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              _account_id?: string
+              _allowed_email_domains?: string[]
+              _name: string
+              _organization_type: Database["public"]["Enums"]["organization_type"]
+              _owner_id: string
+              _slug: string
+              _workspace_type: string
+            }
+            Returns: string
+          }
       get_leadership_members: {
         Args: { _org_id: string }
         Returns: {
