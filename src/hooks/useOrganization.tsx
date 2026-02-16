@@ -11,6 +11,8 @@ interface Organization {
   created_at: string;
   organization_type: "personal" | "company";
   allowed_email_domains: string[] | null;
+  workspace_type: string;
+  public_visibility_mode: boolean;
 }
 
 interface OrganizationContextType {
@@ -62,7 +64,7 @@ export const OrganizationProvider = ({ children }: { children: React.ReactNode }
       // Fetch organization details
       const { data: orgsData, error: orgsError } = await supabase
         .from("organizations")
-        .select("id, name, subscription_tier, subscription_status, trial_ends_at, created_at, organization_type, allowed_email_domains")
+        .select("id, name, subscription_tier, subscription_status, trial_ends_at, created_at, organization_type, allowed_email_domains, workspace_type, public_visibility_mode")
         .in("id", orgIds)
         .order("created_at", { ascending: true });
 

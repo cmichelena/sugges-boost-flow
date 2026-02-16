@@ -18,6 +18,7 @@ import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { UpgradePrompt } from "@/components/UpgradePrompt";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useAuth } from "@/hooks/useAuth";
+import { getWorkspaceConfig } from "@/lib/workspace-type-config";
 
 const suggestionSchema = z.object({
   title: z.string().trim().min(5, 'Title must be at least 5 characters').max(100, 'Title must be less than 100 characters'),
@@ -40,10 +41,15 @@ const Submit = () => {
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  // Building-specific fields
+  const [targetResponseDate, setTargetResponseDate] = useState("");
+  const [targetResolutionDate, setTargetResolutionDate] = useState("");
+  const [responsiblePartyName, setResponsiblePartyName] = useState("");
   const navigate = useNavigate();
   const { hasAccess, loading: featureLoading } = useFeatureAccess();
   const { activeOrganization, loading: orgLoading } = useOrganization();
   const { user } = useAuth();
+  const workspaceConfig = getWorkspaceConfig(activeOrganization?.workspace_type);
 
   const hasAIAccess = hasAccess("ai_improvements");
 
@@ -135,10 +141,14 @@ const Submit = () => {
         ai_improved_title: improved?.improved_title || null,
         ai_improved_description: improved?.improved_description || null,
         ai_tags: improved?.tags || [],
-        status: "Open",
+        status: workspaceConfig.statuses[0] || "Open",
         is_anonymous: isAnonymous,
         assigned_team_id: assignmentData?.[0]?.team_id || null,
         assigned_to_user_id: assignmentData?.[0]?.assigned_user_id || null,
+        // Building-specific fields
+        target_response_date: workspaceConfig.extraFields.targetResponseDate && targetResponseDate ? targetResponseDate : null,
+        target_resolution_date: workspaceConfig.extraFields.targetResolutionDate && targetResolutionDate ? targetResolutionDate : null,
+        responsible_party_name: workspaceConfig.extraFields.responsibleParty && responsiblePartyName ? responsiblePartyName : null,
       }).select('id').single();
 
       if (error) throw error;
@@ -211,11 +221,13 @@ const Submit = () => {
           <Card className="p-8">
             <h1 className="font-bold mb-2 flex items-center gap-2">
               <ScrollText className="h-7 w-7" />
-              Submit a Suggestion
+              {workspaceConfig.terminology.submit}
             </h1>
             <p className="text-muted-foreground mb-6">
-              Share your ideas to improve our organization.
-              {hasAIAccess && " AI will help refine your suggestion."}
+              {activeOrganization?.workspace_type === "building"
+                ? "Log an issue or concern about this building."
+                : "Share your ideas to improve our organization."}
+              {hasAIAccess && " AI will help refine your submission."}
             </p>
 
             {/* AI Enhancement Status */}
@@ -366,6 +378,45 @@ const Submit = () => {
                 />
               </div>
 
+              {/* Building-specific extra fields */}
+              {workspaceConfig.extraFields.targetResponseDate && (
+                <div className="space-y-4 p-4 rounded-lg border bg-muted/30">
+                  <p className="text-sm font-medium text-muted-foreground">Additional Details</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="targetResponseDate">Target Response Date</Label>
+                      <Input
+                        id="targetResponseDate"
+                        type="date"
+                        value={targetResponseDate}
+                        onChange={(e) => setTargetResponseDate(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="targetResolutionDate">Target Resolution Date</Label>
+                      <Input
+                        id="targetResolutionDate"
+                        type="date"
+                        value={targetResolutionDate}
+                        onChange={(e) => setTargetResolutionDate(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="responsibleParty">Responsible Party</Label>
+                    <Input
+                      id="responsibleParty"
+                      placeholder="e.g., Building Manager, John Smith"
+                      value={responsiblePartyName}
+                      onChange={(e) => setResponsiblePartyName(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Enter a name or role responsible for this issue
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {categoryId && categories.find(c => c.id === categoryId)?.can_be_anonymous && (
                 <div className="flex items-center space-x-2">
                   <Checkbox
@@ -388,7 +439,7 @@ const Submit = () => {
                 </Button>
                 <Button type="submit" className="flex-1" disabled={loading}>
                   {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  {loading ? "Submitting..." : "Submit Suggestion"}
+                  {loading ? "Submitting..." : workspaceConfig.terminology.submit}
                 </Button>
               </div>
             </form>
