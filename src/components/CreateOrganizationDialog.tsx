@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Building2, Plus, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { useAccount } from "@/hooks/useAccount";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
@@ -17,6 +18,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { UpgradePrompt } from "@/components/UpgradePrompt";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   WORKSPACE_TYPE_CONFIGS,
   WORKSPACE_TYPES,
@@ -34,6 +42,7 @@ export const CreateOrganizationDialog = ({
 }: CreateOrganizationDialogProps) => {
   const { user } = useAuth();
   const { hasAccess } = useFeatureAccess();
+  const { accounts } = useAccount();
 
   const [name, setName] = useState("");
   const [workspaceType, setWorkspaceType] = useState<WorkspaceType>("organisation");
@@ -41,6 +50,7 @@ export const CreateOrganizationDialog = ({
   const [domainInput, setDomainInput] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
 
   const canCreate = hasAccess("create_company_org");
 
@@ -119,6 +129,7 @@ export const CreateOrganizationDialog = ({
         _organization_type: "company",
         _workspace_type: workspaceType,
         _allowed_email_domains: emailDomains.length > 0 ? emailDomains : null,
+        _account_id: selectedAccountId,
       });
 
       if (error) throw error;
@@ -131,6 +142,7 @@ export const CreateOrganizationDialog = ({
       setWorkspaceType("organisation");
       setEmailDomains([]);
       setDomainInput("");
+      setSelectedAccountId(null);
 
       // Reload to switch context
       window.location.reload();
@@ -198,6 +210,32 @@ export const CreateOrganizationDialog = ({
                 })}
               </div>
             </div>
+
+            {/* Account / Portfolio Selector */}
+            {accounts.length > 0 && (
+              <div className="space-y-2">
+                <Label>Attach to Portfolio (Optional)</Label>
+                <Select
+                  value={selectedAccountId || "none"}
+                  onValueChange={(val) => setSelectedAccountId(val === "none" ? null : val)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="No portfolio (standalone)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No portfolio (standalone)</SelectItem>
+                    {accounts.map((account) => (
+                      <SelectItem key={account.id} value={account.id}>
+                        {account.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Attach this workspace to a portfolio account for consolidated management
+                </p>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="org-name">Workspace Name *</Label>

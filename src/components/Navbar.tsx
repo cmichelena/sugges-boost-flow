@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
-import { Plus, User, LogOut, Info, DollarSign, CreditCard, Sparkles, Crown, LayoutDashboard, Lightbulb, Users, Settings, Building2 } from "lucide-react";
+import { Plus, User, LogOut, Info, DollarSign, CreditCard, Sparkles, Crown, LayoutDashboard, Lightbulb, Users, Settings, Building2, Briefcase } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useAccount } from "@/hooks/useAccount";
 import { useTranslation } from "react-i18next";
 import {
   DropdownMenu,
@@ -30,6 +31,7 @@ const tierConfig = {
 export const Navbar = () => {
   const { user, signOut } = useAuth();
   const { tier } = useSubscription();
+  const { hasAccountAccess } = useAccount();
   const { t } = useTranslation();
   
   const config = tierConfig[tier] || tierConfig.free;
@@ -106,6 +108,20 @@ export const Navbar = () => {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                
+                {/* Portfolio - only if user has account access */}
+                {hasAccountAccess && (
+                  <>
+                    <DropdownMenuLabel className="text-xs text-muted-foreground">Portfolio</DropdownMenuLabel>
+                    <DropdownMenuItem asChild>
+                      <Link to="/portfolio" className="flex items-center gap-2">
+                        <Briefcase className="w-4 h-4" />
+                        Portfolio Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 
                 {/* Info Section */}
                 <DropdownMenuLabel className="text-xs text-muted-foreground">Info</DropdownMenuLabel>

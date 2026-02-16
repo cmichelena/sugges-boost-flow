@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/hooks/useAuth";
 import { OrganizationProvider } from "@/hooks/useOrganization";
+import { AccountProvider } from "@/hooks/useAccount";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
@@ -22,6 +23,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Organization from "./pages/Organization";
 import Install from "./pages/Install";
 import NotFound from "./pages/NotFound";
+import Portfolio from "./pages/Portfolio";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +36,7 @@ const App = () => (
         <BrowserRouter>
           <AuthProvider>
             <OrganizationProvider>
+            <AccountProvider>
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/dashboard" element={<Dashboard />} />
@@ -50,9 +53,11 @@ const App = () => (
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/organization" element={<Organization />} />
               <Route path="/install" element={<Install />} />
+              <Route path="/portfolio" element={<Portfolio />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
+            </AccountProvider>
             </OrganizationProvider>
           </AuthProvider>
         </BrowserRouter>
