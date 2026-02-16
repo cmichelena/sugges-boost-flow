@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Building2, ChevronDown, Check, User, Plus } from "lucide-react";
+import { ChevronDown, Check, User, Plus } from "lucide-react";
 import { useOrganization } from "@/hooks/useOrganization";
+import { getWorkspaceConfig } from "@/lib/workspace-type-config";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,11 +16,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { CreateOrganizationDialog } from "@/components/CreateOrganizationDialog";
 
-const OrgIcon = ({ type }: { type: "personal" | "company" }) => {
+const OrgIcon = ({ type, workspaceType }: { type: "personal" | "company"; workspaceType?: string }) => {
   if (type === "personal") {
     return <User className="w-4 h-4 shrink-0" />;
   }
-  return <Building2 className="w-4 h-4 shrink-0" />;
+  const config = getWorkspaceConfig(workspaceType);
+  const IconComponent = config.icon;
+  return <IconComponent className="w-4 h-4 shrink-0" />;
 };
 
 export const OrganizationSwitcher = () => {
@@ -32,7 +35,6 @@ export const OrganizationSwitcher = () => {
     const success = await switchOrganization(orgId);
     if (success) {
       toast.success("Switched organization");
-      // Reload the page to refresh all data
       window.location.reload();
     } else {
       toast.error("Failed to switch organization");
@@ -47,25 +49,24 @@ export const OrganizationSwitcher = () => {
     return null;
   }
 
-  // If user only has one organization, show a simple display with create option
   if (organizations.length === 1) {
     return (
       <>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="gap-2 max-w-[200px]">
-              <OrgIcon type={activeOrganization.organization_type} />
+              <OrgIcon type={activeOrganization.organization_type} workspaceType={activeOrganization.workspace_type} />
               <span className="truncate">{activeOrganization.name}</span>
               <ChevronDown className="w-3 h-3 shrink-0 opacity-50" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-64">
             <DropdownMenuLabel className="text-xs text-muted-foreground">
-              Your Organization
+              Your Workspace
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="flex items-center gap-2">
-              <OrgIcon type={activeOrganization.organization_type} />
+              <OrgIcon type={activeOrganization.organization_type} workspaceType={activeOrganization.workspace_type} />
               <span className="truncate">{activeOrganization.name}</span>
               <Check className="w-4 h-4 text-primary shrink-0 ml-auto" />
             </DropdownMenuItem>
@@ -75,7 +76,7 @@ export const OrganizationSwitcher = () => {
               className="flex items-center gap-2 text-primary"
             >
               <Plus className="w-4 h-4" />
-              <span>Create Organization</span>
+              <span>Create Workspace</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -92,43 +93,46 @@ export const OrganizationSwitcher = () => {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="sm" className="gap-2 max-w-[200px]">
-            <OrgIcon type={activeOrganization.organization_type} />
+            <OrgIcon type={activeOrganization.organization_type} workspaceType={activeOrganization.workspace_type} />
             <span className="truncate">{activeOrganization.name}</span>
             <ChevronDown className="w-3 h-3 shrink-0 opacity-50" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-64">
           <DropdownMenuLabel className="text-xs text-muted-foreground">
-            Switch Organization
+            Switch Workspace
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          {organizations.map((org) => (
-            <DropdownMenuItem
-              key={org.id}
-              onClick={() => handleSwitch(org.id)}
-              className="flex items-center justify-between gap-2"
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <OrgIcon type={org.organization_type} />
-                <span className="truncate">{org.name}</span>
-                {org.organization_type === "company" && (
-                  <Badge variant="secondary" className="text-xs px-1 py-0">
-                    Company
-                  </Badge>
+          {organizations.map((org) => {
+            const config = getWorkspaceConfig(org.workspace_type);
+            return (
+              <DropdownMenuItem
+                key={org.id}
+                onClick={() => handleSwitch(org.id)}
+                className="flex items-center justify-between gap-2"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <OrgIcon type={org.organization_type} workspaceType={org.workspace_type} />
+                  <span className="truncate">{org.name}</span>
+                  {org.organization_type === "company" && (
+                    <Badge variant="secondary" className="text-xs px-1 py-0">
+                      {config.label}
+                    </Badge>
+                  )}
+                </div>
+                {org.id === activeOrganization.id && (
+                  <Check className="w-4 h-4 text-primary shrink-0" />
                 )}
-              </div>
-              {org.id === activeOrganization.id && (
-                <Check className="w-4 h-4 text-primary shrink-0" />
-              )}
-            </DropdownMenuItem>
-          ))}
+              </DropdownMenuItem>
+            );
+          })}
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => setShowCreateDialog(true)}
             className="flex items-center gap-2 text-primary"
           >
             <Plus className="w-4 h-4" />
-            <span>Create Organization</span>
+            <span>Create Workspace</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

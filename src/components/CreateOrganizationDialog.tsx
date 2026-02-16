@@ -17,6 +17,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { UpgradePrompt } from "@/components/UpgradePrompt";
+import {
+  WORKSPACE_TYPE_CONFIGS,
+  WORKSPACE_TYPES,
+  type WorkspaceType,
+} from "@/lib/workspace-type-config";
 
 interface CreateOrganizationDialogProps {
   open: boolean;
@@ -31,6 +36,7 @@ export const CreateOrganizationDialog = ({
   const { hasAccess } = useFeatureAccess();
 
   const [name, setName] = useState("");
+  const [workspaceType, setWorkspaceType] = useState<WorkspaceType>("organisation");
   const [emailDomains, setEmailDomains] = useState<string[]>([]);
   const [domainInput, setDomainInput] = useState("");
   const [isCreating, setIsCreating] = useState(false);
@@ -105,7 +111,7 @@ export const CreateOrganizationDialog = ({
     try {
       const slug = generateSlug(trimmedName);
 
-      // Create the organization
+      // Create the organization with workspace_type
       const { data: newOrg, error: orgError } = await supabase
         .from("organizations")
         .insert({
@@ -117,6 +123,7 @@ export const CreateOrganizationDialog = ({
           subscription_status: "trialing",
           trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
           allowed_email_domains: emailDomains.length > 0 ? emailDomains : null,
+          workspace_type: workspaceType,
         })
         .select("id")
         .single();
@@ -156,6 +163,7 @@ export const CreateOrganizationDialog = ({
       
       // Reset form
       setName("");
+      setWorkspaceType("organisation");
       setEmailDomains([]);
       setDomainInput("");
 
@@ -183,19 +191,54 @@ export const CreateOrganizationDialog = ({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Building2 className="w-5 h-5" />
-              Create Company Organization
+              Create Workspace
             </DialogTitle>
             <DialogDescription>
-              Set up a new company workspace for your team. You'll be the owner.
+              Set up a new workspace for your team. You'll be the owner.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
+            {/* Workspace Type Selector */}
             <div className="space-y-2">
-              <Label htmlFor="org-name">Organization Name *</Label>
+              <Label>Workspace Type *</Label>
+              <div className="grid grid-cols-2 gap-3">
+                {WORKSPACE_TYPES.map((type) => {
+                  const config = WORKSPACE_TYPE_CONFIGS[type];
+                  const IconComponent = config.icon;
+                  const isSelected = workspaceType === type;
+
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setWorkspaceType(type)}
+                      className={`
+                        flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all
+                        ${isSelected
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/40 hover:bg-muted/50"
+                        }
+                      `}
+                    >
+                      <IconComponent className={`w-6 h-6 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
+                      <span className={`text-sm font-medium ${isSelected ? "text-primary" : "text-foreground"}`}>
+                        {config.label}
+                      </span>
+                      <span className="text-xs text-muted-foreground text-center leading-tight">
+                        {config.description}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="org-name">Workspace Name *</Label>
               <Input
                 id="org-name"
-                placeholder="Acme Corporation"
+                placeholder={workspaceType === "building" ? "Parkview Tower" : "Acme Corporation"}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 maxLength={50}
@@ -262,7 +305,7 @@ export const CreateOrganizationDialog = ({
               Cancel
             </Button>
             <Button onClick={handleCreate} disabled={isCreating || !name.trim()}>
-              {isCreating ? "Creating..." : "Create Organization"}
+              {isCreating ? "Creating..." : "Create Workspace"}
             </Button>
           </DialogFooter>
         </DialogContent>

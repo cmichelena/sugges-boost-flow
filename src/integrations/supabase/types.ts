@@ -221,6 +221,7 @@ export type Database = {
           name: string
           organization_type: Database["public"]["Enums"]["organization_type"]
           owner_id: string
+          public_visibility_mode: boolean
           slug: string
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
@@ -228,6 +229,7 @@ export type Database = {
           subscription_tier: Database["public"]["Enums"]["subscription_tier"]
           trial_ends_at: string | null
           updated_at: string
+          workspace_type: string
         }
         Insert: {
           allowed_email_domains?: string[] | null
@@ -236,6 +238,7 @@ export type Database = {
           name: string
           organization_type?: Database["public"]["Enums"]["organization_type"]
           owner_id: string
+          public_visibility_mode?: boolean
           slug: string
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
@@ -243,6 +246,7 @@ export type Database = {
           subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
           trial_ends_at?: string | null
           updated_at?: string
+          workspace_type?: string
         }
         Update: {
           allowed_email_domains?: string[] | null
@@ -251,6 +255,7 @@ export type Database = {
           name?: string
           organization_type?: Database["public"]["Enums"]["organization_type"]
           owner_id?: string
+          public_visibility_mode?: boolean
           slug?: string
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
@@ -258,6 +263,7 @@ export type Database = {
           subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
           trial_ends_at?: string | null
           updated_at?: string
+          workspace_type?: string
         }
         Relationships: []
       }
@@ -526,7 +532,11 @@ export type Database = {
           organization_id: string | null
           original_description: string
           original_title: string
+          responsible_party_id: string | null
+          responsible_party_name: string | null
           status: string
+          target_resolution_date: string | null
+          target_response_date: string | null
           title: string
           updated_at: string
           user_id: string | null
@@ -551,7 +561,11 @@ export type Database = {
           organization_id?: string | null
           original_description: string
           original_title: string
+          responsible_party_id?: string | null
+          responsible_party_name?: string | null
           status?: string
+          target_resolution_date?: string | null
+          target_response_date?: string | null
           title: string
           updated_at?: string
           user_id?: string | null
@@ -576,7 +590,11 @@ export type Database = {
           organization_id?: string | null
           original_description?: string
           original_title?: string
+          responsible_party_id?: string | null
+          responsible_party_name?: string | null
           status?: string
+          target_resolution_date?: string | null
+          target_response_date?: string | null
           title?: string
           updated_at?: string
           user_id?: string | null
@@ -837,6 +855,7 @@ export type Database = {
           name: string
           organization_type: Database["public"]["Enums"]["organization_type"]
           owner_id: string
+          public_visibility_mode: boolean
           slug: string
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
@@ -844,6 +863,7 @@ export type Database = {
           subscription_tier: Database["public"]["Enums"]["subscription_tier"]
           trial_ends_at: string | null
           updated_at: string
+          workspace_type: string
         }[]
         SetofOptions: {
           from: "*"

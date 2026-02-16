@@ -10,12 +10,14 @@ import { MomentumDial } from "@/components/MomentumDial";
 import { ReactionButtons } from "@/components/ReactionButtons";
 import { ElevateToLeadershipDialog } from "@/components/ElevateToLeadershipDialog";
 import { calculateMomentum, getMomentumLevel, calculateReactionScore } from "@/lib/momentum";
-import { MessageCircle, Eye, ArrowLeft, Send, Trash2, CheckCircle, XCircle, ArrowUpCircle } from "lucide-react";
+import { MessageCircle, Eye, ArrowLeft, Send, Trash2, CheckCircle, XCircle, ArrowUpCircle, Calendar, UserCheck } from "lucide-react";
 import { toast } from "sonner";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { useCanManageSuggestion } from "@/hooks/useCanManageSuggestion";
 import { useCanEscalate } from "@/hooks/useCanEscalate";
+import { useOrganization } from "@/hooks/useOrganization";
+import { getWorkspaceConfig } from "@/lib/workspace-type-config";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { z } from "zod";
 import { AttachmentList } from "@/components/AttachmentList";
@@ -64,6 +66,8 @@ const SuggestionDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
+  const workspaceConfig = getWorkspaceConfig(activeOrganization?.workspace_type);
   const [suggestion, setSuggestion] = useState<any>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -410,11 +414,37 @@ const SuggestionDetail = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Open">Open</SelectItem>
-                      <SelectItem value="Acknowledged">Acknowledged</SelectItem>
-                      <SelectItem value="In Progress">In Progress</SelectItem>
+                      {workspaceConfig.statuses.map((status) => (
+                        <SelectItem key={status} value={status}>{status}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
+                </div>
+              )}
+
+              {/* Building-specific fields display */}
+              {workspaceConfig.extraFields.targetResponseDate && (
+                <div className="mb-4 pb-4 border-b space-y-2">
+                  <div className="flex flex-wrap gap-4 text-sm">
+                    {suggestion.target_response_date && (
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Calendar className="w-4 h-4" />
+                        <span>Response by: <span className="text-foreground font-medium">{format(new Date(suggestion.target_response_date), "PPP")}</span></span>
+                      </div>
+                    )}
+                    {suggestion.target_resolution_date && (
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Calendar className="w-4 h-4" />
+                        <span>Resolution by: <span className="text-foreground font-medium">{format(new Date(suggestion.target_resolution_date), "PPP")}</span></span>
+                      </div>
+                    )}
+                    {suggestion.responsible_party_name && (
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <UserCheck className="w-4 h-4" />
+                        <span>Responsible: <span className="text-foreground font-medium">{suggestion.responsible_party_name}</span></span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
