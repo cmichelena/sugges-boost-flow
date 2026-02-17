@@ -309,16 +309,21 @@ const Settings = () => {
         <Card className="p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
             <Building2 className="w-5 h-5" />
-            {t("settings.organization")}
+            Workspace & Organisation
           </h2>
           
           <p className="text-sm text-muted-foreground mb-4">
-            Manage your organization settings, team members, and categories.
+            Manage your workspace settings, team members, and categories.
           </p>
           
-          <Button variant="outline" onClick={() => navigate("/organization")}>
-            Go to Organization Settings
-          </Button>
+          <div className="flex gap-2 flex-wrap">
+            <Button variant="outline" onClick={() => navigate("/organization")}>
+              Workspace Settings
+            </Button>
+            <Button variant="outline" onClick={() => navigate("/organisation-settings")}>
+              Organisation Settings
+            </Button>
+          </div>
         </Card>
 
         {/* Account Settings */}
