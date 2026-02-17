@@ -1,7 +1,7 @@
-import { Building2, Landmark } from "lucide-react";
+import { Building2, Landmark, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-export type WorkspaceType = "organisation" | "building";
+export type WorkspaceType = "organisation" | "building" | "community";
 
 export interface WorkspaceTypeConfig {
   label: string;
@@ -89,6 +89,40 @@ export const WORKSPACE_TYPE_CONFIGS: Record<WorkspaceType, WorkspaceTypeConfig> 
       suggestion: "Issue",
       suggestions: "Issues",
       submit: "Log an Issue",
+    },
+  },
+  community: {
+    label: "Community",
+    description: "For neighbourhoods, clubs, associations, and local communities",
+    icon: Users,
+    defaultCategories: [
+      "Infrastructure",
+      "Cleanliness",
+      "Safety",
+      "Events",
+      "Ideas",
+      "Other",
+    ],
+    statuses: [
+      "Logged",
+      "In Review",
+      "Scheduled",
+      "In Progress",
+      "Resolved",
+      "Archived",
+    ],
+    extraFields: {
+      targetResponseDate: true,
+      targetResolutionDate: true,
+      responsibleParty: true,
+    },
+    optionalSettings: {
+      publicVisibilityMode: true,
+    },
+    terminology: {
+      suggestion: "Issue / Idea",
+      suggestions: "Issues & Ideas",
+      submit: "Log an Issue or Idea",
     },
   },
 };
