@@ -20,7 +20,7 @@ const Landing = () => {
           <div className="max-w-4xl mx-auto text-center">
             <img src={centerIcon} alt="Suggistit" className="h-32 mx-auto mb-8" />
             <h1 className="text-5xl lg:text-7xl font-bold mb-6 text-foreground">
-              Turn Ideas<br />Into Actions
+              Structured Visibility<br />For Offices, Buildings &amp; Communities
             </h1>
             <p className="text-xl lg:text-2xl text-muted-foreground mb-10 max-w-2xl mx-auto">
               {t("landing.heroSubtitle")}

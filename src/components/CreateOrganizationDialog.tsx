@@ -134,6 +134,14 @@ export const CreateOrganizationDialog = ({
 
       if (error) throw error;
 
+      // Default public visibility for community and building types
+      if (workspaceType === "community" || workspaceType === "building") {
+        await supabase
+          .from("organizations")
+          .update({ public_visibility_mode: true })
+          .eq("id", newOrgId);
+      }
+
       toast.success("Workspace created successfully!");
       onOpenChange(false);
       
@@ -179,7 +187,7 @@ export const CreateOrganizationDialog = ({
             {/* Workspace Type Selector */}
             <div className="space-y-2">
               <Label>Workspace Type *</Label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 {WORKSPACE_TYPES.map((type) => {
                   const config = WORKSPACE_TYPE_CONFIGS[type];
                   const IconComponent = config.icon;
