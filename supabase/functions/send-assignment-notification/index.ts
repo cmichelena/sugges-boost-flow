@@ -27,6 +27,33 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+
+    // Authenticate the caller
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    const callerId = claimsData.claims.sub;
+
+    // Service role client for admin operations
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { 
@@ -36,6 +63,34 @@ const handler = async (req: Request): Promise<Response> => {
       assigned_team_id,
       organization_name 
     }: AssignmentNotificationRequest = await req.json();
+
+    // Verify the suggestion exists and caller is a member of its organization
+    const { data: suggestion, error: suggestionError } = await supabase
+      .from("suggestions")
+      .select("organization_id")
+      .eq("id", suggestion_id)
+      .single();
+
+    if (suggestionError || !suggestion) {
+      return new Response(JSON.stringify({ error: "Suggestion not found" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    if (suggestion.organization_id) {
+      const { data: isMember } = await supabase.rpc("is_org_member", {
+        _user_id: callerId,
+        _org_id: suggestion.organization_id,
+      });
+
+      if (!isMember) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
+    }
 
     console.log("Processing assignment notification:", { 
       suggestion_id, 
