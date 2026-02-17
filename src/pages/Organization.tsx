@@ -366,24 +366,32 @@ const OrganizationPage = () => {
   return (
     <AppLayout>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Hierarchy breadcrumb */}
-        {hasAccountAccess && activeAccount && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-            <Link to="/organisation-settings" className="hover:text-foreground transition-colors flex items-center gap-1">
-              <Briefcase className="w-4 h-4" />
-              {activeAccount.name}
-            </Link>
-            <ChevronRight className="w-3 h-3" />
-            <span className="text-foreground font-medium flex items-center gap-1.5">
-              {activeOrganization?.name}
-              {activeOrganization?.workspace_type && (
-                <Badge variant="outline" className="text-xs capitalize">
-                  {activeOrganization.workspace_type}
-                </Badge>
-              )}
-            </span>
+        {/* Organisation context card */}
+        <Card className="p-4 mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            <Briefcase className="w-5 h-5 text-muted-foreground shrink-0" />
+            {hasAccountAccess && activeAccount ? (
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">Organisation</p>
+                <p className="font-medium truncate">{activeAccount.name}</p>
+              </div>
+            ) : (
+              <div className="min-w-0">
+                <p className="text-sm text-muted-foreground">This workspace is standalone.</p>
+              </div>
+            )}
           </div>
-        )}
+          {hasAccountAccess && activeAccount ? (
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/organisation-settings">Open Organisation Settings</Link>
+            </Button>
+          ) : (
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/portfolio">Attach to Organisation</Link>
+            </Button>
+          )}
+        </Card>
+
         <h1 className="font-bold mb-6 flex items-center gap-3">
           <Building2 className="w-8 h-8" />
           Workspace Settings

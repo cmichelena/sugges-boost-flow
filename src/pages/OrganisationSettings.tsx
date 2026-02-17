@@ -154,9 +154,9 @@ const OrganisationSettings = () => {
           </h1>
           <Card className="p-8 text-center">
             <Building2 className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">No Organisation Yet</h2>
+            <h2 className="text-xl font-semibold mb-2">Not Attached to an Organisation</h2>
             <p className="text-muted-foreground mb-4">
-              Create an organisation from the Portfolio page to manage multiple workspaces.
+              Your current workspace is not attached to an organisation. Create one from the Portfolio page to manage multiple workspaces under a single entity.
             </p>
             <Button onClick={() => navigate("/portfolio")}>
               Go to Portfolio
