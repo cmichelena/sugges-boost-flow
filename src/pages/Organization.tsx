@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
+import { useAccount } from "@/hooks/useAccount";
 import { AppLayout } from "@/components/AppLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,9 +12,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Loader2, Users, Crown, Calendar, Mail, CheckCircle, Clock, Trash2, AlertTriangle, Building2, User, Globe, X, ChevronRight } from "lucide-react";
+import { Loader2, Users, Crown, Calendar, Mail, CheckCircle, Clock, Trash2, AlertTriangle, Building2, User, Globe, X, ChevronRight, Briefcase } from "lucide-react";
 import { z } from "zod";
-import { PlanUsageCard } from "@/components/PlanUsageCard";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,6 +51,7 @@ interface Member {
 const OrganizationPage = () => {
   const { user } = useAuth();
   const { activeOrganization, organizations, userRole, loading: orgLoading, refreshOrganizations, switchOrganization } = useOrganization();
+  const { activeAccount, hasAccountAccess } = useAccount();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [inviting, setInviting] = useState(false);
@@ -365,6 +366,24 @@ const OrganizationPage = () => {
   return (
     <AppLayout>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Hierarchy breadcrumb */}
+        {hasAccountAccess && activeAccount && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+            <Link to="/organisation-settings" className="hover:text-foreground transition-colors flex items-center gap-1">
+              <Briefcase className="w-4 h-4" />
+              {activeAccount.name}
+            </Link>
+            <ChevronRight className="w-3 h-3" />
+            <span className="text-foreground font-medium flex items-center gap-1.5">
+              {activeOrganization?.name}
+              {activeOrganization?.workspace_type && (
+                <Badge variant="outline" className="text-xs capitalize">
+                  {activeOrganization.workspace_type}
+                </Badge>
+              )}
+            </span>
+          </div>
+        )}
         <h1 className="font-bold mb-6 flex items-center gap-3">
           <Building2 className="w-8 h-8" />
           Workspace Settings
@@ -555,15 +574,17 @@ const OrganizationPage = () => {
           </Card>
         )}
 
-        {activeOrganization && (
-          <div className="mb-6">
-            <PlanUsageCard
-              organizationId={activeOrganization.id}
-              dbSubscriptionTier={activeOrganization.subscription_tier}
-              dbSubscriptionStatus={activeOrganization.subscription_status}
-              trialEndsAt={activeOrganization.trial_ends_at}
-            />
-          </div>
+        {/* Subscription moved to Organisation Settings */}
+        {hasAccountAccess && (
+          <Card className="p-6 mb-6">
+            <h2 className="text-lg font-semibold mb-2">Subscription & Billing</h2>
+            <p className="text-sm text-muted-foreground mb-3">
+              Subscription and usage limits are managed at the organisation level.
+            </p>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/organisation-settings">Go to Organisation Settings</Link>
+            </Button>
+          </Card>
         )}
 
         {/* Category Management */}

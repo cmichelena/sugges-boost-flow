@@ -119,6 +119,12 @@ export const Navbar = () => {
                         Organisation Dashboard
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/organisation-settings" className="flex items-center gap-2">
+                        <Building2 className="w-4 h-4" />
+                        Organisation Settings
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                   </>
                 )}
