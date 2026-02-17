@@ -53,6 +53,7 @@ export type Database = {
           id: string
           name: string
           owner_id: string
+          portfolio_features_enabled: boolean
           stripe_customer_id: string | null
           updated_at: string
         }
@@ -62,6 +63,7 @@ export type Database = {
           id?: string
           name: string
           owner_id: string
+          portfolio_features_enabled?: boolean
           stripe_customer_id?: string | null
           updated_at?: string
         }
@@ -71,6 +73,7 @@ export type Database = {
           id?: string
           name?: string
           owner_id?: string
+          portfolio_features_enabled?: boolean
           stripe_customer_id?: string | null
           updated_at?: string
         }
@@ -336,6 +339,48 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ownership_transfer_log: {
+        Row: {
+          from_owner_id: string
+          id: string
+          to_owner_id: string
+          transferred_at: string
+          transferred_by: string
+          workspace_id: string
+        }
+        Insert: {
+          from_owner_id: string
+          id?: string
+          to_owner_id: string
+          transferred_at?: string
+          transferred_by: string
+          workspace_id: string
+        }
+        Update: {
+          from_owner_id?: string
+          id?: string
+          to_owner_id?: string
+          transferred_at?: string
+          transferred_by?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ownership_transfer_log_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ownership_transfer_log_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_member_view"
             referencedColumns: ["id"]
           },
         ]
@@ -998,6 +1043,10 @@ export type Database = {
       set_active_organization: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
+      }
+      transfer_workspace_ownership: {
+        Args: { _new_owner_id: string; _workspace_id: string }
+        Returns: Json
       }
       validate_invitation_token: {
         Args: { p_token: string; p_user_email: string; p_user_id: string }

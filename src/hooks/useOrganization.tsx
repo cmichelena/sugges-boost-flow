@@ -5,6 +5,7 @@ import { useAuth } from "./useAuth";
 interface Organization {
   id: string;
   name: string;
+  owner_id: string;
   subscription_tier: string;
   subscription_status: string;
   trial_ends_at: string | null;
@@ -64,7 +65,7 @@ export const OrganizationProvider = ({ children }: { children: React.ReactNode }
       // Fetch organization details
       const { data: orgsData, error: orgsError } = await supabase
         .from("organizations")
-        .select("id, name, subscription_tier, subscription_status, trial_ends_at, created_at, organization_type, allowed_email_domains, workspace_type, public_visibility_mode")
+        .select("id, name, owner_id, subscription_tier, subscription_status, trial_ends_at, created_at, organization_type, allowed_email_domains, workspace_type, public_visibility_mode")
         .in("id", orgIds)
         .order("created_at", { ascending: true });
 
