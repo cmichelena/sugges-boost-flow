@@ -174,8 +174,11 @@ const Pricing = () => {
           <h1 className="font-bold mb-4">
             Simple, Transparent Pricing
           </h1>
-          <p className="text-xl text-muted-foreground mb-8">
-            Start free and scale as your team grows
+          <p className="text-xl text-muted-foreground mb-4">
+            Each office, building, or community operates as its own workspace.
+          </p>
+          <p className="text-base text-muted-foreground mb-8">
+            Subscriptions apply per workspace. Organisations group multiple workspaces for portfolio oversight.
           </p>
 
           {/* Currency indicator */}
@@ -281,9 +284,16 @@ const Pricing = () => {
           })}
         </div>
 
+        {/* Ownership Note */}
+        <div className="mt-8 text-center">
+          <p className="text-sm text-muted-foreground">
+            Workspace data ownership always remains with the workspace owner.
+          </p>
+        </div>
+
         {/* VAT Notice */}
         {isEU && (
-          <div className="mt-8 text-center">
+          <div className="mt-4 text-center">
             <p className="text-sm text-muted-foreground">
               Prices shown exclude VAT. VAT added where applicable (EU only).
             </p>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { TransferOwnershipDialog } from "@/components/TransferOwnershipDialog";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -62,6 +63,7 @@ const OrganizationPage = () => {
   const [deleting, setDeleting] = useState(false);
   const [newDomain, setNewDomain] = useState("");
   const [savingSettings, setSavingSettings] = useState(false);
+  const [transferDialogOpen, setTransferDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -521,6 +523,45 @@ const OrganizationPage = () => {
             )}
           </div>
         </Card>
+
+        {/* Workspace Ownership */}
+        <Card className="p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <Crown className="w-5 h-5" />
+            Workspace Ownership
+          </h2>
+          <div className="space-y-3">
+            <div>
+              <p className="text-sm text-muted-foreground">Current Owner</p>
+              <div className="flex items-center gap-2 mt-1">
+                <Badge variant="default"><Crown className="w-3 h-3 mr-1" />Owner</Badge>
+                <span className="font-medium">
+                  {members.find(m => m.user_id === activeOrganization?.owner_id)?.profiles?.display_name || "Loading..."}
+                </span>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              The workspace owner is the legal data authority. Only the owner can transfer or delete this workspace.
+            </p>
+            {userRole === "owner" && (
+              <Button
+                variant="outline"
+                onClick={() => setTransferDialogOpen(true)}
+              >
+                Transfer Ownership
+              </Button>
+            )}
+          </div>
+        </Card>
+
+        <TransferOwnershipDialog
+          open={transferDialogOpen}
+          onOpenChange={setTransferDialogOpen}
+          onTransferComplete={async () => {
+            await refreshOrganizations();
+            await loadOrganizationData();
+          }}
+        />
 
         {/* My Workspaces - show all workspaces the user has joined */}
         {organizations.length > 1 && (
