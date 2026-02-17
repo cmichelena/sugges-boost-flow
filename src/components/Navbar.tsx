@@ -109,14 +109,14 @@ export const Navbar = () => {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 
-                {/* Portfolio - only if user has account access */}
+                {/* Organisation - only if user has account access */}
                 {hasAccountAccess && (
                   <>
-                    <DropdownMenuLabel className="text-xs text-muted-foreground">Portfolio</DropdownMenuLabel>
+                    <DropdownMenuLabel className="text-xs text-muted-foreground">Organisation</DropdownMenuLabel>
                     <DropdownMenuItem asChild>
                       <Link to="/portfolio" className="flex items-center gap-2">
                         <Briefcase className="w-4 h-4" />
-                        Portfolio Dashboard
+                        Organisation Dashboard
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -140,7 +140,7 @@ export const Navbar = () => {
                 <DropdownMenuSeparator />
                 
                 {/* Settings Section */}
-                <DropdownMenuLabel className="text-xs text-muted-foreground">Account</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-xs text-muted-foreground">Management</DropdownMenuLabel>
                 <DropdownMenuItem asChild>
                   <Link to="/organization" className="flex items-center gap-2">
                     <Building2 className="w-4 h-4" />

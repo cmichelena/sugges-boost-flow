@@ -26,7 +26,7 @@ export const AccountSwitcher = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuLabel className="text-xs text-muted-foreground">
-          Switch Portfolio
+          Switch Organisation
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {accounts.map((account) => (

@@ -110,7 +110,7 @@ const OrganizationPage = () => {
       setMembers(enrichedMembers);
     } catch (error: any) {
       console.error("Error loading organization data:", error);
-      toast.error("Failed to load organization data");
+      toast.error("Failed to load workspace data");
     } finally {
       setLoading(false);
     }
@@ -135,7 +135,7 @@ const OrganizationPage = () => {
       }
 
       if (!activeOrganization?.id) {
-        toast.error("Organization not found");
+        toast.error("Workspace not found");
         setInviting(false);
         return;
       }
@@ -270,11 +270,11 @@ const OrganizationPage = () => {
         .eq("id", activeOrganization.id);
 
       if (error) throw error;
-      toast.success(`Organization type updated to ${type}`);
+      toast.success(`Access type updated to ${type}`);
       await refreshOrganizations();
     } catch (error) {
       console.error("Error updating organization type:", error);
-      toast.error("Failed to update organization type");
+      toast.error("Failed to update access type");
     } finally {
       setSavingSettings(false);
     }
@@ -367,10 +367,10 @@ const OrganizationPage = () => {
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <h1 className="font-bold mb-6 flex items-center gap-3">
           <Building2 className="w-8 h-8" />
-          Organization
+          Workspace Settings
         </h1>
 
-        {/* Organization Info */}
+        {/* Workspace Info */}
         <Card className="p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
             {activeOrganization?.organization_type === "company" ? (
@@ -378,11 +378,11 @@ const OrganizationPage = () => {
             ) : (
               <User className="w-5 h-5" />
             )}
-            Organization Details
+            Workspace Details
           </h2>
           <div className="space-y-4">
             <div>
-              <Label className="text-muted-foreground">Organization Name</Label>
+              <Label className="text-muted-foreground">Workspace Name</Label>
               <p className="text-lg font-medium">{activeOrganization?.name}</p>
             </div>
             <div>
@@ -395,7 +395,7 @@ const OrganizationPage = () => {
             
             {/* Organization Type */}
             <div>
-              <Label className="text-muted-foreground">Organization Type</Label>
+              <Label className="text-muted-foreground">Access Type</Label>
               {userRole === "owner" ? (
                 <Select
                   value={activeOrganization?.organization_type || "personal"}
@@ -495,15 +495,15 @@ const OrganizationPage = () => {
           </div>
         </Card>
 
-        {/* My Organizations - show all orgs the user has joined */}
+        {/* My Workspaces - show all workspaces the user has joined */}
         {organizations.length > 1 && (
           <Card className="p-6 mb-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
               <Users className="w-5 h-5" />
-              My Organizations ({organizations.length})
+              My Workspaces ({organizations.length})
             </h2>
             <p className="text-sm text-muted-foreground mb-4">
-              All organizations you're a member of. Click to switch.
+              All workspaces you're a member of. Click to switch.
             </p>
             <div className="space-y-2">
               {organizations.map((org) => {
@@ -518,7 +518,7 @@ const OrganizationPage = () => {
                           toast.success(`Switched to ${org.name}`);
                           window.location.reload();
                         } else {
-                          toast.error("Failed to switch organization");
+                          toast.error("Failed to switch workspace");
                         }
                       }
                     }}
@@ -571,7 +571,7 @@ const OrganizationPage = () => {
           <Card className="p-6 mb-6">
             <h2 className="text-xl font-semibold mb-2">Suggestion Categories</h2>
             <p className="text-sm text-muted-foreground mb-4">
-              Customize the categories available for suggestions in your organization
+              Customize the categories available for suggestions in your workspace
             </p>
             <Button variant="outline" onClick={() => navigate("/categories")}>
               Manage Categories

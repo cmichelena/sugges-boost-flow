@@ -51,7 +51,7 @@ export default function Portfolio() {
             {accounts.length > 0 && <AccountSwitcher />}
             <Button onClick={() => setShowCreateAccount(true)} size="sm">
               <Plus className="w-4 h-4 mr-2" />
-              New Account
+              New Organisation
             </Button>
           </div>
         </div>
@@ -82,13 +82,13 @@ function EmptyState({ onCreateAccount }: { onCreateAccount: () => void }) {
     <Card className="border-dashed">
       <CardContent className="flex flex-col items-center justify-center py-12 text-center">
         <Briefcase className="w-12 h-12 text-muted-foreground mb-4" />
-        <h3 className="text-lg font-semibold mb-2">No Portfolios Yet</h3>
+        <h3 className="text-lg font-semibold mb-2">No Organisations Yet</h3>
         <p className="text-muted-foreground mb-4 max-w-md">
-          Create an account to group multiple buildings under one portfolio and get consolidated insights.
+          Create an organisation to group multiple workspaces and get consolidated insights.
         </p>
         <Button onClick={onCreateAccount}>
           <Plus className="w-4 h-4 mr-2" />
-          Create Your First Account
+          Create Your First Organisation
         </Button>
       </CardContent>
     </Card>
@@ -193,7 +193,7 @@ function PortfolioView({ account, userRole }: { account: { id: string; name: str
             <div className="text-2xl font-bold">
               {summary?.buildings_by_backlog?.length || 0}
             </div>
-            <div className="text-xs text-muted-foreground mt-1">Buildings</div>
+            <div className="text-xs text-muted-foreground mt-1">Workspaces</div>
           </CardContent>
         </Card>
         <Card>
@@ -283,12 +283,12 @@ function PortfolioView({ account, userRole }: { account: { id: string; name: str
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
             <Building2 className="w-4 h-4" />
-            Buildings by Backlog
+            Workspaces by Backlog
           </CardTitle>
         </CardHeader>
         <CardContent>
           {!summary?.buildings_by_backlog?.length ? (
-            <p className="text-sm text-muted-foreground">No buildings with open issues</p>
+            <p className="text-sm text-muted-foreground">No workspaces with open issues</p>
           ) : (
             <div className="space-y-2">
               {summary.buildings_by_backlog.map((building) => (
@@ -363,14 +363,14 @@ function CreateAccountDialog({
       // Save as active account
       localStorage.setItem(`active_account_${user.id}`, newAccount.id);
 
-      toast.success("Account created successfully!");
+      toast.success("Organisation created successfully!");
       setName("");
       setBillingEmail("");
       onOpenChange(false);
       await onCreated();
     } catch (error: any) {
       console.error("Error creating account:", error);
-      toast.error(error.message || "Failed to create account");
+      toast.error(error.message || "Failed to create organisation");
     } finally {
       setIsCreating(false);
     }
@@ -382,15 +382,15 @@ function CreateAccountDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Briefcase className="w-5 h-5" />
-            Create Portfolio Account
+            Create Organisation
           </DialogTitle>
           <DialogDescription>
-            Create an account to group multiple building workspaces under one portfolio.
+            Create an organisation to group multiple workspaces under one umbrella.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="account-name">Account Name *</Label>
+            <Label htmlFor="account-name">Organisation Name *</Label>
             <Input
               id="account-name"
               placeholder="Pinnacle Properties"
@@ -415,7 +415,7 @@ function CreateAccountDialog({
             Cancel
           </Button>
           <Button onClick={handleCreate} disabled={isCreating || !name.trim()}>
-            {isCreating ? "Creating..." : "Create Account"}
+            {isCreating ? "Creating..." : "Create Organisation"}
           </Button>
         </DialogFooter>
       </DialogContent>
