@@ -34,10 +34,10 @@ export const OrganizationSwitcher = () => {
 
     const success = await switchOrganization(orgId);
     if (success) {
-      toast.success("Switched organization");
+      toast.success("Switched workspace");
       window.location.reload();
     } else {
-      toast.error("Failed to switch organization");
+      toast.error("Failed to switch workspace");
     }
   };
 

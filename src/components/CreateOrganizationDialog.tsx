@@ -134,7 +134,7 @@ export const CreateOrganizationDialog = ({
 
       if (error) throw error;
 
-      toast.success("Organization created successfully!");
+      toast.success("Workspace created successfully!");
       onOpenChange(false);
       
       // Reset form
@@ -148,7 +148,7 @@ export const CreateOrganizationDialog = ({
       window.location.reload();
     } catch (error: any) {
       console.error("Error creating organization:", error);
-      toast.error(error.message || "Failed to create organization");
+      toast.error(error.message || "Failed to create workspace");
     } finally {
       setIsCreating(false);
     }
@@ -214,7 +214,7 @@ export const CreateOrganizationDialog = ({
             {/* Account / Portfolio Selector */}
             {accounts.length > 0 && (
               <div className="space-y-2">
-                <Label>Attach to Portfolio (Optional)</Label>
+                <Label>Attach to Organisation (Optional)</Label>
                 <Select
                   value={selectedAccountId || "none"}
                   onValueChange={(val) => setSelectedAccountId(val === "none" ? null : val)}
@@ -232,7 +232,7 @@ export const CreateOrganizationDialog = ({
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
-                  Attach this workspace to a portfolio account for consolidated management
+                  Attach this workspace to an organisation for consolidated management
                 </p>
               </div>
             )}
