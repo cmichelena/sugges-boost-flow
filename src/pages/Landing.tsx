@@ -18,26 +18,28 @@ const Landing = () => {
         <div className="container mx-auto px-4 py-20 lg:py-32 relative">
           <div className="max-w-4xl mx-auto text-center">
             <img src={centerIcon} alt="Suggistit" className="h-28 mx-auto mb-8" />
-            <h1 className="text-4xl lg:text-6xl font-bold mb-6 text-foreground leading-tight">
-              Structured Visibility.<br />Transparent Action.
-            </h1>
-            <p className="text-xl lg:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Suggistit brings people and decision-makers into one clear interface — for offices, buildings, and communities.
-            </p>
-            <div className="flex flex-col items-center gap-1 text-muted-foreground mb-10 text-base">
+            <div className="flex flex-col items-center gap-1 text-muted-foreground mb-6 text-base">
               <span>No noise.</span>
               <span>No black holes.</span>
               <span>No forgotten issues.</span>
-              <span className="font-medium text-foreground mt-1">Just visible progress.</span>
             </div>
+            <h1 className="text-4xl lg:text-6xl font-bold mb-4 text-foreground leading-tight">
+              Structured Visibility.<br />Transparent Action.
+            </h1>
+            <p className="text-lg lg:text-xl font-semibold text-foreground mb-6">
+              Just visible progress.
+            </p>
+            <p className="text-xl lg:text-2xl text-muted-foreground mb-10 max-w-2xl mx-auto">
+              Suggistit brings people and decision-makers into one clear interface — for offices, buildings, and communities.
+            </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" asChild className="text-lg px-8 py-6">
                 <Link to="/auth">
-                  {t("common.getStarted")} <ArrowRight className="ml-2 w-5 h-5" />
+                  Start Free Trial <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild className="text-lg px-8 py-6">
-                <Link to="/how-it-works">{t("common.learnMore")}</Link>
+                <Link to="/how-it-works">Watch Demo</Link>
               </Button>
             </div>
           </div>
@@ -54,7 +56,7 @@ const Landing = () => {
               </div>
               <h3 className="text-lg font-semibold mb-2">Human Interface</h3>
               <p className="text-muted-foreground text-sm">
-                Simple, structured input. Photo + description + category. Nothing buried in email threads.
+                Submit in seconds. Photo, description, category. No email threads. No forms. No friction.
               </p>
             </div>
             <div className="text-center">
