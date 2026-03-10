@@ -56,7 +56,7 @@ const Landing = () => {
               </div>
               <h3 className="text-lg font-semibold mb-2">Human Interface</h3>
               <p className="text-muted-foreground text-sm">
-                Simple, structured input. Photo + description + category. Nothing buried in email threads.
+                Submit in seconds. Photo, description, category. No email threads. No forms. No friction.
               </p>
             </div>
             <div className="text-center">
