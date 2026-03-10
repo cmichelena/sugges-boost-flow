@@ -87,17 +87,17 @@ const Landing = () => {
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="font-bold mb-8">Built for</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
-              <div className="flex flex-col items-center gap-2 p-6 rounded-lg bg-card border">
+              <div className="flex flex-col items-center gap-2 p-6 rounded-lg bg-card border transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-md">
                 <Building2 className="w-8 h-8 text-primary" />
                 <span className="font-medium">Offices &amp; Teams</span>
                 <span className="text-sm text-muted-foreground">Idea management with guaranteed closure</span>
               </div>
-              <div className="flex flex-col items-center gap-2 p-6 rounded-lg bg-card border">
+              <div className="flex flex-col items-center gap-2 p-6 rounded-lg bg-card border transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-md">
                 <Home className="w-8 h-8 text-primary" />
                 <span className="font-medium">Residential Buildings</span>
                 <span className="text-sm text-muted-foreground">Issue tracking with tenant visibility</span>
               </div>
-              <div className="flex flex-col items-center gap-2 p-6 rounded-lg bg-card border">
+              <div className="flex flex-col items-center gap-2 p-6 rounded-lg bg-card border transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-md">
                 <Users className="w-8 h-8 text-primary" />
                 <span className="font-medium">Communities &amp; Associations</span>
                 <span className="text-sm text-muted-foreground">Clear communication with accountability</span>
