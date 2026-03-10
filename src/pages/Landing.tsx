@@ -26,7 +26,7 @@ const Landing = () => {
             <h1 className="text-4xl lg:text-6xl font-bold mb-4 text-foreground leading-tight">
               Structured Visibility.<br />Transparent Action.
             </h1>
-            <p className="text-lg lg:text-xl font-semibold text-foreground mb-6">
+            <p className="text-2xl lg:text-3xl font-bold mb-6" style={{ color: '#FF6B35' }}>
               Just visible progress.
             </p>
             <p className="text-xl lg:text-2xl text-muted-foreground mb-10 max-w-2xl mx-auto">
