@@ -112,13 +112,13 @@ const Landing = () => {
       <section className="py-20 bg-gradient-to-br from-primary/10 via-accent/5 to-primary/10">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="font-bold mb-6">{t("landing.ctaTitle")}</h2>
+            <h2 className="font-bold mb-6">Stop losing track of issues and ideas.</h2>
             <p className="text-xl text-muted-foreground mb-8">
-              {t("landing.ctaSubtitle")}
+              See what happens after you speak up.
             </p>
-            <Button size="lg" asChild className="text-lg px-8 py-6">
+            <Button size="lg" asChild className="text-lg px-8 py-6 text-white hover:opacity-90" style={{ backgroundColor: '#FF6B35' }}>
               <Link to="/auth">
-                {t("landing.ctaButton")} <ArrowRight className="ml-2 w-5 h-5" />
+                Start Free Trial <ArrowRight className="ml-2 w-5 h-5" />
               </Link>
             </Button>
           </div>
