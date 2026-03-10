@@ -33,7 +33,7 @@ const Landing = () => {
               Suggistit brings people and decision-makers into one clear interface — for offices, buildings, and communities.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" asChild className="text-lg px-8 py-6">
+              <Button size="lg" asChild className="text-lg px-8 py-6 text-white hover:opacity-90" style={{ backgroundColor: '#FF6B35' }}>
                 <Link to="/auth">
                   Start Free Trial <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
