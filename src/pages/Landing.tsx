@@ -24,8 +24,11 @@ const Landing = () => {
               <span>No forgotten issues.</span>
             </div>
             <h1 className="text-4xl lg:text-6xl font-bold mb-4 text-foreground leading-tight">
-              Structured Visibility.<br />Transparent Action.
+              Turn Ideas Into Action
             </h1>
+            <p className="text-xl lg:text-2xl text-muted-foreground mb-4">
+              Structured Visibility. Transparent Action.
+            </p>
             <p className="text-2xl lg:text-3xl font-bold mb-6" style={{ color: '#FF6B35' }}>
               Just visible progress.
             </p>
