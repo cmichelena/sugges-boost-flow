@@ -19,6 +19,7 @@ import { UpgradePrompt } from "@/components/UpgradePrompt";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useAuth } from "@/hooks/useAuth";
 import { getWorkspaceConfig } from "@/lib/workspace-type-config";
+import { useTranslation } from "react-i18next";
 
 const suggestionSchema = z.object({
   title: z.string().trim().min(5, 'Title must be at least 5 characters').max(100, 'Title must be less than 100 characters'),
@@ -33,6 +34,7 @@ interface Category {
 }
 
 const Submit = () => {
+  const { t } = useTranslation();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
@@ -75,7 +77,7 @@ const Submit = () => {
 
     if (categoriesError) {
       console.error("Error fetching categories:", categoriesError);
-      toast.error("Failed to load categories");
+      toast.error(t("suggestion.failedToLoadCategories"));
       return;
     }
 
@@ -98,7 +100,7 @@ const Submit = () => {
 
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !session || !activeOrganization) {
-        toast.error("Please sign in to submit a suggestion");
+        toast.error(t("suggestion.pleaseSignIn"));
         navigate("/auth");
         return;
       }
@@ -119,7 +121,6 @@ const Submit = () => {
 
         if (aiError) {
           console.error("AI improvement error:", aiError);
-          // Don't block submission, just log the error
         } else {
           improved = aiData;
         }
@@ -145,7 +146,6 @@ const Submit = () => {
         is_anonymous: isAnonymous,
         assigned_team_id: assignmentData?.[0]?.team_id || null,
         assigned_to_user_id: assignmentData?.[0]?.assigned_user_id || null,
-        // Building-specific fields
         target_response_date: workspaceConfig.extraFields.targetResponseDate && targetResponseDate ? targetResponseDate : null,
         target_resolution_date: workspaceConfig.extraFields.targetResolutionDate && targetResolutionDate ? targetResolutionDate : null,
         responsible_party_name: workspaceConfig.extraFields.responsibleParty && responsiblePartyName ? responsiblePartyName : null,
@@ -203,8 +203,8 @@ const Submit = () => {
 
       toast.success(
         hasAIAccess 
-          ? "Suggestion submitted and enhanced with AI!" 
-          : "Suggestion submitted successfully!"
+          ? t("suggestion.submitSuccessAI")
+          : t("suggestion.submitSuccess")
       );
       navigate("/");
     } catch (error: any) {
@@ -225,9 +225,9 @@ const Submit = () => {
             </h1>
             <p className="text-muted-foreground mb-6">
               {activeOrganization?.workspace_type === "building"
-                ? "Log an issue or concern about this building."
-                : "Share your ideas to improve our organization."}
-              {hasAIAccess && " AI will help refine your submission."}
+                ? t("suggestion.logIssue")
+                : t("suggestion.shareIdeas")}
+              {hasAIAccess && ` ${t("suggestion.aiWillRefine")}`}
             </p>
 
             {/* AI Enhancement Status */}
@@ -245,9 +245,9 @@ const Submit = () => {
                           <Sparkles className="w-4 h-4 text-primary" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium">AI Enhancement Active</p>
+                          <p className="text-sm font-medium">{t("suggestion.aiEnhancementActive")}</p>
                           <p className="text-xs text-muted-foreground">
-                            Your suggestion will be automatically improved
+                            {t("suggestion.aiAutoImprove")}
                           </p>
                         </div>
                       </>
@@ -258,13 +258,13 @@ const Submit = () => {
                         </div>
                         <div>
                           <p className="text-sm font-medium flex items-center gap-2">
-                            AI Enhancement
+                            {t("suggestion.aiEnhancement")}
                             <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-600 border-amber-500/20">
                               Pro+
                             </Badge>
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            Upgrade to get AI-powered improvements
+                            {t("suggestion.upgradeForAI")}
                           </p>
                         </div>
                       </>
@@ -278,7 +278,7 @@ const Submit = () => {
                       className="shrink-0"
                     >
                       <Sparkles className="w-3 h-3 mr-1" />
-                      Upgrade
+                      {t("pricing.upgrade")}
                     </Button>
                   )}
                 </div>
@@ -287,25 +287,24 @@ const Submit = () => {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <Label htmlFor="title">Title</Label>
+                <Label htmlFor="title">{t("suggestion.title")}</Label>
                 <Input
                   id="title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   required
-                  placeholder="Brief summary of your suggestion"
+                  placeholder={t("suggestion.briefSummary")}
                   maxLength={100}
                 />
               </div>
 
               <div>
-                <Label>Category</Label>
+                <Label>{t("suggestion.category")}</Label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-wrap gap-1.5 mt-2">
                   {categories.map((cat, index) => {
                     const isSelected = categoryId === cat.id;
                     const isPrivate = cat.name.toLowerCase().includes('private');
                     
-                    // Color palette for categories
                     const colorVariants = [
                       { bg: 'bg-blue-500/10', border: 'border-blue-500', text: 'text-blue-600 dark:text-blue-400', hoverBg: 'hover:bg-blue-500/5' },
                       { bg: 'bg-emerald-500/10', border: 'border-emerald-500', text: 'text-emerald-600 dark:text-emerald-400', hoverBg: 'hover:bg-emerald-500/5' },
@@ -317,7 +316,6 @@ const Submit = () => {
                       { bg: 'bg-pink-500/10', border: 'border-pink-500', text: 'text-pink-600 dark:text-pink-400', hoverBg: 'hover:bg-pink-500/5' },
                     ];
                     
-                    // Private category always gets purple
                     const privateColor = { bg: 'bg-purple-500/10', border: 'border-purple-500', text: 'text-purple-600 dark:text-purple-400', hoverBg: 'hover:bg-purple-500/5' };
                     const color = isPrivate ? privateColor : colorVariants[index % colorVariants.length];
                     
@@ -347,28 +345,28 @@ const Submit = () => {
                   })}
                 </div>
                 {!categoryId && (
-                  <p className="text-xs text-muted-foreground mt-2">Please select a category</p>
+                  <p className="text-xs text-muted-foreground mt-2">{t("suggestion.pleaseSelectCategory")}</p>
                 )}
               </div>
 
               <div>
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{t("suggestion.description")}</Label>
                 <Textarea
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   required
-                  placeholder="Describe your suggestion in detail..."
+                  placeholder={t("suggestion.descriptionPlaceholder")}
                   rows={6}
                   maxLength={2000}
                 />
                 <p className="text-sm text-muted-foreground mt-1">
-                  {description.length}/2000 characters
+                  {description.length}/2000 {t("suggestion.characters")}
                 </p>
               </div>
 
               <div>
-                <Label>Attachments (optional)</Label>
+                <Label>{t("suggestion.attachmentsOptional")}</Label>
                 <FileUpload
                   files={attachments}
                   onFilesChange={setAttachments}
@@ -381,10 +379,10 @@ const Submit = () => {
               {/* Building-specific extra fields */}
               {workspaceConfig.extraFields.targetResponseDate && (
                 <div className="space-y-4 p-4 rounded-lg border bg-muted/30">
-                  <p className="text-sm font-medium text-muted-foreground">Additional Details</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t("suggestion.additionalDetails")}</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="targetResponseDate">Target Response Date</Label>
+                      <Label htmlFor="targetResponseDate">{t("suggestion.targetResponseDate")}</Label>
                       <Input
                         id="targetResponseDate"
                         type="date"
@@ -393,7 +391,7 @@ const Submit = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="targetResolutionDate">Target Resolution Date</Label>
+                      <Label htmlFor="targetResolutionDate">{t("suggestion.targetResolutionDate")}</Label>
                       <Input
                         id="targetResolutionDate"
                         type="date"
@@ -403,15 +401,15 @@ const Submit = () => {
                     </div>
                   </div>
                   <div>
-                    <Label htmlFor="responsibleParty">Responsible Party</Label>
+                    <Label htmlFor="responsibleParty">{t("suggestion.responsibleParty")}</Label>
                     <Input
                       id="responsibleParty"
-                      placeholder="e.g., Building Manager, John Smith"
+                      placeholder={t("suggestion.responsiblePartyPlaceholder")}
                       value={responsiblePartyName}
                       onChange={(e) => setResponsiblePartyName(e.target.value)}
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      Enter a name or role responsible for this issue
+                      {t("suggestion.responsiblePartyHint")}
                     </p>
                   </div>
                 </div>
@@ -428,18 +426,18 @@ const Submit = () => {
                     htmlFor="anonymous"
                     className="text-sm font-normal cursor-pointer"
                   >
-                    Submit anonymously
+                    {t("suggestion.anonymous")}
                   </Label>
                 </div>
               )}
 
               <div className="flex gap-3">
                 <Button type="button" variant="outline" className="flex-1" onClick={() => navigate(-1)}>
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
                 <Button type="submit" className="flex-1" disabled={loading}>
                   {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  {loading ? "Submitting..." : workspaceConfig.terminology.submit}
+                  {loading ? t("suggestion.submitting") : workspaceConfig.terminology.submit}
                 </Button>
               </div>
             </form>
@@ -447,7 +445,7 @@ const Submit = () => {
             <SuggestionDisclaimer />
 
             <p className="text-sm text-muted-foreground mt-6 bg-muted/50 p-3 rounded-md border border-border">
-              <span className="font-medium">Need to share something confidential?</span> You can do it here by selecting <span className="font-semibold text-foreground">Private (HR visible only)</span> from the category dropdown.
+              <span className="font-medium">{t("suggestion.confidentialNote")}</span> {t("suggestion.confidentialHint")} <span className="font-semibold text-foreground">{t("suggestion.confidentialCategory")}</span> {t("suggestion.confidentialSuffix")}
             </p>
           </Card>
         </div>
