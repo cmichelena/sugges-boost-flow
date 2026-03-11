@@ -12,6 +12,7 @@ import { toast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useGeoLocation } from "@/hooks/useGeoLocation";
 import { Navbar } from "@/components/Navbar";
+import { useTranslation } from "react-i18next";
 import { 
   PRICING_TIERS, 
   CURRENCIES,
@@ -28,6 +29,7 @@ const Pricing = () => {
   const { user } = useAuth();
   const { tier: currentTier } = useSubscription();
   const { currency, isEU, loading: geoLoading } = useGeoLocation();
+  const { t } = useTranslation();
 
   const getDisplayPrice = (tier: PricingTier): string => {
     if (tier.isEnterprise) {
@@ -66,11 +68,10 @@ const Pricing = () => {
       return;
     }
 
-    // Require authentication for paid tiers
     if (!user) {
       toast({
-        title: "Sign in required",
-        description: "Please sign in to subscribe to a paid plan.",
+        title: t("pricing.signInRequired"),
+        description: t("pricing.signInRequiredDesc"),
         variant: "destructive",
       });
       navigate("/auth");
@@ -100,8 +101,8 @@ const Pricing = () => {
     } catch (error) {
       console.error("Checkout error:", error);
       toast({
-        title: "Checkout failed",
-        description: "There was a problem starting the checkout process. Please try again.",
+        title: t("pricing.checkoutFailed"),
+        description: t("pricing.checkoutFailedDesc"),
         variant: "destructive",
       });
     } finally {
@@ -118,7 +119,7 @@ const Pricing = () => {
       return (
         <>
           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-          Loading...
+          {t("pricing.loading")}
         </>
       );
     }
@@ -127,20 +128,20 @@ const Pricing = () => {
       return (
         <>
           <Mail className="w-4 h-4 mr-2" />
-          Contact Sales
+          {t("pricing.contact")}
         </>
       );
     }
 
     if (isCurrentPlan(tier)) {
-      return "Current Plan";
+      return t("pricing.currentPlan");
     }
 
     if (tier.tier === "free") {
-      return user ? "Current Plan" : "Start Free";
+      return user ? t("pricing.currentPlan") : t("pricing.startFree");
     }
 
-    return "Upgrade";
+    return t("pricing.upgrade");
   };
 
   const getButtonVariant = (tier: PricingTier): "default" | "outline" | "secondary" => {
@@ -157,9 +158,7 @@ const Pricing = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      {/* Hero Section */}
       <div className="container mx-auto px-4 py-8">
-        {/* Back Button */}
         <Button
           variant="ghost"
           size="sm"
@@ -167,31 +166,29 @@ const Pricing = () => {
           className="mb-6"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
+          {t("pricing.back")}
         </Button>
 
         <div className="text-center mb-12">
           <h1 className="font-bold mb-4">
-            Simple, Transparent Pricing
+            {t("pricing.title")}
           </h1>
           <p className="text-xl text-muted-foreground mb-4">
-            Each office, building, or community operates as its own workspace.
+            {t("pricing.subtitle")}
           </p>
           <p className="text-base text-muted-foreground mb-8">
-            Subscriptions apply per workspace. Organisations group multiple workspaces for portfolio oversight.
+            {t("pricing.subtitleNote")}
           </p>
 
-          {/* Currency indicator */}
           <div className="flex items-center justify-center gap-2 mb-6">
             <span className="text-sm text-muted-foreground">
-              Prices shown in {getCurrencyLabel(currency)}
+              {t("pricing.pricesShownIn")} {getCurrencyLabel(currency)}
             </span>
           </div>
 
-          {/* Annual/Monthly Toggle */}
           <div className="flex items-center justify-center gap-4 mb-8">
             <Label htmlFor="billing-toggle" className={!isAnnual ? "font-semibold" : ""}>
-              Monthly
+              {t("pricing.monthly")}
             </Label>
             <Switch
               id="billing-toggle"
@@ -199,17 +196,16 @@ const Pricing = () => {
               onCheckedChange={setIsAnnual}
             />
             <Label htmlFor="billing-toggle" className={isAnnual ? "font-semibold" : ""}>
-              Annual
+              {t("pricing.annual")}
             </Label>
             {isAnnual && (
               <Badge variant="secondary" className="ml-2">
-                Save up to 17%
+                {t("pricing.saveUpTo")}
               </Badge>
             )}
           </div>
         </div>
 
-        {/* Pricing Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 max-w-7xl mx-auto">
           {PRICING_TIERS.map((tier) => {
             const savings = getAnnualSavings(tier);
@@ -226,7 +222,7 @@ const Pricing = () => {
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                     <Badge className="gap-1">
                       <Crown className="w-3 h-3" />
-                      Recommended
+                      {t("pricing.recommended")}
                     </Badge>
                   </div>
                 )}
@@ -238,23 +234,23 @@ const Pricing = () => {
                       <span className="text-4xl font-bold">{getDisplayPrice(tier)}</span>
                       {!tier.isEnterprise && tier.priceMonthly[currency] > 0 && (
                         <span className="text-muted-foreground">
-                          {isAnnual ? "/yr" : "/mo"}
+                          {isAnnual ? t("pricing.perYear") : t("pricing.perMonth")}
                         </span>
                       )}
                     </div>
                     {isAnnual && monthlyEquiv && (
                       <p className="text-sm text-muted-foreground mt-1">
-                        {monthlyEquiv}/mo when billed annually
+                        {t("pricing.billedAnnually", { price: monthlyEquiv })}
                       </p>
                     )}
                     {isAnnual && savings && (
                       <Badge variant="outline" className="mt-2 text-green-600 border-green-600">
-                        Save {savings}%
+                        {t("pricing.savePercent", { percent: savings })}
                       </Badge>
                     )}
                   </div>
                   <CardDescription className="mt-2 min-h-[20px]">
-                    {tier.isEnterprise && "Tailored for large organizations"}
+                    {tier.isEnterprise && t("pricing.tailoredForLarge")}
                   </CardDescription>
                 </CardHeader>
 
@@ -284,28 +280,25 @@ const Pricing = () => {
           })}
         </div>
 
-        {/* Ownership Note */}
         <div className="mt-8 text-center">
           <p className="text-sm text-muted-foreground">
-            Workspace data ownership always remains with the workspace owner.
+            {t("pricing.ownershipNote")}
           </p>
         </div>
 
-        {/* VAT Notice */}
         {isEU && (
           <div className="mt-4 text-center">
             <p className="text-sm text-muted-foreground">
-              Prices shown exclude VAT. VAT added where applicable (EU only).
+              {t("pricing.vatNotice")}
             </p>
           </div>
         )}
 
-        {/* Contact Section */}
         <div className="mt-16 text-center">
           <p className="text-muted-foreground">
-            Questions about pricing?{" "}
+            {t("pricing.questionsAboutPricing")}{" "}
             <a href="mailto:support@suggistit.com" className="text-primary hover:underline">
-              Contact our team
+              {t("pricing.contactOurTeam")}
             </a>
           </p>
         </div>
