@@ -17,7 +17,7 @@ const Landing = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
         <div className="container mx-auto px-4 py-20 lg:py-32 relative">
           <div className="max-w-4xl mx-auto text-center">
-            <img src={centerIcon} alt="Suggistit" className="h-28 mx-auto mb-8" />
+            <img src={centerIcon} alt="Suggistit" className="h-56 mx-auto mb-8" />
             <div className="flex flex-col items-center gap-1 text-muted-foreground mb-6 text-base">
               <span>No noise.</span>
               <span>No black holes.</span>
