@@ -23,6 +23,7 @@ import {
 } from "@/lib/pricing-config";
 
 const Pricing = () => {
+  const isIOSApp = /iPad|iPhone|iPod/.test(navigator.userAgent) && window.matchMedia('(display-mode: standalone)').matches;
   const [isAnnual, setIsAnnual] = useState(false);
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
   const navigate = useNavigate();
