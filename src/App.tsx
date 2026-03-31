@@ -23,6 +23,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Organization from "./pages/Organization";
 import Install from "./pages/Install";
 import NotFound from "./pages/NotFound";
+import Support from "./pages/Support";
 import Portfolio from "./pages/Portfolio";
 import OrganisationSettings from "./pages/OrganisationSettings";
 const queryClient = new QueryClient();
