@@ -130,27 +130,36 @@ export const SubscriptionStatusCard = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
-        <Button
-          variant={subscribed ? "outline" : "default"}
-          size="sm"
-          onClick={handleManageSubscription}
-          disabled={portalLoading}
-          className="w-full"
-        >
-          {portalLoading ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Loading...
-            </>
-          ) : subscribed ? (
-            "Manage Subscription"
-          ) : (
-            <>
-              <Sparkles className="w-4 h-4 mr-2" />
-              Upgrade Plan
-            </>
-          )}
-        </Button>
+        {isIOSApp ? (
+          <p className="text-xs text-muted-foreground text-center">
+            To upgrade or manage your subscription, visit{" "}
+            <a href="https://suggistit.com/pricing" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+              suggistit.com
+            </a>
+          </p>
+        ) : (
+          <Button
+            variant={subscribed ? "outline" : "default"}
+            size="sm"
+            onClick={handleManageSubscription}
+            disabled={portalLoading}
+            className="w-full"
+          >
+            {portalLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Loading...
+              </>
+            ) : subscribed ? (
+              "Manage Subscription"
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4 mr-2" />
+                Upgrade Plan
+              </>
+            )}
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
