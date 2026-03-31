@@ -56,6 +56,7 @@ const App = () => (
               <Route path="/install" element={<Install />} />
               <Route path="/portfolio" element={<Portfolio />} />
               <Route path="/organisation-settings" element={<OrganisationSettings />} />
+              <Route path="/support" element={<Support />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
