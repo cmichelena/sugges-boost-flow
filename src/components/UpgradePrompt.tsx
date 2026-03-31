@@ -157,6 +157,14 @@ export const UpgradeBanner = ({ feature, compact = false, onUpgradeClick }: Upgr
   };
 
   if (compact) {
+    if (isIOSApp) {
+      return (
+        <span className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Lock className="w-3 h-3" />
+          <span>Available at suggistit.com</span>
+        </span>
+      );
+    }
     return (
       <button
         onClick={handleClick}
