@@ -23,6 +23,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Organization from "./pages/Organization";
 import Install from "./pages/Install";
 import NotFound from "./pages/NotFound";
+import Support from "./pages/Support";
 import Portfolio from "./pages/Portfolio";
 import OrganisationSettings from "./pages/OrganisationSettings";
 const queryClient = new QueryClient();
@@ -55,6 +56,7 @@ const App = () => (
               <Route path="/install" element={<Install />} />
               <Route path="/portfolio" element={<Portfolio />} />
               <Route path="/organisation-settings" element={<OrganisationSettings />} />
+              <Route path="/support" element={<Support />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
