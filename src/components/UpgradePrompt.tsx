@@ -141,6 +141,7 @@ interface UpgradeBannerProps {
 }
 
 export const UpgradeBanner = ({ feature, compact = false, onUpgradeClick }: UpgradeBannerProps) => {
+  const isIOSApp = /iPad|iPhone|iPod/.test(navigator.userAgent) && window.matchMedia('(display-mode: standalone)').matches;
   const navigate = useNavigate();
   const { getFeatureName, getMinTierForFeature } = useFeatureAccess();
 
