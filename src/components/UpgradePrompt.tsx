@@ -113,11 +113,20 @@ export const UpgradePrompt = ({
               Continue without
             </Button>
           )}
-          <Button onClick={handleUpgrade} disabled={isNavigating} className="w-full sm:w-auto gap-2">
-            <Crown className="w-4 h-4" />
-            View Plans
-            <ArrowRight className="w-4 h-4" />
-          </Button>
+          {isIOSApp ? (
+            <p className="text-sm text-muted-foreground text-center w-full">
+              To unlock this feature, visit{" "}
+              <a href="https://suggistit.com/pricing" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                suggistit.com
+              </a>
+            </p>
+          ) : (
+            <Button onClick={handleUpgrade} disabled={isNavigating} className="w-full sm:w-auto gap-2">
+              <Crown className="w-4 h-4" />
+              View Plans
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
