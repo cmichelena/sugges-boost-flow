@@ -146,6 +146,9 @@ const Landing = () => {
               <Link to="/how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
                 {t("nav.howItWorks")}
               </Link>
+              <a href="https://www.suggistit.com/support" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+                {t("nav.support") || "Support"}
+              </a>
               <Link to="/privacy-policy" className="text-sm text-muted-foreground/70 hover:text-foreground transition-colors">
                 {t("landing.privacyPolicy")}
               </Link>
