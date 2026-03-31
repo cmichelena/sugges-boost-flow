@@ -264,6 +264,7 @@ export const PlanUsageCard = ({
             </>
           )}
         </Button>
+        )}
       </div>
 
       {/* Trial warning */}

@@ -195,10 +195,19 @@ export const UpgradeBanner = ({ feature, compact = false, onUpgradeClick }: Upgr
             </p>
           </div>
         </div>
-        <Button size="sm" variant="outline" onClick={handleClick} className="shrink-0">
-          <Sparkles className="w-3 h-3 mr-1" />
-          Upgrade
-        </Button>
+        {isIOSApp ? (
+          <p className="text-xs text-muted-foreground shrink-0">
+            Visit{" "}
+            <a href="https://suggistit.com/pricing" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+              suggistit.com
+            </a>
+          </p>
+        ) : (
+          <Button size="sm" variant="outline" onClick={handleClick} className="shrink-0">
+            <Sparkles className="w-3 h-3 mr-1" />
+            Upgrade
+          </Button>
+        )}
       </div>
     </div>
   );
