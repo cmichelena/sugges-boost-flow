@@ -29,11 +29,6 @@ export const UpgradePrompt = ({
   showContinueWithout = false,
 }: UpgradePromptProps) => {
   const isIOSApp = /iPad|iPhone|iPod/.test(navigator.userAgent) && window.matchMedia('(display-mode: standalone)').matches;
-  open,
-  onClose,
-  onContinueWithout,
-  showContinueWithout = false,
-}: UpgradePromptProps) => {
   const navigate = useNavigate();
   const { getFeatureName, getFeatureDescription, getMinTierForFeature } = useFeatureAccess();
   const [isNavigating, setIsNavigating] = useState(false);
