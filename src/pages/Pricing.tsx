@@ -24,6 +24,13 @@ import {
 
 const Pricing = () => {
   const isIOSApp = /iPad|iPhone|iPod/.test(navigator.userAgent) && window.matchMedia('(display-mode: standalone)').matches;
+  const [isAnnual, setIsAnnual] = useState(false);
+  const [loadingTier, setLoadingTier] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { tier: currentTier } = useSubscription();
+  const { currency, isEU, loading: geoLoading } = useGeoLocation();
+  const { t } = useTranslation();
 
   if (isIOSApp) {
     return (
@@ -45,13 +52,6 @@ const Pricing = () => {
     );
   }
 
-  const [isAnnual, setIsAnnual] = useState(false);
-  const [loadingTier, setLoadingTier] = useState<string | null>(null);
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const { tier: currentTier } = useSubscription();
-  const { currency, isEU, loading: geoLoading } = useGeoLocation();
-  const { t } = useTranslation();
 
   const getDisplayPrice = (tier: PricingTier): string => {
     if (tier.isEnterprise) {
