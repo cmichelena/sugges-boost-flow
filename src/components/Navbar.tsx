@@ -143,6 +143,12 @@ export const Navbar = () => {
                     {t("nav.pricing")}
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <a href="https://www.suggistit.com/support" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                    <Info className="w-4 h-4" />
+                    {t("nav.support") || "Support"}
+                  </a>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 
                 {/* Settings Section */}
