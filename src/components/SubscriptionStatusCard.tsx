@@ -43,6 +43,7 @@ const tierConfig = {
 };
 
 export const SubscriptionStatusCard = () => {
+  const isIOSApp = /iPad|iPhone|iPod/.test(navigator.userAgent) && window.matchMedia('(display-mode: standalone)').matches;
   const { subscribed, tier, subscriptionEnd, loading, error, refresh, openCustomerPortal } = useSubscription();
   const [portalLoading, setPortalLoading] = useState(false);
   const navigate = useNavigate();
