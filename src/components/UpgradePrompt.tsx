@@ -28,6 +28,7 @@ export const UpgradePrompt = ({
   onContinueWithout,
   showContinueWithout = false,
 }: UpgradePromptProps) => {
+  const isIOSApp = /iPad|iPhone|iPod/.test(navigator.userAgent) && window.matchMedia('(display-mode: standalone)').matches;
   const navigate = useNavigate();
   const { getFeatureName, getFeatureDescription, getMinTierForFeature } = useFeatureAccess();
   const [isNavigating, setIsNavigating] = useState(false);
@@ -107,11 +108,20 @@ export const UpgradePrompt = ({
               Continue without
             </Button>
           )}
-          <Button onClick={handleUpgrade} disabled={isNavigating} className="w-full sm:w-auto gap-2">
-            <Crown className="w-4 h-4" />
-            View Plans
-            <ArrowRight className="w-4 h-4" />
-          </Button>
+          {isIOSApp ? (
+            <p className="text-sm text-muted-foreground text-center w-full">
+              To unlock this feature, visit{" "}
+              <a href="https://suggistit.com/pricing" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                suggistit.com
+              </a>
+            </p>
+          ) : (
+            <Button onClick={handleUpgrade} disabled={isNavigating} className="w-full sm:w-auto gap-2">
+              <Crown className="w-4 h-4" />
+              View Plans
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -126,6 +136,7 @@ interface UpgradeBannerProps {
 }
 
 export const UpgradeBanner = ({ feature, compact = false, onUpgradeClick }: UpgradeBannerProps) => {
+  const isIOSApp = /iPad|iPhone|iPod/.test(navigator.userAgent) && window.matchMedia('(display-mode: standalone)').matches;
   const navigate = useNavigate();
   const { getFeatureName, getMinTierForFeature } = useFeatureAccess();
 
@@ -141,6 +152,14 @@ export const UpgradeBanner = ({ feature, compact = false, onUpgradeClick }: Upgr
   };
 
   if (compact) {
+    if (isIOSApp) {
+      return (
+        <span className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Lock className="w-3 h-3" />
+          <span>Available at suggistit.com</span>
+        </span>
+      );
+    }
     return (
       <button
         onClick={handleClick}
@@ -171,10 +190,19 @@ export const UpgradeBanner = ({ feature, compact = false, onUpgradeClick }: Upgr
             </p>
           </div>
         </div>
-        <Button size="sm" variant="outline" onClick={handleClick} className="shrink-0">
-          <Sparkles className="w-3 h-3 mr-1" />
-          Upgrade
-        </Button>
+        {isIOSApp ? (
+          <p className="text-xs text-muted-foreground shrink-0">
+            Visit{" "}
+            <a href="https://suggistit.com/pricing" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+              suggistit.com
+            </a>
+          </p>
+        ) : (
+          <Button size="sm" variant="outline" onClick={handleClick} className="shrink-0">
+            <Sparkles className="w-3 h-3 mr-1" />
+            Upgrade
+          </Button>
+        )}
       </div>
     </div>
   );

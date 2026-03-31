@@ -32,6 +32,27 @@ const Pricing = () => {
   const { currency, isEU, loading: geoLoading } = useGeoLocation();
   const { t } = useTranslation();
 
+  if (isIOSApp) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-6">
+        <div className="text-center max-w-md space-y-6">
+          <Crown className="w-12 h-12 text-primary mx-auto" />
+          <h1 className="text-2xl font-bold text-foreground">Manage Your Subscription</h1>
+          <p className="text-muted-foreground">
+            To view plans, upgrade, or manage your subscription, please visit{" "}
+            <a href="https://suggistit.com/pricing" target="_blank" rel="noopener noreferrer" className="text-primary underline font-medium">
+              suggistit.com
+            </a>
+          </p>
+          <Button variant="outline" onClick={() => window.history.back()} className="w-full">
+            Go Back
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+
   const getDisplayPrice = (tier: PricingTier): string => {
     if (tier.isEnterprise) {
       return "Custom";
