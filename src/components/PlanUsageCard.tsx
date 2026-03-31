@@ -243,23 +243,24 @@ export const PlanUsageCard = ({
           </div>
         </div>
         
-        <Button
-          variant={subscribed ? "outline" : "default"}
-          size="sm"
-          onClick={handleManageSubscription}
-          disabled={portalLoading}
-        >
-          {portalLoading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : subscribed ? (
-            <>
-              Manage
-              <ExternalLink className="w-3 h-3 ml-1" />
-            </>
-          ) : (
-            <>
-              <Sparkles className="w-4 h-4 mr-1" />
-              Upgrade
+        {!isIOSApp && (
+          <Button
+            variant={subscribed ? "outline" : "default"}
+            size="sm"
+            onClick={handleManageSubscription}
+            disabled={portalLoading}
+          >
+            {portalLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : subscribed ? (
+              <>
+                Manage
+                <ExternalLink className="w-3 h-3 ml-1" />
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4 mr-1" />
+                Upgrade
             </>
           )}
         </Button>
