@@ -210,6 +210,8 @@ export const PlanUsageCard = ({
     ? Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
     : 0;
 
+  const isIOSApp = /iPad|iPhone|iPod/.test(navigator.userAgent) && window.matchMedia('(display-mode: standalone)').matches;
+
   if (stripeLoading || loadingUsage) {
     return (
       <Card className="p-6">
