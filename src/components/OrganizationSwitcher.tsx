@@ -55,25 +55,21 @@ export const OrganizationSwitcher = () => {
   const accountName = hasAccountAccess && activeAccount ? activeAccount.name : null;
 
   const triggerContent = (
-    <Button variant="ghost" size="sm" className="gap-1.5 max-w-[320px] h-auto py-1.5">
+    <Button variant="ghost" size="sm" className="gap-1.5 max-w-[200px] sm:max-w-[280px] h-auto py-1.5">
       <div className="flex flex-col items-start text-left min-w-0">
-        {accountName ? (
+        {accountName && (
           <span className="text-[10px] leading-tight text-muted-foreground truncate max-w-full flex items-center gap-1">
             <Briefcase className="w-3 h-3 shrink-0" />
             {accountName}
           </span>
-        ) : (
-          <span className="text-[10px] leading-tight text-muted-foreground truncate max-w-full">
-            Standalone Workspace
-          </span>
         )}
         <span className="text-sm font-medium truncate max-w-full flex items-center gap-1.5">
           <OrgIcon type={activeOrganization.organization_type} workspaceType={activeOrganization.workspace_type} />
-          {activeOrganization.name}
-          <Badge variant="outline" className="text-[10px] px-1.5 py-0 capitalize shrink-0">
-            {workspaceConfig.label}
-          </Badge>
+          <span className="truncate">{activeOrganization.name}</span>
         </span>
+        <Badge variant="outline" className="text-[10px] px-1.5 py-0 capitalize mt-0.5">
+          {workspaceConfig.label}
+        </Badge>
       </div>
       <ChevronDown className="w-3 h-3 shrink-0 opacity-50" />
     </Button>
