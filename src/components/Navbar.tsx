@@ -202,12 +202,14 @@ export const Navbar = () => {
             </Link>
           </Button>
 
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/pricing">
-              <DollarSign className="w-4 h-4 mr-2" />
-              {t("nav.pricing")}
-            </Link>
-          </Button>
+          {!/iPad|iPhone|iPod/.test(navigator.userAgent) && (
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/pricing">
+                <DollarSign className="w-4 h-4 mr-2" />
+                {t("nav.pricing")}
+              </Link>
+            </Button>
+          )}
 
           <LanguageSwitcher />
 
