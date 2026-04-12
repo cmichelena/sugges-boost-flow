@@ -71,7 +71,7 @@ export const Navbar = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64">
                 {/* Plan Badge - hide pricing link on iOS */}
-                {!(/iPad|iPhone|iPod/.test(navigator.userAgent) && window.matchMedia('(display-mode: standalone)').matches) && (
+                {!/iPad|iPhone|iPod/.test(navigator.userAgent) && (
                   <>
                     <div className="px-2 py-2">
                       <Link to="/pricing" className="block">
@@ -141,12 +141,14 @@ export const Navbar = () => {
                     {t("nav.howItWorks")}
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/pricing" className="flex items-center gap-2">
-                    <DollarSign className="w-4 h-4" />
-                    {t("nav.pricing")}
-                  </Link>
-                </DropdownMenuItem>
+                {!/iPad|iPhone|iPod/.test(navigator.userAgent) && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/pricing" className="flex items-center gap-2">
+                      <DollarSign className="w-4 h-4" />
+                      {t("nav.pricing")}
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem asChild>
                   <a href="https://www.suggistit.com/support" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                     <Info className="w-4 h-4" />
@@ -200,12 +202,14 @@ export const Navbar = () => {
             </Link>
           </Button>
 
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/pricing">
-              <DollarSign className="w-4 h-4 mr-2" />
-              {t("nav.pricing")}
-            </Link>
-          </Button>
+          {!/iPad|iPhone|iPod/.test(navigator.userAgent) && (
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/pricing">
+                <DollarSign className="w-4 h-4 mr-2" />
+                {t("nav.pricing")}
+              </Link>
+            </Button>
+          )}
 
           <LanguageSwitcher />
 
