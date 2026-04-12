@@ -109,11 +109,8 @@ export const UpgradePrompt = ({
             </Button>
           )}
           {isIOSApp ? (
-            <p className="text-sm text-muted-foreground text-center w-full">
-              To unlock this feature, visit{" "}
-              <a href="https://suggistit.com/pricing" target="_blank" rel="noopener noreferrer" className="text-primary underline">
-                suggistit.com
-              </a>
+            <p className="text-sm text-muted-foreground text-center w-full py-2">
+              This feature is managed by your organisation admin.
             </p>
           ) : (
             <Button onClick={handleUpgrade} disabled={isNavigating} className="w-full sm:w-auto gap-2">
@@ -156,7 +153,7 @@ export const UpgradeBanner = ({ feature, compact = false, onUpgradeClick }: Upgr
       return (
         <span className="flex items-center gap-2 text-xs text-muted-foreground">
           <Lock className="w-3 h-3" />
-          <span>Available at suggistit.com</span>
+          <span>Managed by your organisation admin</span>
         </span>
       );
     }
@@ -192,10 +189,7 @@ export const UpgradeBanner = ({ feature, compact = false, onUpgradeClick }: Upgr
         </div>
         {isIOSApp ? (
           <p className="text-xs text-muted-foreground shrink-0">
-            Visit{" "}
-            <a href="https://suggistit.com/pricing" target="_blank" rel="noopener noreferrer" className="text-primary underline">
-              suggistit.com
-            </a>
+            Managed by your organisation admin
           </p>
         ) : (
           <Button size="sm" variant="outline" onClick={handleClick} className="shrink-0">

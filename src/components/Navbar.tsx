@@ -70,22 +70,26 @@ export const Navbar = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64">
-                {/* Plan Badge */}
-                <div className="px-2 py-2">
-                  <Link to="/pricing" className="block">
-                    <div className="flex items-center justify-between p-2 rounded-md hover:bg-accent transition-colors">
-                      <div className="flex items-center gap-2">
-                        <CreditCard className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm font-medium">{t("nav.myPlan")}</span>
-                      </div>
-                      <Badge variant="outline" className={`${config.color} text-xs`}>
-                        {TierIcon && <TierIcon className="w-3 h-3 mr-1" />}
-                        {config.name}
-                      </Badge>
+                {/* Plan Badge - hide pricing link on iOS */}
+                {!(/iPad|iPhone|iPod/.test(navigator.userAgent) && window.matchMedia('(display-mode: standalone)').matches) && (
+                  <>
+                    <div className="px-2 py-2">
+                      <Link to="/pricing" className="block">
+                        <div className="flex items-center justify-between p-2 rounded-md hover:bg-accent transition-colors">
+                          <div className="flex items-center gap-2">
+                            <CreditCard className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm font-medium">{t("nav.myPlan")}</span>
+                          </div>
+                          <Badge variant="outline" className={`${config.color} text-xs`}>
+                            {TierIcon && <TierIcon className="w-3 h-3 mr-1" />}
+                            {config.name}
+                          </Badge>
+                        </div>
+                      </Link>
                     </div>
-                  </Link>
-                </div>
-                <DropdownMenuSeparator />
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 
                 {/* Navigation Section */}
                 <DropdownMenuLabel className="text-xs text-muted-foreground">Navigation</DropdownMenuLabel>
