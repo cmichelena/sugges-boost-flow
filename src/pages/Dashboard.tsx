@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import { NoOrganizationScreen } from "@/components/NoOrganizationScreen";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { SuggestionCard } from "@/components/SuggestionCard";
@@ -286,9 +287,7 @@ const Dashboard = () => {
   if (!activeOrganization) {
     return (
       <AppLayout>
-        <div className="container mx-auto px-4 py-8 text-center">
-          <p className="text-muted-foreground">No organization found. Please create or join an organization.</p>
-        </div>
+        <NoOrganizationScreen />
       </AppLayout>
     );
   }
