@@ -28,7 +28,7 @@ export const UpgradePrompt = ({
   onContinueWithout,
   showContinueWithout = false,
 }: UpgradePromptProps) => {
-  const isIOSApp = /iPad|iPhone|iPod/.test(navigator.userAgent) && window.matchMedia('(display-mode: standalone)').matches;
+  const isIOSApp = /iPad|iPhone|iPod/.test(navigator.userAgent);
   const navigate = useNavigate();
   const { getFeatureName, getFeatureDescription, getMinTierForFeature } = useFeatureAccess();
   const [isNavigating, setIsNavigating] = useState(false);
@@ -133,7 +133,7 @@ interface UpgradeBannerProps {
 }
 
 export const UpgradeBanner = ({ feature, compact = false, onUpgradeClick }: UpgradeBannerProps) => {
-  const isIOSApp = /iPad|iPhone|iPod/.test(navigator.userAgent) && window.matchMedia('(display-mode: standalone)').matches;
+  const isIOSApp = /iPad|iPhone|iPod/.test(navigator.userAgent);
   const navigate = useNavigate();
   const { getFeatureName, getMinTierForFeature } = useFeatureAccess();
 
