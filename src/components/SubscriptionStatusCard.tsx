@@ -132,10 +132,7 @@ export const SubscriptionStatusCard = () => {
       <CardContent className="pt-0">
         {isIOSApp ? (
           <p className="text-xs text-muted-foreground text-center">
-            To upgrade or manage your subscription, visit{" "}
-            <a href="https://suggistit.com/pricing" target="_blank" rel="noopener noreferrer" className="text-primary underline">
-              suggistit.com
-            </a>
+            This feature is managed by your organisation admin.
           </p>
         ) : (
           <Button
