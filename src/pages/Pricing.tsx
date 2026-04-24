@@ -21,9 +21,10 @@ import {
   type Currency,
   type PricingTier 
 } from "@/lib/pricing-config";
+import { isIOSApp } from "@/lib/platform";
 
 const Pricing = () => {
-  const isIOSApp = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const iosApp = isIOSApp();
   const [isAnnual, setIsAnnual] = useState(false);
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ const Pricing = () => {
   const { currency, isEU, loading: geoLoading } = useGeoLocation();
   const { t } = useTranslation();
 
-  if (isIOSApp) {
+  if (iosApp) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-6">
         <div className="text-center max-w-md space-y-6">

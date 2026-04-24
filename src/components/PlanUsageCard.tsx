@@ -21,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { isIOSApp } from "@/lib/platform";
 
 interface PlanLimits {
   maxSuggestions: number | null;
@@ -210,7 +211,7 @@ export const PlanUsageCard = ({
     ? Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
     : 0;
 
-  const isIOSApp = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const iosApp = isIOSApp();
 
   if (stripeLoading || loadingUsage) {
     return (
@@ -243,7 +244,7 @@ export const PlanUsageCard = ({
           </div>
         </div>
         
-        {!isIOSApp && (
+        {!iosApp && (
           <Button
             variant={subscribed ? "outline" : "default"}
             size="sm"

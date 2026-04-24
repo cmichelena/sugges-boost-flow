@@ -74,13 +74,19 @@ export const NotificationSettings = () => {
     // Optimistic update
     setPreferences({ ...preferences, [key]: value });
 
+    type PrefUpdate = Partial<
+      Pick<NotificationPreferences, "in_app_enabled" | "email_enabled" | "push_enabled">
+    > & { updated_at: string };
+
+    const payload: PrefUpdate = {
+      [key]: value,
+      updated_at: new Date().toISOString(),
+    } as PrefUpdate;
+
     try {
       const { error } = await supabase
         .from("notification_preferences")
-        .update({
-          [key]: value,
-          updated_at: new Date().toISOString(),
-        })
+        .update(payload)
         .eq("user_id", user!.id);
 
       if (error) throw error;

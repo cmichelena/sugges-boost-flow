@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Sparkles, Crown, Lock, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Feature, useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { isIOSApp } from "@/lib/platform";
 
 interface UpgradePromptProps {
   feature: Feature;
@@ -28,7 +29,7 @@ export const UpgradePrompt = ({
   onContinueWithout,
   showContinueWithout = false,
 }: UpgradePromptProps) => {
-  const isIOSApp = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const iosApp = isIOSApp();
   const navigate = useNavigate();
   const { getFeatureName, getFeatureDescription, getMinTierForFeature } = useFeatureAccess();
   const [isNavigating, setIsNavigating] = useState(false);
@@ -108,7 +109,7 @@ export const UpgradePrompt = ({
               Continue without
             </Button>
           )}
-          {isIOSApp ? (
+          {iosApp ? (
             <p className="text-sm text-muted-foreground text-center w-full py-2">
               This feature is managed by your organisation admin.
             </p>
@@ -133,7 +134,7 @@ interface UpgradeBannerProps {
 }
 
 export const UpgradeBanner = ({ feature, compact = false, onUpgradeClick }: UpgradeBannerProps) => {
-  const isIOSApp = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const iosApp = isIOSApp();
   const navigate = useNavigate();
   const { getFeatureName, getMinTierForFeature } = useFeatureAccess();
 
@@ -149,7 +150,7 @@ export const UpgradeBanner = ({ feature, compact = false, onUpgradeClick }: Upgr
   };
 
   if (compact) {
-    if (isIOSApp) {
+    if (iosApp) {
       return (
         <span className="flex items-center gap-2 text-xs text-muted-foreground">
           <Lock className="w-3 h-3" />
@@ -187,7 +188,7 @@ export const UpgradeBanner = ({ feature, compact = false, onUpgradeClick }: Upgr
             </p>
           </div>
         </div>
-        {isIOSApp ? (
+        {iosApp ? (
           <p className="text-xs text-muted-foreground shrink-0">
             Managed by your organisation admin
           </p>
