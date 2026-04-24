@@ -3,9 +3,40 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Building2, Mail, Plus, ArrowRight } from "lucide-react";
 import { CreateOrganizationDialog } from "@/components/CreateOrganizationDialog";
+import { isIOSApp } from "@/lib/platform";
 
 export const NoOrganizationScreen = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const iosApp = isIOSApp();
+
+  if (iosApp) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center px-4">
+        <div className="w-full max-w-lg space-y-6">
+          <div className="text-center space-y-2">
+            <h1 className="text-2xl font-bold tracking-tight">Welcome to Suggistit 👋</h1>
+          </div>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Mail className="w-5 h-5 text-primary" />
+                You haven't been added to a workspace yet
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0 space-y-3 text-sm text-muted-foreground">
+              <p>
+                Ask your administrator to invite you, or visit suggistit.com in your browser to create a workspace.
+              </p>
+              <p>
+                Once you've been invited, sign back in here to open your workspace.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

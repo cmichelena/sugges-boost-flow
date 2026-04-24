@@ -8,6 +8,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { isIOSApp } from "@/lib/platform";
 
 const tierConfig = {
   free: {
@@ -43,7 +44,7 @@ const tierConfig = {
 };
 
 export const SubscriptionStatusCard = () => {
-  const isIOSApp = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const iosApp = isIOSApp();
   const { subscribed, tier, subscriptionEnd, loading, error, refresh, openCustomerPortal } = useSubscription();
   const [portalLoading, setPortalLoading] = useState(false);
   const navigate = useNavigate();
@@ -130,7 +131,7 @@ export const SubscriptionStatusCard = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
-        {isIOSApp ? (
+        {iosApp ? (
           <p className="text-xs text-muted-foreground text-center">
             This feature is managed by your organisation admin.
           </p>

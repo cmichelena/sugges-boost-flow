@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { isIOSApp } from "@/lib/platform";
 
 interface LeadershipMember {
   user_id: string;
@@ -116,6 +117,27 @@ export const ElevateToLeadershipDialog = ({
       setLoading(false);
     }
   };
+
+  if (isIOSApp()) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ArrowUpCircle className="w-5 h-5 text-primary" />
+              Elevate to Leadership
+            </DialogTitle>
+          </DialogHeader>
+          <p className="py-4 text-sm text-muted-foreground">
+            This action is managed on suggistit.com.
+          </p>
+          <DialogFooter>
+            <Button onClick={() => onOpenChange(false)} className="w-full">Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

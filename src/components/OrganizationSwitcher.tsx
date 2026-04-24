@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { CreateOrganizationDialog } from "@/components/CreateOrganizationDialog";
+import { isIOSApp } from "@/lib/platform";
 
 const OrgIcon = ({ type, workspaceType }: { type: "personal" | "company"; workspaceType?: string }) => {
   if (type === "personal") {
@@ -107,14 +108,18 @@ export const OrganizationSwitcher = () => {
               </DropdownMenuItem>
             );
           })}
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => setShowCreateDialog(true)}
-            className="flex items-center gap-2 text-primary"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Create Workspace</span>
-          </DropdownMenuItem>
+          {!isIOSApp() && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => setShowCreateDialog(true)}
+                className="flex items-center gap-2 text-primary"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Create Workspace</span>
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
       <CreateOrganizationDialog

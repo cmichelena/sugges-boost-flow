@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { PlanUsageCard } from "@/components/PlanUsageCard";
 import { AccountSwitcher } from "@/components/AccountSwitcher";
+import { isIOSApp } from "@/lib/platform";
 
 interface AccountMember {
   id: string;
@@ -221,7 +222,7 @@ const OrganisationSettings = () => {
                       placeholder="billing@company.com"
                       disabled={userAccountRole !== "owner" && userAccountRole !== "portfolio_admin"}
                     />
-                    {(userAccountRole === "owner" || userAccountRole === "portfolio_admin") && (
+                    {!isIOSApp() && (userAccountRole === "owner" || userAccountRole === "portfolio_admin") && (
                       <Button onClick={handleSaveBillingEmail} disabled={savingEmail}>
                         {savingEmail ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
                       </Button>

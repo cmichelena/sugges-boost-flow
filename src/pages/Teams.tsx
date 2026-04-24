@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useAuth } from "@/hooks/useAuth";
+import { isIOSApp } from "@/lib/platform";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -299,6 +300,8 @@ const Teams = () => {
     );
   }
 
+  const iosApp = isIOSApp();
+
   return (
     <AppLayout>
       <div className="container mx-auto px-4 py-8">
@@ -310,27 +313,35 @@ const Teams = () => {
             </div>
           </div>
 
-          {/* Create Team */}
-          <Card className="p-6 mb-6">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Plus className="w-5 h-5" />
-              Create New Team
-            </h2>
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <Input
-                  placeholder="Team name"
-                  value={newTeamName}
-                  onChange={(e) => setNewTeamName(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleCreateTeam()}
-                />
+          {iosApp && (
+            <p className="text-sm text-muted-foreground mb-6">
+              Team management is handled on suggistit.com.
+            </p>
+          )}
+
+          {/* Create Team — hidden on iOS per App Store guidelines */}
+          {!iosApp && (
+            <Card className="p-6 mb-6">
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <Plus className="w-5 h-5" />
+                Create New Team
+              </h2>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <Input
+                    placeholder="Team name"
+                    value={newTeamName}
+                    onChange={(e) => setNewTeamName(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleCreateTeam()}
+                  />
+                </div>
+                <Button onClick={handleCreateTeam} disabled={creatingTeam || !newTeamName.trim()}>
+                  {creatingTeam && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                  Create Team
+                </Button>
               </div>
-              <Button onClick={handleCreateTeam} disabled={creatingTeam || !newTeamName.trim()}>
-                {creatingTeam && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Create Team
-              </Button>
-            </div>
-          </Card>
+            </Card>
+          )}
 
           {/* Teams List */}
           <div className="space-y-4">
@@ -377,52 +388,56 @@ const Teams = () => {
                             onCheckedChange={() => handleToggleActive(team.id, team.is_active)}
                           />
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setDeleteConfirm({ type: 'team', id: team.id })}
-                        >
-                          <Trash2 className="w-4 h-4 text-destructive" />
-                        </Button>
+                        {!iosApp && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setDeleteConfirm({ type: 'team', id: team.id })}
+                          >
+                            <Trash2 className="w-4 h-4 text-destructive" />
+                          </Button>
+                        )}
                       </div>
                     </div>
 
                     {isExpanded && (
                       <div className="border-t pt-4 space-y-4">
-                        {/* Add Member */}
-                        <div className="flex gap-2">
-                          <Select
-                            value={selectedTeamForMember === team.id ? selectedUserId : ""}
-                            onValueChange={(val) => {
-                              setSelectedTeamForMember(team.id);
-                              setSelectedUserId(val);
-                            }}
-                          >
-                            <SelectTrigger className="flex-1">
-                              <SelectValue placeholder={availableMembers.length === 0 ? "No available members" : "Add team member..."} />
-                            </SelectTrigger>
-                            <SelectContent className="bg-background z-50">
-                              {availableMembers.length === 0 ? (
-                                <div className="py-2 px-3 text-sm text-muted-foreground">
-                                  All organization members are already in this team
-                                </div>
-                              ) : (
-                                availableMembers.map((member) => (
-                                  <SelectItem key={member.user_id} value={member.user_id}>
-                                    {member.profiles?.display_name || 'Unknown User'}
-                                  </SelectItem>
-                                ))
-                              )}
-                            </SelectContent>
-                          </Select>
-                          <Button
-                            onClick={handleAddMember}
-                            disabled={!selectedUserId || selectedTeamForMember !== team.id || availableMembers.length === 0}
-                            size="sm"
-                          >
-                            <UserPlus className="w-4 h-4" />
-                          </Button>
-                        </div>
+                        {/* Add Member — hidden on iOS per App Store guidelines */}
+                        {!iosApp && (
+                          <div className="flex gap-2">
+                            <Select
+                              value={selectedTeamForMember === team.id ? selectedUserId : ""}
+                              onValueChange={(val) => {
+                                setSelectedTeamForMember(team.id);
+                                setSelectedUserId(val);
+                              }}
+                            >
+                              <SelectTrigger className="flex-1">
+                                <SelectValue placeholder={availableMembers.length === 0 ? "No available members" : "Add team member..."} />
+                              </SelectTrigger>
+                              <SelectContent className="bg-background z-50">
+                                {availableMembers.length === 0 ? (
+                                  <div className="py-2 px-3 text-sm text-muted-foreground">
+                                    All organization members are already in this team
+                                  </div>
+                                ) : (
+                                  availableMembers.map((member) => (
+                                    <SelectItem key={member.user_id} value={member.user_id}>
+                                      {member.profiles?.display_name || 'Unknown User'}
+                                    </SelectItem>
+                                  ))
+                                )}
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              onClick={handleAddMember}
+                              disabled={!selectedUserId || selectedTeamForMember !== team.id || availableMembers.length === 0}
+                              size="sm"
+                            >
+                              <UserPlus className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        )}
 
                         {/* Members List */}
                         <div className="space-y-2">
@@ -443,7 +458,7 @@ const Teams = () => {
                                 )}
                               </div>
                               <div className="flex gap-2">
-                                {member.role === "member" && (
+                                {!iosApp && member.role === "member" && (
                                   <Button
                                     variant="outline"
                                     size="sm"
@@ -452,13 +467,15 @@ const Teams = () => {
                                     Promote to Lead
                                   </Button>
                                 )}
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => setDeleteConfirm({ type: 'member', id: member.id, teamId: team.id })}
-                                >
-                                  <Trash2 className="w-4 h-4 text-destructive" />
-                                </Button>
+                                {!iosApp && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setDeleteConfirm({ type: 'member', id: member.id, teamId: team.id })}
+                                  >
+                                    <Trash2 className="w-4 h-4 text-destructive" />
+                                  </Button>
+                                )}
                               </div>
                             </div>
                           ))}

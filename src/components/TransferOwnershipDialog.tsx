@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { isIOSApp } from "@/lib/platform";
 
 interface MemberOption {
   user_id: string;
@@ -112,6 +113,25 @@ export const TransferOwnershipDialog = ({
       setTransferring(false);
     }
   };
+
+  if (isIOSApp()) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Crown className="w-5 h-5" />
+              Transfer Workspace Ownership
+            </DialogTitle>
+          </DialogHeader>
+          <p className="py-4 text-sm text-muted-foreground">
+            Workspace ownership transfers are managed on suggistit.com.
+          </p>
+          <Button onClick={() => onOpenChange(false)} className="w-full">Close</Button>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

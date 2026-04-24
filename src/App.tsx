@@ -2,7 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { isIOSApp } from "@/lib/platform";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/hooks/useAuth";
 import { OrganizationProvider } from "@/hooks/useOrganization";
@@ -57,6 +58,16 @@ const App = () => (
               <Route path="/portfolio" element={<Portfolio />} />
               <Route path="/organisation-settings" element={<OrganisationSettings />} />
               <Route path="/support" element={<Support />} />
+              <Route path="/support" element={<Support />} />
+              {/* iOS App Store 3.1.1 — block registration/onboarding URLs on iOS */}
+              {isIOSApp() && (
+                <>
+                  <Route path="/signup" element={<Navigate to="/auth" replace />} />
+                  <Route path="/register" element={<Navigate to="/auth" replace />} />
+                  <Route path="/create-workspace" element={<Navigate to="/auth" replace />} />
+                  <Route path="/onboarding" element={<Navigate to="/auth" replace />} />
+                </>
+              )}
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
