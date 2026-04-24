@@ -300,6 +300,8 @@ const Teams = () => {
     );
   }
 
+  const iosApp = isIOSApp();
+
   return (
     <AppLayout>
       <div className="container mx-auto px-4 py-8">
@@ -311,27 +313,35 @@ const Teams = () => {
             </div>
           </div>
 
-          {/* Create Team */}
-          <Card className="p-6 mb-6">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Plus className="w-5 h-5" />
-              Create New Team
-            </h2>
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <Input
-                  placeholder="Team name"
-                  value={newTeamName}
-                  onChange={(e) => setNewTeamName(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleCreateTeam()}
-                />
+          {iosApp && (
+            <p className="text-sm text-muted-foreground mb-6">
+              Team management is handled on suggistit.com.
+            </p>
+          )}
+
+          {/* Create Team — hidden on iOS per App Store guidelines */}
+          {!iosApp && (
+            <Card className="p-6 mb-6">
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <Plus className="w-5 h-5" />
+                Create New Team
+              </h2>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <Input
+                    placeholder="Team name"
+                    value={newTeamName}
+                    onChange={(e) => setNewTeamName(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleCreateTeam()}
+                  />
+                </div>
+                <Button onClick={handleCreateTeam} disabled={creatingTeam || !newTeamName.trim()}>
+                  {creatingTeam && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                  Create Team
+                </Button>
               </div>
-              <Button onClick={handleCreateTeam} disabled={creatingTeam || !newTeamName.trim()}>
-                {creatingTeam && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Create Team
-              </Button>
-            </div>
-          </Card>
+            </Card>
+          )}
 
           {/* Teams List */}
           <div className="space-y-4">
