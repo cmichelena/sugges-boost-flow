@@ -20,6 +20,7 @@ import { useOrganization } from "@/hooks/useOrganization";
 import { useAuth } from "@/hooks/useAuth";
 import { getWorkspaceConfig } from "@/lib/workspace-type-config";
 import { useTranslation } from "react-i18next";
+import { isIOSApp } from "@/lib/platform";
 
 const suggestionSchema = z.object({
   title: z.string().trim().min(5, 'Title must be at least 5 characters').max(100, 'Title must be less than 100 characters'),

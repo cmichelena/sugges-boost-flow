@@ -142,7 +142,7 @@ export const Navbar = () => {
                     {t("nav.howItWorks")}
                   </Link>
                 </DropdownMenuItem>
-                {!/iPad|iPhone|iPod/.test(navigator.userAgent) && (
+                {!isIOSApp() && (
                   <DropdownMenuItem asChild>
                     <Link to="/pricing" className="flex items-center gap-2">
                       <DollarSign className="w-4 h-4" />
