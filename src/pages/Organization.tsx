@@ -503,24 +503,26 @@ const OrganizationPage = () => {
                   )}
                 </div>
                 
-                {/* Add domain form */}
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="example.com"
-                    value={newDomain}
-                    onChange={(e) => setNewDomain(e.target.value)}
-                    disabled={savingSettings}
-                    className="w-48"
-                  />
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handleAddDomain}
-                    disabled={savingSettings || !newDomain.trim()}
-                  >
-                    Add Domain
-                  </Button>
-                </div>
+                {/* Add domain form — hidden on iOS per App Store guidelines */}
+                {!isIOSApp() && (
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="example.com"
+                      value={newDomain}
+                      onChange={(e) => setNewDomain(e.target.value)}
+                      disabled={savingSettings}
+                      className="w-48"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleAddDomain}
+                      disabled={savingSettings || !newDomain.trim()}
+                    >
+                      Add Domain
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>
