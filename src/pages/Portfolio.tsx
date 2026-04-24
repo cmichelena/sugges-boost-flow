@@ -78,6 +78,7 @@ export default function Portfolio() {
           ) : (
             <EmptyState onCreateAccount={() => setShowCreateAccount(true)} />
           )
+        ) : activeAccount ? (
           <PortfolioView account={activeAccount} userRole={userAccountRole} />
         ) : null}
 
