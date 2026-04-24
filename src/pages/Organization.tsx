@@ -545,7 +545,7 @@ const OrganizationPage = () => {
             <p className="text-sm text-muted-foreground">
               The workspace owner is the legal data authority. Only the owner can transfer or delete this workspace.
             </p>
-            {userRole === "owner" && (
+            {!isIOSApp() && userRole === "owner" && (
               <Button
                 variant="outline"
                 onClick={() => setTransferDialogOpen(true)}
@@ -676,7 +676,7 @@ const OrganizationPage = () => {
                   <div className="flex items-center gap-2">
                     {getStatusBadge(member.status)}
                     {memberRole && getRoleBadge(memberRole)}
-                    {canDelete && (
+                    {!isIOSApp() && canDelete && (
                       <Button
                         variant="ghost"
                         size="icon"
@@ -695,37 +695,43 @@ const OrganizationPage = () => {
           {(userRole === "admin" || userRole === "owner") && (
             <>
               <Separator className="my-4" />
-              <form onSubmit={handleInviteMember} className="space-y-4">
-                <div>
-                  <Label htmlFor="invite-email" className="flex items-center gap-2">
-                    <Mail className="w-4 h-4" />
-                    Invite New Member
-                  </Label>
-                  <div className="flex gap-2 mt-2">
-                    <Input
-                      id="invite-email"
-                      type="email"
-                      placeholder="colleague@example.com"
-                      value={inviteEmail}
-                      onChange={(e) => setInviteEmail(e.target.value)}
-                      disabled={inviting}
-                    />
-                    <Button type="submit" disabled={inviting || !inviteEmail}>
-                      {inviting ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Inviting...
-                        </>
-                      ) : (
-                        "Send Invite"
-                      )}
-                    </Button>
+              {isIOSApp() ? (
+                <p className="text-sm text-muted-foreground">
+                  Team invitations are managed on suggistit.com.
+                </p>
+              ) : (
+                <form onSubmit={handleInviteMember} className="space-y-4">
+                  <div>
+                    <Label htmlFor="invite-email" className="flex items-center gap-2">
+                      <Mail className="w-4 h-4" />
+                      Invite New Member
+                    </Label>
+                    <div className="flex gap-2 mt-2">
+                      <Input
+                        id="invite-email"
+                        type="email"
+                        placeholder="colleague@example.com"
+                        value={inviteEmail}
+                        onChange={(e) => setInviteEmail(e.target.value)}
+                        disabled={inviting}
+                      />
+                      <Button type="submit" disabled={inviting || !inviteEmail}>
+                        {inviting ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Inviting...
+                          </>
+                        ) : (
+                          "Send Invite"
+                        )}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      An invitation email will be sent to this address. They'll have 7 days to accept.
+                    </p>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    An invitation email will be sent to this address. They'll have 7 days to accept.
-                  </p>
-                </div>
-              </form>
+                </form>
+              )}
             </>
           )}
         </Card>
