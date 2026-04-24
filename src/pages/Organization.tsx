@@ -25,6 +25,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { isIOSApp } from "@/lib/platform";
 import {
   Select,
   SelectContent,
@@ -121,6 +122,7 @@ const OrganizationPage = () => {
 
   const handleInviteMember = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isIOSApp()) return;
     setInviting(true);
 
     try {
