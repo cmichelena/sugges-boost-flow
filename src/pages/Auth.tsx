@@ -10,6 +10,7 @@ import { Check, X, Loader2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import boxLogoDark from "@/assets/suggistit-box-logo.png";
 import boxLogoLight from "@/assets/suggistit-logo-light.png";
+import { isIOSApp } from "@/lib/platform";
 
 // Common weak passwords to reject
 const WEAK_PASSWORDS = [
@@ -96,6 +97,7 @@ const PasswordStrengthIndicator = ({ password }: { password: string }) => {
 };
 
 const Auth = () => {
+  const iosApp = isIOSApp();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -129,6 +131,13 @@ const Auth = () => {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // iOS App Store 3.1.1 — block any sign-up attempt from the iOS PWA
+    if (iosApp && isSignUp) {
+      toast.error("Account creation is not available in the iOS app. Visit suggistit.com to create an account.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -220,7 +229,9 @@ const Auth = () => {
             <img src={boxLogoLight} alt="Suggistit" className="h-36" />
           )}
           <p className={`text-sm mt-2 ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-            If you see something, Suggistit
+            {iosApp
+              ? "Sign in to Suggistit. Enter your email and password to continue."
+              : "If you see something, Suggistit"}
           </p>
         </div>
 
@@ -231,11 +242,11 @@ const Auth = () => {
             : 'bg-white/80 border border-orange-100'
         }`}>
           <h2 className={`text-xl font-semibold text-center mb-6 ${isDark ? 'text-white' : 'text-zinc-900'}`}>
-            {isSignUp ? "Create your account" : "Welcome back"}
+            {iosApp ? "Welcome back" : isSignUp ? "Create your account" : "Welcome back"}
           </h2>
 
           <form onSubmit={handleAuth} className="space-y-5">
-            {isSignUp && (
+            {!iosApp && isSignUp && (
               <div className="space-y-2">
                 <Label htmlFor="displayName" className={`text-sm font-medium ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>
                   Display Name
@@ -293,7 +304,7 @@ const Auth = () => {
                     : 'bg-white border-zinc-200 text-zinc-900 placeholder:text-zinc-400'
                 } focus:border-orange-500 focus:ring-orange-500/20`}
               />
-              {isSignUp && password && (
+              {!iosApp && isSignUp && password && (
                 <PasswordStrengthIndicator password={password} />
               )}
             </div>
@@ -306,23 +317,29 @@ const Auth = () => {
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {isSignUp ? "Creating account..." : "Signing in..."}
+                  {iosApp ? "Signing in..." : isSignUp ? "Creating account..." : "Signing in..."}
                 </>
               ) : (
-                isSignUp ? "Create Account" : "Sign In"
+                iosApp ? "Sign In" : isSignUp ? "Create Account" : "Sign In"
               )}
             </Button>
           </form>
 
           <div className="mt-6 text-center">
-            <button
-              onClick={() => setIsSignUp(!isSignUp)}
-              className={`text-sm transition-colors ${isDark ? 'text-zinc-400 hover:text-orange-400' : 'text-zinc-500 hover:text-orange-600'}`}
-            >
-              {isSignUp
-                ? "Already have an account? Sign in"
-                : "Don't have an account? Sign up"}
-            </button>
+            {iosApp ? (
+              <p className={`text-sm ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                New to Suggistit? Visit suggistit.com in your browser to create your account.
+              </p>
+            ) : (
+              <button
+                onClick={() => setIsSignUp(!isSignUp)}
+                className={`text-sm transition-colors ${isDark ? 'text-zinc-400 hover:text-orange-400' : 'text-zinc-500 hover:text-orange-600'}`}
+              >
+                {isSignUp
+                  ? "Already have an account? Sign in"
+                  : "Don't have an account? Sign up"}
+              </button>
+            )}
           </div>
         </div>
 
