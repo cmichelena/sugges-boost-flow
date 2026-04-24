@@ -22,6 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { AccountSwitcher } from "@/components/AccountSwitcher";
+import { isIOSApp } from "@/lib/platform";
 
 export default function Portfolio() {
   const { user } = useAuth();
@@ -49,10 +50,12 @@ export default function Portfolio() {
           </div>
           <div className="flex items-center gap-2">
             {accounts.length > 0 && <AccountSwitcher />}
-            <Button onClick={() => setShowCreateAccount(true)} size="sm">
-              <Plus className="w-4 h-4 mr-2" />
-              New Organisation
-            </Button>
+            {!isIOSApp() && (
+              <Button onClick={() => setShowCreateAccount(true)} size="sm">
+                <Plus className="w-4 h-4 mr-2" />
+                New Organisation
+              </Button>
+            )}
           </div>
         </div>
 
@@ -62,8 +65,19 @@ export default function Portfolio() {
             <Skeleton className="h-64 w-full" />
           </div>
         ) : accounts.length === 0 ? (
-          <EmptyState onCreateAccount={() => setShowCreateAccount(true)} />
-        ) : activeAccount ? (
+          isIOSApp() ? (
+            <Card className="border-dashed">
+              <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                <Briefcase className="w-12 h-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No Organisations Yet</h3>
+                <p className="text-muted-foreground max-w-md">
+                  Organisations are managed on suggistit.com.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <EmptyState onCreateAccount={() => setShowCreateAccount(true)} />
+          )
           <PortfolioView account={activeAccount} userRole={userAccountRole} />
         ) : null}
 

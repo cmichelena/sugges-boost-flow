@@ -30,6 +30,7 @@ import {
   WORKSPACE_TYPES,
   type WorkspaceType,
 } from "@/lib/workspace-type-config";
+import { isIOSApp } from "@/lib/platform";
 
 interface CreateOrganizationDialogProps {
   open: boolean;
@@ -168,6 +169,39 @@ export const CreateOrganizationDialog = ({
       addDomain();
     }
   };
+
+  const iosApp = isIOSApp();
+
+  if (iosApp) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Building2 className="w-5 h-5" />
+              Create Workspace
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-4 text-sm text-muted-foreground">
+            <p className="font-medium text-foreground">
+              Workspaces are created on the web.
+            </p>
+            <p>
+              Visit suggistit.com in your browser to set up a workspace.
+            </p>
+            <p>
+              If you have been invited to an existing workspace, sign in to open it.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => onOpenChange(false)} className="w-full">
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <>
